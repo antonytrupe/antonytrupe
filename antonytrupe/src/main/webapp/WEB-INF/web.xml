@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns="http://java.sun.com/xml/ns/javaee"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+	id="WebApp_ID" version="2.5">
+	<display-name>antonytrupe</display-name>
+	<error-page>
+		<error-code>404</error-code>
+		<location>/404.html</location>
+	</error-page>
+	<error-page>
+		<exception-type>com.antonytrupe.wiki.WikiPageNotFoundException</exception-type>
+		<location>/404.html</location>
+	</error-page>
+
+	<servlet>
+		<servlet-name>OpenIdServlet</servlet-name>
+		<servlet-class>com.antonytrupe.authentication.OpenIdServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>OpenIdServlet</servlet-name>
+		<url-pattern>/openid/</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<description>BattledisksServlet</description>
+		<display-name>BattledisksServlet</display-name>
+		<servlet-name>BattledisksServlet</servlet-name>
+		<servlet-class>com.antonytrupe.battledisks.APIServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>BattledisksServlet</servlet-name>
+		<url-pattern>/battledisks/api</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<description>WikiEditServlet</description>
+		<display-name>WikiEditServlet</display-name>
+		<servlet-name>WikiEditServlet</servlet-name>
+		<servlet-class>com.antonytrupe.wiki.WikiEditServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>WikiEditServlet</servlet-name>
+		<url-pattern>/edit/*</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<description>WikiServlet</description>
+		<display-name>WikiServlet</display-name>
+		<servlet-name>WikiServlet</servlet-name>
+		<servlet-class>com.antonytrupe.wiki.WikiServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>WikiServlet</servlet-name>
+		<url-pattern>/</url-pattern>
+	</servlet-mapping>
+</web-app>
