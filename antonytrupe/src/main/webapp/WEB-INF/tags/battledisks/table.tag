@@ -1,18 +1,28 @@
-﻿<!DOCTYPE html>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib prefix="bd" tagdir="/WEB-INF/tags/battledisks/" %>
+<%@ tag description="table" pageEncoding="UTF-8"%>
+<%@ attribute name="title" fragment="true" %>
+<%@ attribute name="API" fragment="true" %>
+<c:set var="API" value="${API!='' ? '/com/antonytrupe/battledisks/API.js' : API}" />
+
+<%@ attribute name="AI" fragment="true" %>
+<c:set var="AI" value="${AI ? '/com/antonytrupe/battledisks/AI.js' : AI}" />
+
+<!DOCTYPE html>
 <html>
 <head>
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=9">
-<title>battledisks - antonytrupe.com</title>
+<title><jsp:invoke fragment="title"/>battledisks - antonytrupe.com</title>
 <link rel="canonical" href="http://www.antonytrupe.com/battledisks/">
 
-<script src="//cdnjs.cloudflare.com/ajax/libs/headjs/1.0.3/head.load.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/headjs/1.0.3/head.core.min.js"></script>
 
 <script type="text/javascript">
 	head.js("https://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js",
 			"https://ajax.googleapis.com/ajax/libs/jqueryui/1/jquery-ui.min.js",
 			"/ca/jimr/gae/profiler/resources/jquery.tmpl.min.js",
-			/*"/ca/jimr/gae/profiler/resources/mini_profiler.js",*/
+			"/ca/jimr/gae/profiler/resources/mini_profiler.js",
 			//prod
 			//"/battledisks/battledisks.min.js",
 			//dev
@@ -23,7 +33,7 @@
 			"/com/antonytrupe/battledisks/Table.js",
 			"/com/antonytrupe/battledisks/TableUI.js", 
 			"/com/antonytrupe/battledisks/UI.js", 
-			"/com/antonytrupe/battledisks/API.js", 
+			"<jsp:invoke fragment='API'/>", 
 			function() {
 				//wait for the template iframe to load
 				$("mini-profiler-templates").ready(function (){
@@ -64,7 +74,15 @@
 
 	<div class="sidebar" id="navigation">
 		<a href="/battledisks/" class="tab">battledisks</a><br />
+		
+		<bd:loginout>
+    		<jsp:attribute name="user"></jsp:attribute>
+    		<jsp:attribute name="return_to">battledisks%2Fapi%3Faction%3DLOG_IN</jsp:attribute>
+		</bd:loginout>
+		<br />
+		<!-- 
 		<a id="log_in" href="/login.html?return_to=battledisks%2Fapi%3Faction%3DLOG_IN">log in</a><br />
+		 -->
 		<a id="shop" href="shop.html">shop</a><br />
 		<a class="table_list" href="table_list.html">table list</a><br />
 		<a class="new_table" href="/login.html?return_to=battledisks%2Fnew_table.html">new table</a><br />

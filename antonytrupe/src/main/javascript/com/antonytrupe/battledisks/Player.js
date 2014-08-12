@@ -70,7 +70,14 @@ function Player(name) {
 			return;
 		}
 
-		location = (location === undefined ? $this.diskLocations[diskNumber].location : location);
+		// console.log(location);
+		// console.log($this.diskLocations);
+		// console.log(diskNumber);
+		// console.log($this.diskLocations[diskNumber]);
+		// console.log($this.diskLocations[diskNumber].location);
+
+		location = (location === undefined ? $this.diskLocations[diskNumber].location
+				: location);
 		if ($this.armies[armyName] === undefined) {
 			$this.armies[armyName] = [];
 		}
@@ -100,25 +107,29 @@ function Player(name) {
 
 		// $this.debug('armyName:' + armyName);
 
-		Object.keys($this.armies[armyName]).forEach(function(order) {
-			// armyDisks
-			// $this.debug('order:' + order);
-			// $this.debug('$this.armies[armyName][order]:' +
-			// $this.armies[armyName][order]);
-			var armyDiskInfo = $this.armies[armyName][order];
-			var diskInfo = $this.getDiskInfo(armyDiskInfo.diskNumber, armyName);
-			points += parseInt(diskInfo.disk.cost, 10);
-			if (!factions[diskInfo.disk.faction]) {
-				factions[diskInfo.disk.faction] = 0;
-			}
-			factions[diskInfo.disk.faction] += parseInt(diskInfo.disk.cost, 10);
+		Object.keys($this.armies[armyName]).forEach(
+				function(order) {
+					// armyDisks
+					// $this.debug('order:' + order);
+					// $this.debug('$this.armies[armyName][order]:' +
+					// $this.armies[armyName][order]);
+					var armyDiskInfo = $this.armies[armyName][order];
+					var diskInfo = $this.getDiskInfo(armyDiskInfo.diskNumber,
+							armyName);
+					points += parseInt(diskInfo.disk.cost, 10);
+					if (!factions[diskInfo.disk.faction]) {
+						factions[diskInfo.disk.faction] = 0;
+					}
+					factions[diskInfo.disk.faction] += parseInt(
+							diskInfo.disk.cost, 10);
 
-			if (!alignments[diskInfo.disk.alignment]) {
-				alignments[diskInfo.disk.alignment] = 0;
-			}
-			alignments[diskInfo.disk.alignment] += parseInt(diskInfo.disk.cost, 10);
+					if (!alignments[diskInfo.disk.alignment]) {
+						alignments[diskInfo.disk.alignment] = 0;
+					}
+					alignments[diskInfo.disk.alignment] += parseInt(
+							diskInfo.disk.cost, 10);
 
-		});
+				});
 
 		// get majority faction
 		var faction = null;
@@ -165,7 +176,8 @@ function Player(name) {
 	this.getArmy = function(armyName) {
 		// console.log('Player.getArmy');
 		// console.log(armyName);
-		if (armyName === "" || armyName === null || $this.armies[armyName] === undefined) {
+		if (armyName === "" || armyName === null
+				|| $this.armies[armyName] === undefined) {
 			return {};
 		}
 		return $this.armies[armyName];
@@ -206,7 +218,8 @@ function Player(name) {
 
 		// console.log(info);
 
-		if (armyName !== undefined && $this.armies[armyName] !== undefined && $this.armies[armyName] !== null) {
+		if (armyName !== undefined && $this.armies[armyName] !== undefined
+				&& $this.armies[armyName] !== null) {
 			// console.log($this.armies[armyName]);
 			$this.armies[armyName].forEach(function(armyInfo, index) {
 				// console.log(index);

@@ -10,7 +10,8 @@ function UI(container) {
 	// string
 	$this.currentPlayer = null;
 
-	this.edgeScrollWidth = 60;
+	// 0 to disable
+	this.edgeScrollWidth = 0;
 
 	this.scale = 1;
 
@@ -33,46 +34,50 @@ function UI(container) {
 	});
 
 	$(document).mouseleave(function() {
-		console.log("#document.mouseleave");
+		// console.log("#document.mouseleave");
 		clearTimeout($this.scrollTimeout);
 		$this.scrollTimeout = null;
 	});
 
 	$(document).mouseout(function() {
-		console.log("#document.mouseout");
+		// console.log("#document.mouseout");
 		clearTimeout($this.scrollTimeout);
 		$this.scrollTimeout = null;
 	});
 
 	$("body").mouseleave(function() {
-		console.log("body.mouseleave");
+		// console.log("body.mouseleave");
 		clearTimeout($this.scrollTimeout);
 		$this.scrollTimeout = null;
 	});
 
 	$("#html").mouseleave(function() {
-		console.log("html.mouseleave");
+		// console.log("html.mouseleave");
 		clearTimeout($this.scrollTimeout);
 		$this.scrollTimeout = null;
 	});
 
 	// add a click handler to all the toggler elements on the page
-	$(".collapsible .toggler").click(function(e) {
-		var container = $(this).closest(".collapsible");
-		$(".content", container).slideToggle(function() {
+	$(".collapsible .toggler").click(
+			function(e) {
+				var container = $(this).closest(".collapsible");
+				$(".content", container).slideToggle(
+						function() {
 
-			$(".toggler", container).toggleClass("up down");
+							$(".toggler", container).toggleClass("up down");
 
-			// get the id of the container and persist it locally
-			if (container.attr('id')) {
-				localStorage[container.attr('id')] = $(".content", container).css('display');
-			}
+							// get the id of the container and persist it
+							// locally
+							if (container.attr('id')) {
+								localStorage[container.attr('id')] = $(
+										".content", container).css('display');
+							}
 
-		});
-		e.preventDefault();
+						});
+				e.preventDefault();
 
-		return false;
-	});
+				return false;
+			});
 
 	// restore the state of collapsible divs from local storage
 	$(".collapsible").each(function(i, div) {
@@ -95,7 +100,8 @@ function UI(container) {
 		// console.log("UI.mouseScrollHandler");
 
 		var mapWidth = $(this.container).width() / PIXELS_PER_INCH * this.scale;
-		var mapHeight = $(this.container).height() / PIXELS_PER_INCH * this.scale;
+		var mapHeight = $(this.container).height() / PIXELS_PER_INCH
+				* this.scale;
 		var newMapWidth;
 		var newMapHeight;
 
@@ -108,11 +114,16 @@ function UI(container) {
 		}
 
 		newMapWidth = $(this.container).width() / PIXELS_PER_INCH * this.scale;
-		newMapHeight = $(this.container).height() / PIXELS_PER_INCH * this.scale;
+		newMapHeight = $(this.container).height() / PIXELS_PER_INCH
+				* this.scale;
 
-		var newMapX = tl.x - ((event.originalEvent.pageX - $(this.container).position().left) / $(this.container).width() * (newMapWidth - mapWidth));
+		var newMapX = tl.x
+				- ((event.originalEvent.pageX - $(this.container).position().left)
+						/ $(this.container).width() * (newMapWidth - mapWidth));
 
-		var newMapY = tl.y - ((event.originalEvent.pageY - $(this.container).position().top) / $(this.container).height() * (newMapHeight - mapHeight));
+		var newMapY = tl.y
+				- ((event.originalEvent.pageY - $(this.container).position().top)
+						/ $(this.container).height() * (newMapHeight - mapHeight));
 
 		newMapX *= PIXELS_PER_INCH / this.scale;
 		newMapY *= PIXELS_PER_INCH / this.scale;
@@ -166,13 +177,15 @@ function UI(container) {
 		if (event.pageX < this.edgeScrollWidth) {
 			xScroll = (this.edgeScrollWidth - event.pageX);
 		} else if ($(this.container).width() - event.pageX < this.edgeScrollWidth) {
-			xScroll = -(this.edgeScrollWidth + event.pageX - $(this.container).width());
+			xScroll = -(this.edgeScrollWidth + event.pageX - $(this.container)
+					.width());
 		}
 
 		if (event.pageY < this.edgeScrollWidth) {
 			yScroll = (this.edgeScrollWidth - event.pageY);
 		} else if ($(this.container).height() - event.pageY < this.edgeScrollWidth) {
-			yScroll = -(this.edgeScrollWidth + event.pageY - $(this.container).height());
+			yScroll = -(this.edgeScrollWidth + event.pageY - $(this.container)
+					.height());
 		}
 
 		// console.log(this.lastMouseEvent);
@@ -248,7 +261,8 @@ function UI(container) {
 	 * @param {number}
 	 *            alpha
 	 */
-	this.drawRotatedImage = function(ctx, image, x, y, width, height, angle, alpha) {
+	this.drawRotatedImage = function(ctx, image, x, y, width, height, angle,
+			alpha) {
 		if (typeof image === "undefined") {
 			return;
 		}
@@ -302,7 +316,8 @@ function UI(container) {
 	 * @return {Point}
 	 */
 	this.getTableLocation = function(x, y) {
-		return new Point(((x - this.offset.x) / PIXELS_PER_INCH * this.scale), ((y - this.offset.y) / PIXELS_PER_INCH * this.scale));
+		return new Point(((x - this.offset.x) / PIXELS_PER_INCH * this.scale),
+				((y - this.offset.y) / PIXELS_PER_INCH * this.scale));
 	};
 
 	/**
@@ -404,7 +419,7 @@ function UI(container) {
 
 	this.drawDisk = function(ctx, info, highlightsCtx, o) {
 		// console.log("UI.drawDisk");
-		// console.log(info.diskName);
+		// console.log(info);
 
 		var options = $.extend(true, {}, {
 			// hugh : '',
@@ -424,30 +439,38 @@ function UI(container) {
 		var fillStyle = 'grey';
 		if (info.disk.alignment === 'Evil') {
 			// strokeColor = '#922';
-			strokeColor = 'hsla(0,64%,' + (37 + (100 - 37) * options.lightness) + '%,1)';
+			strokeColor = 'hsla(0,64%,' + (37 + (100 - 37) * options.lightness)
+					+ '%,1)';
 			// fillStyle = '#F99';
-			fillStyle = 'hsla(0,100%,' + (80 + (100 - 80) * options.lightness) + '%,1)';
+			fillStyle = 'hsla(0,100%,' + (80 + (100 - 80) * options.lightness)
+					+ '%,1)';
 		} else if (info.disk.alignment === 'Good') {
 			// strokeColor = 'green';
 			// strokeColor = 'rgba(0,128,0,' + alpha + ')';
-			strokeColor = 'hsla(120,100%,' + (25 + (100 - 25) * options.lightness) + '%,1)';
+			strokeColor = 'hsla(120,100%,'
+					+ (25 + (100 - 25) * options.lightness) + '%,1)';
 			// fillStyle = 'lightGreen';
 			// fillStyle = 'rgba(144,238,144,' + options.alpha + ')';
-			fillStyle = 'hsla(120,73%,' + (75 + (100 - 75) * options.lightness) + '%,1)';
+			fillStyle = 'hsla(120,73%,' + (75 + (100 - 75) * options.lightness)
+					+ '%,1)';
 		} else if (info.disk.alignment === 'Neutral') {
 			// strokeColor = 'blue';
 			// strokeColor = 'rgba(0,0,255,' + 1 + ')';
-			strokeColor = 'hsla(240,100%,' + (50 + (100 - 50) * options.lightness) + '%,1)';
+			strokeColor = 'hsla(240,100%,'
+					+ (50 + (100 - 50) * options.lightness) + '%,1)';
 			// fillStyle = 'lightBlue';
 			// fillStyle = 'rgba(173,216,230,' + 1 + ')';
-			fillStyle = 'hsla(195,53%,' + (79 + (100 - 79) * options.lightness) + '%,1)';
+			fillStyle = 'hsla(195,53%,' + (79 + (100 - 79) * options.lightness)
+					+ '%,1)';
 		} else if (info.disk.alignment === 'Champion') {
 			// strokeColor = '#FBB917';
 			// strokeColor = 'rgba(251,185,23,' + 1 + ')';
-			strokeColor = 'hsla(43,97%,' + (54 + (100 - 54) * options.lightness) + '%,1)';
+			strokeColor = 'hsla(43,97%,'
+					+ (54 + (100 - 54) * options.lightness) + '%,1)';
 			// fillStyle = '#FFF380';
 			// fillStyle = 'rgba(255,243,128,' + 1 + ')';
-			fillStyle = 'hsla(54,100%,' + (75 + (100 - 75) * options.lightness) + '%,1)';
+			fillStyle = 'hsla(54,100%,' + (75 + (100 - 75) * options.lightness)
+					+ '%,1)';
 		}
 
 		if (typeof info.mementoInfo.rotation === 'undefined') {
@@ -461,27 +484,34 @@ function UI(container) {
 		// add a shadow to the outer circle
 		ctx.save();
 		// ctx.shadowColor = 'rgba(0,0,0,' + options.alpha + ')';
-		ctx.shadowColor = 'hsla(' + options.shadow.color.hugh + ',' + options.shadow.color.saturation + '%,'
-				+ (options.shadow.color.lightness + (100 - options.shadow.color.lightness) * options.lightness) + '%,' + 1 + ')';
+		ctx.shadowColor = 'hsla('
+				+ options.shadow.color.hugh
+				+ ','
+				+ options.shadow.color.saturation
+				+ '%,'
+				+ (options.shadow.color.lightness + (100 - options.shadow.color.lightness)
+						* options.lightness) + '%,' + 1 + ')';
 		ctx.shadowBlur = 16 / this.scale;
 		ctx.shadowOffsetX = 16 / this.scale;
 		ctx.shadowOffsetY = 16 / this.scale;
 
 		// lighter, inner circle
-		this.drawCircle(ctx, this.getScreenLocation(oLocation.x, oLocation.y), (info.disk.diameter * PIXELS_PER_INCH - 6) / this.scale / 2, {
-			// 'strokeStyle' : strokeColor,
-			'fillStyle' : fillStyle
-		// 'lineWidth' : 6 / this.scale
-		});
+		this.drawCircle(ctx, this.getScreenLocation(oLocation.x, oLocation.y),
+				(info.disk.diameter * PIXELS_PER_INCH - 6) / this.scale / 2, {
+					// 'strokeStyle' : strokeColor,
+					'fillStyle' : fillStyle
+				// 'lineWidth' : 6 / this.scale
+				});
 
 		ctx.restore();
 
 		// dark, outer circle
-		this.drawCircle(ctx, this.getScreenLocation(oLocation.x, oLocation.y), (info.disk.diameter * PIXELS_PER_INCH - 6) / this.scale / 2, {
-			'strokeStyle' : strokeColor,
-			// 'fillStyle' : fillStyle,
-			'lineWidth' : 6 / this.scale
-		});
+		this.drawCircle(ctx, this.getScreenLocation(oLocation.x, oLocation.y),
+				(info.disk.diameter * PIXELS_PER_INCH - 6) / this.scale / 2, {
+					'strokeStyle' : strokeColor,
+					// 'fillStyle' : fillStyle,
+					'lineWidth' : 6 / this.scale
+				});
 
 		var statDiameter = 50;
 
@@ -520,7 +550,8 @@ function UI(container) {
 		// console.log(Math.asin(opp / hyp));
 		// console.log('-----------');
 
-		var attackLocation = this.getScreenLocation(oLocation.x + radius * Math.cos(rotation * TO_RADIANS), oLocation.y + radius
+		var attackLocation = this.getScreenLocation(oLocation.x + radius
+				* Math.cos(rotation * TO_RADIANS), oLocation.y + radius
 				* Math.sin(rotation * TO_RADIANS));
 
 		this.drawCircle(ctx, attackLocation, statDiameter / this.scale / 2, {
@@ -528,41 +559,48 @@ function UI(container) {
 			'lineWidth' : statlineWidth,
 			'strokeStyle' : strokeColor
 		});
-		this.printCenterMiddle(ctx, info.disk.attack, attackLocation.x, attackLocation.y, oRotation, {
-			"font" : statFont
-		});
+		this.printCenterMiddle(ctx, info.disk.attack, attackLocation.x,
+				attackLocation.y, oRotation, {
+					"font" : statFont
+				});
 
 		// console.log(info.disk.attack);
 
 		if (info.disk.defense !== undefined && info.disk.type == 'creature') {
 			// print defense
 			rotation = oRotation - 90;
-			var defenseLocation = this.getScreenLocation(oLocation.x + radius * Math.cos(rotation * TO_RADIANS), oLocation.y + radius
+			var defenseLocation = this.getScreenLocation(oLocation.x + radius
+					* Math.cos(rotation * TO_RADIANS), oLocation.y + radius
 					* Math.sin(rotation * TO_RADIANS));
-			this.drawCircle(ctx, defenseLocation, statDiameter / this.scale / 2, {
-				'fillStyle' : '#EEE',
-				'lineWidth' : statlineWidth,
-				'strokeStyle' : strokeColor
-			});
-			this.printCenterMiddle(ctx, info.disk.defense, defenseLocation.x, defenseLocation.y, oRotation, {
-				"font" : statFont
-			});
+			this.drawCircle(ctx, defenseLocation,
+					statDiameter / this.scale / 2, {
+						'fillStyle' : '#EEE',
+						'lineWidth' : statlineWidth,
+						'strokeStyle' : strokeColor
+					});
+			this.printCenterMiddle(ctx, info.disk.defense, defenseLocation.x,
+					defenseLocation.y, oRotation, {
+						"font" : statFont
+					});
 		}
 
 		if (info.disk.toughness !== undefined && info.disk.type == 'creature') {
 			// print toughness
 			// rotation = info.rotation - 45;
 			rotation = oRotation - 90 + (Math.asin(opp / hyp) / TO_RADIANS) * 2;
-			var toughnessLocation = this.getScreenLocation(oLocation.x + radius * Math.cos(rotation * TO_RADIANS), oLocation.y + radius
+			var toughnessLocation = this.getScreenLocation(oLocation.x + radius
+					* Math.cos(rotation * TO_RADIANS), oLocation.y + radius
 					* Math.sin(rotation * TO_RADIANS));
-			this.drawCircle(ctx, toughnessLocation, statDiameter / this.scale / 2, {
+			this.drawCircle(ctx, toughnessLocation, statDiameter / this.scale
+					/ 2, {
 				'fillStyle' : '#EEE',
 				'lineWidth' : statlineWidth,
 				'strokeStyle' : strokeColor
 			});
-			this.printCenterMiddle(ctx, info.disk.toughness, toughnessLocation.x, toughnessLocation.y, oRotation, {
-				"font" : statFont
-			});
+			this.printCenterMiddle(ctx, info.disk.toughness,
+					toughnessLocation.x, toughnessLocation.y, oRotation, {
+						"font" : statFont
+					});
 		}
 
 		// print wounds
@@ -570,24 +608,28 @@ function UI(container) {
 		rotation = oRotation - 90 + (Math.asin(opp / hyp) / TO_RADIANS) * 4;
 
 		if (parseInt(info.disk.wounds, 10) > 1 && info.disk.type == 'creature') {
-			var woundsLocation = this.getScreenLocation(oLocation.x + radius * Math.cos(rotation * TO_RADIANS), oLocation.y + radius
+			var woundsLocation = this.getScreenLocation(oLocation.x + radius
+					* Math.cos(rotation * TO_RADIANS), oLocation.y + radius
 					* Math.sin(rotation * TO_RADIANS));
-			this.drawCircle(ctx, woundsLocation, statDiameter / this.scale / 2, {
-				// dark red
-				'fillStyle' : '#900',
-				'lineWidth' : statlineWidth,
-				'strokeStyle' : "white"
-			});
-			this.printCenterMiddle(ctx, info.disk.wounds, woundsLocation.x, woundsLocation.y, oRotation, {
-				"font" : statFont,
-				"fillStyle" : "white"
-			});
+			this.drawCircle(ctx, woundsLocation, statDiameter / this.scale / 2,
+					{
+						// dark red
+						'fillStyle' : '#900',
+						'lineWidth' : statlineWidth,
+						'strokeStyle' : "white"
+					});
+			this.printCenterMiddle(ctx, info.disk.wounds, woundsLocation.x,
+					woundsLocation.y, oRotation, {
+						"font" : statFont,
+						"fillStyle" : "white"
+					});
 		}
 
 		if (info.disk.cost !== undefined && info.disk.type == 'creature') {
 			// print cost
 			rotation = oRotation + 90 - (Math.asin(opp / hyp) / TO_RADIANS) * 2;
-			var costLocation = this.getScreenLocation(oLocation.x + radius * Math.cos(rotation * TO_RADIANS), oLocation.y + radius
+			var costLocation = this.getScreenLocation(oLocation.x + radius
+					* Math.cos(rotation * TO_RADIANS), oLocation.y + radius
 					* Math.sin(rotation * TO_RADIANS));
 			this.drawCircle(ctx, costLocation, (40) / this.scale / 2, {
 				'fillStyle' : '#000',
@@ -595,24 +637,29 @@ function UI(container) {
 				'strokeStyle' : "#000"
 			});
 			// make cost white
-			this.printCenterMiddle(ctx, info.disk.cost, costLocation.x, costLocation.y, oRotation, {
-				"font" : (1 / this.scale) * 2 + "em OpenSans",
-				"fillStyle" : "white"
-			});
+			this.printCenterMiddle(ctx, info.disk.cost, costLocation.x,
+					costLocation.y, oRotation, {
+						"font" : (1 / this.scale) * 2 + "em OpenSans",
+						"fillStyle" : "white"
+					});
 		}
 
 		if (info.disk.movement !== undefined && info.disk.type == 'creature') {
 			// print movement
 			rotation = oRotation - 225;
-			var movementLocation = this.getScreenLocation(oLocation.x + radius * Math.cos(rotation * TO_RADIANS), oLocation.y + radius
+			var movementLocation = this.getScreenLocation(oLocation.x + radius
+					* Math.cos(rotation * TO_RADIANS), oLocation.y + radius
 					* Math.sin(rotation * TO_RADIANS));
-			this.drawCircle(ctx, movementLocation, statDiameter / this.scale / 2, {
+			this.drawCircle(ctx, movementLocation, statDiameter / this.scale
+					/ 2, {
 				'fillStyle' : '#AAF',
 				'lineWidth' : statlineWidth,
 				'strokeStyle' : "white"
 			});
-			this.printCenterMiddle(ctx, info.disk.movement - (info.mementoInfo.flips ? info.mementoInfo.flips : 0) + "/" + info.disk.movement,
-					movementLocation.x, movementLocation.y, oRotation, {
+			this.printCenterMiddle(ctx, info.disk.movement
+					- (info.mementoInfo.flips ? info.mementoInfo.flips : 0)
+					+ "/" + info.disk.movement, movementLocation.x,
+					movementLocation.y, oRotation, {
 						"font" : (1 / this.scale) * 2 + "em OpenSans"
 					});
 		}
@@ -620,37 +667,45 @@ function UI(container) {
 		// print flying
 		if (info.disk.flying && info.disk.type == 'creature') {
 			// opp = 46 / 2 / this.scale;
-			rotation = oRotation - 225 + (Math.asin(opp / hyp) / TO_RADIANS) * 2;
-			var flyingLocation = this.getScreenLocation(oLocation.x + radius * Math.cos(rotation * TO_RADIANS), oLocation.y + radius
+			rotation = oRotation - 225 + (Math.asin(opp / hyp) / TO_RADIANS)
+					* 2;
+			var flyingLocation = this.getScreenLocation(oLocation.x + radius
+					* Math.cos(rotation * TO_RADIANS), oLocation.y + radius
 					* Math.sin(rotation * TO_RADIANS));
-			this.drawCircle(ctx, flyingLocation, statDiameter / this.scale / 2, {
-				'fillStyle' : '#AAF',
-				'lineWidth' : statlineWidth,
-				'strokeStyle' : "#33F"
-			});
-			this.printCenterMiddle(ctx, "F", flyingLocation.x, flyingLocation.y, oRotation, {
-				"font" : (1 / this.scale) * 2 + "em OpenSans",
-				'fillStyle' : "#33F"
-			});
+			this.drawCircle(ctx, flyingLocation, statDiameter / this.scale / 2,
+					{
+						'fillStyle' : '#AAF',
+						'lineWidth' : statlineWidth,
+						'strokeStyle' : "#33F"
+					});
+			this.printCenterMiddle(ctx, "F", flyingLocation.x,
+					flyingLocation.y, oRotation, {
+						"font" : (1 / this.scale) * 2 + "em OpenSans",
+						'fillStyle' : "#33F"
+					});
 		}
 
 		// print name
 		radius = 0.1 * info.disk.diameter;
 		rotation = oRotation - 90;
-		var nameLocation = this.getScreenLocation(oLocation.x + radius * Math.cos(rotation * TO_RADIANS), oLocation.y + radius
+		var nameLocation = this.getScreenLocation(oLocation.x + radius
+				* Math.cos(rotation * TO_RADIANS), oLocation.y + radius
 				* Math.sin(rotation * TO_RADIANS));
-		this.printCenterMiddle(ctx, info.disk.name, nameLocation.x, nameLocation.y, oRotation, {
-			"font" : statFont,
-			"lineHeight" : (1 / this.scale) * 36,
-			"fitWidth" : info.disk.diameter * PIXELS_PER_INCH * 1 / this.scale// ,
-		// "lineWidth" : 1 / this.scale,
-		// "strokeStyle" : "darkGrey"
-		});
+		this.printCenterMiddle(ctx, info.disk.name, nameLocation.x,
+				nameLocation.y, oRotation, {
+					"font" : statFont,
+					"lineHeight" : (1 / this.scale) * 36,
+					"fitWidth" : info.disk.diameter * PIXELS_PER_INCH * 1
+							/ this.scale// ,
+				// "lineWidth" : 1 / this.scale,
+				// "strokeStyle" : "darkGrey"
+				});
 
 		// print description
 		radius = 0.2 * info.disk.diameter;
 		rotation = oRotation + 90;
-		var descriptionLocation = this.getScreenLocation(oLocation.x + radius * Math.cos(rotation * TO_RADIANS), oLocation.y + radius
+		var descriptionLocation = this.getScreenLocation(oLocation.x + radius
+				* Math.cos(rotation * TO_RADIANS), oLocation.y + radius
 				* Math.sin(rotation * TO_RADIANS));
 
 		var details = "";
@@ -693,22 +748,26 @@ function UI(container) {
 		}
 
 		if (info.disk.description !== undefined) {
-			this.printCenterMiddle(ctx, details + info.disk.description, descriptionLocation.x, descriptionLocation.y, oRotation, {
-				"font" : (1 / this.scale) * 1 + "em OpenSans",
-				"lineHeight" : (1 / this.scale) * 12,
-				"fitWidth" : info.disk.diameter * PIXELS_PER_INCH * 0.7 / this.scale
-			});
+			this.printCenterMiddle(ctx, details + info.disk.description,
+					descriptionLocation.x, descriptionLocation.y, oRotation, {
+						"font" : (1 / this.scale) * 1 + "em OpenSans",
+						"lineHeight" : (1 / this.scale) * 12,
+						"fitWidth" : info.disk.diameter * PIXELS_PER_INCH * 0.7
+								/ this.scale
+					});
 		}
 
 		if (info.disk.faction !== undefined && info.disk.type == 'creature') {
 			// print faction
 			radius = 0.42 * info.disk.diameter;
 			rotation = oRotation + 90;
-			var factionLocation = this.getScreenLocation(oLocation.x + radius * Math.cos(rotation * TO_RADIANS), oLocation.y + radius
+			var factionLocation = this.getScreenLocation(oLocation.x + radius
+					* Math.cos(rotation * TO_RADIANS), oLocation.y + radius
 					* Math.sin(rotation * TO_RADIANS));
-			this.printCenterMiddle(ctx, "(" + info.disk.faction + ")", factionLocation.x, factionLocation.y, oRotation, {
-				"font" : (1 / this.scale) * 1.5 + "em OpenSans"
-			});
+			this.printCenterMiddle(ctx, "(" + info.disk.faction + ")",
+					factionLocation.x, factionLocation.y, oRotation, {
+						"font" : (1 / this.scale) * 1.5 + "em OpenSans"
+					});
 		}
 	};
 
@@ -723,10 +782,12 @@ function UI(container) {
 			$("#log_in").text($this.currentPlayer);
 
 			// new_table
-			$(".new_table").attr("href", $(".new_table").attr("href").replace(toRemove, ""));
+			$(".new_table").attr("href",
+					$(".new_table").attr("href").replace(toRemove, ""));
 
 			// shop
-			$("#shop").attr("href", $("#shop").attr("href").replace(toRemove, ""));
+			$("#shop").attr("href",
+					$("#shop").attr("href").replace(toRemove, ""));
 		}
 	};
 }

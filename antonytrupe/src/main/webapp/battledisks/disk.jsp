@@ -12,21 +12,29 @@
 <title>disk admin - battledisks - antonytrupe.com</title>
 <link rel="canonical" href="http://www.antonytrupe.com/battledisks/">
 
-<script src="/head.load.min.js"></script>
+<script
+	src="//cdnjs.cloudflare.com/ajax/libs/headjs/1.0.3/head.load.min.js"></script>
 
 <script type="text/javascript">
-	head.js("https://ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js", "/ca/jimr/gae/profiler/resources/jquery.tmpl.min.js",
-			"/ca/jimr/gae/profiler/resources/mini_profiler.js",
+	head.js("https://ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js",
+		//	"/ca/jimr/gae/profiler/resources/jquery.tmpl.min.js",
+		//	"/ca/jimr/gae/profiler/resources/mini_profiler.js",
 			//"/battledisks/battledisks.min.js",
-			"/com/antonytrupe/battledisks/Main.js", "/com/antonytrupe/battledisks/UI.js", "/com/antonytrupe/battledisks/Disk.js",
-			"/com/antonytrupe/battledisks/DiskUI.js", "/com/antonytrupe/battledisks/Point.js", "/com/antonytrupe/battledisks/API.js", function() {
+			"/com/antonytrupe/battledisks/Main.js",
+			"/com/antonytrupe/battledisks/UI.js",
+			"/com/antonytrupe/battledisks/Disk.js",
+			"/com/antonytrupe/battledisks/DiskUI.js",
+			"/com/antonytrupe/battledisks/Point.js",
+			"/com/antonytrupe/battledisks/API.js", function() {
 				//wait for the template iframe to load
+				/*
 				$("mini-profiler-templates").ready(function() {
 					MiniProfiler.init({
 						requestId : '32',
 						baseURL : '/gae_mini_profile/'
 					});
 				});
+				*/
 				new Main().disk();
 			});
 </script>
@@ -49,16 +57,21 @@
 <link href='http://fonts.googleapis.com/css?family=Open+Sans'
 	rel='stylesheet' type='text/css'>
 <link href="style.css" type="text/css" rel="stylesheet" media="all">
+
+<!-- 
 <link href="/ca/jimr/gae/profiler/resources/mini_profiler.css"
 	rel="stylesheet" type="text/css" media="all">
-
+ -->
+ 
 </head>
 <body>
+<!-- 
 	<iframe id="mini-profiler-templates"
 		src="/ca/jimr/gae/profiler/resources/mini_profiler.html"
 		style="display: none"></iframe>
 	<div id="mp" style="display: none;"></div>
 	<div id="mp-req" style="display: none;"></div>
+	 -->
 	<h1 style="text-align: center; margin: 0;">Disk Maintenance</h1>
 	<h4 style="text-align: center; margin: 0; padding: 1em;">
 		<a href="/battledisks/api?action=DOWNLOAD_DISKS">download all
@@ -93,27 +106,28 @@
 				</span>
 			</div>
 			<div>
-				<label class="one" for="attack">Attack:</label>
-				<span class="two">
-				    <input
-					name="attack" id="attack" type="number" min="0" max="30" value="2" />
-					<del class="previous"></del>
+				<label class="one" for="attack">Attack:</label> <span class="two">
+					<input name="attack" id="attack" type="number" min="0" max="30"
+					value="2" /> <del class="previous"></del>
 				</span>
 			</div>
 			<div>
 				<label class="one" for="defense">Defense:</label> <span class="two"><input
 					name="defense" id="defense" type="number" min="0" max="30"
-					value="2" /><del class="previous"></del></span>
+					value="2" />
+				<del class="previous"></del></span>
 			</div>
 			<div>
 				<label class="one" for="toughness">Toughness:</label> <span
 					class="two"><input name="toughness" id="toughness"
-					type="number" min="0" max="30" value="2" /><del class="previous"></del></span>
+					type="number" min="0" max="30" value="2" />
+				<del class="previous"></del></span>
 			</div>
 			<div>
 				<label class="one" for="movement">Movement:</label> <span
 					class="two"><input name="movement" id="movement"
-					type="number" min="0" max="30" value="2" /><del class="previous"></del></span>
+					type="number" min="0" max="30" value="2" />
+				<del class="previous"></del></span>
 			</div>
 			<div>
 				<label class="one" for="wounds">Wounds:</label> <span class="two"><input
@@ -122,28 +136,27 @@
 			</div>
 			<div>
 				<label class="one" for="flying">Flying:</label> <span class="two">
-					<input name="flying" id="flying" type="checkbox" value="true" />
-					<del class="previous"></del>
+					<input name="flying" id="flying" type="checkbox" value="true" /> <del
+						class="previous"></del>
 				</span>
 			</div>
 			<div>
 				<label class="one" for="swashbuckler">Swashbuckler:</label> <span
 					class="two"> <input name="swashbuckler" id="swashbuckler"
-					type="checkbox" value="true" />
-					<del class="previous"></del>
+					type="checkbox" value="true" /> <del class="previous"></del>
 				</span>
 			</div>
 			<div>
 				<label class="one" for="missileImmunity">Immune to Missiles:</label>
 				<span class="two"> <input name="missileImmunity"
-					id="missileImmunity" type="checkbox" value="true" /><del class="previous"></del>
+					id="missileImmunity" type="checkbox" value="true" />
+				<del class="previous"></del>
 				</span>
 			</div>
 			<div>
 				<label class="one" for="firstblow">First Blow:</label> <span
 					class="two"> <input name="firstblow" id="firstblow"
-					type="checkbox" value="true" />
-					<del class="previous"></del>
+					type="checkbox" value="true" /> <del class="previous"></del>
 				</span>
 			</div>
 			<div>

@@ -1,7 +1,7 @@
 /**
  * @constructor
  */
-function API() {
+function API(allowMultipleRequests, offline) {
 	"use strict";
 
 	var $this = this;
@@ -10,6 +10,11 @@ function API() {
 	$this.images = [];
 	var url = this.baseUrl + "api";
 	$this.timeoutID = null;
+
+	$this.allowMultipleRequests = (typeof allowMultipleRequests === "undefined") ? false
+			: allowMultipleRequests;
+
+	$this.offline = (typeof offline === "undefined") ? false : offline;
 
 	this.abort = function() {
 		// console.log('API.abort');
@@ -135,7 +140,8 @@ function API() {
 		$this.sendRequest(data, onSuccess, onError);
 	};
 
-	this.fireMissiles = function(tableId, diskIndex, missile, tablePoint, onSuccess, onError) {
+	this.fireMissiles = function(tableId, diskIndex, missile, tablePoint,
+			onSuccess, onError) {
 		// API.fireMissile
 		var data = {
 			"action" : "FIRE_MISSILES",
@@ -275,24 +281,28 @@ function API() {
 
 		// console.log(lastMementoId);
 
-		$.each(mementos, function(mementoId, memento) {
-			// console.log('got mementoId ' + mementoId);
+		$.each(mementos,
+				function(mementoId, memento) {
+					// console.log('got mementoId ' + mementoId);
 
-			try {
-				localStorage['tableMemento:' + tableId + ":" + mementoId] = JSON.stringify(memento);
-			} catch (e) {
-				console.log(e);
-				// TODO eject some other stuff from localStorage to make room,
-				// then try again
+					try {
+						localStorage['tableMemento:' + tableId + ":"
+								+ mementoId] = JSON.stringify(memento);
+					} catch (e) {
+						console.log(e);
+						// TODO eject some other stuff from localStorage to make
+						// room,
+						// then try again
 
-			}
+					}
 
-			// console.log(mementoId);
+					// console.log(mementoId);
 
-			if (parseInt(lastMementoId, 10) < parseInt(mementoId, 10)) {
-				lastMementoId = $this.setLastMementoId(tableId, mementoId);
-			}
-		});
+					if (parseInt(lastMementoId, 10) < parseInt(mementoId, 10)) {
+						lastMementoId = $this.setLastMementoId(tableId,
+								mementoId);
+					}
+				});
 	};
 
 	this.getMemento = function(tableId, mementoId) {
@@ -315,10 +325,13 @@ function API() {
 	 *            diskNumber
 	 * @param {Point}
 	 *            tableClickPoint
-	 * @param {Array.<function()>} onSuccess
-	 * @param {Array.<function()>} onError
+	 * @param {Array.
+	 *            <function()>} onSuccess
+	 * @param {Array.
+	 *            <function()>} onError
 	 */
-	this.move = function(tableId, diskNumber, tableClickPoint, onSuccess, onError) {
+	this.move = function(tableId, diskNumber, tableClickPoint, onSuccess,
+			onError) {
 		var data = {
 			"action" : "MOVE_DISK",
 			"id" : tableId,
@@ -352,7 +365,8 @@ function API() {
 		$this.sendRequest(data, onSuccess, onError);
 	};
 
-	this.saveReinforcement = function(tableId, diskNumber, tableClickPoint, onSuccess, onError) {
+	this.saveReinforcement = function(tableId, diskNumber, tableClickPoint,
+			onSuccess, onError) {
 		// console.log('API.saveReinforcement');
 		var data = {
 			"action" : "SAVE_REINFORCEMENT",
@@ -368,32 +382,49 @@ function API() {
 	 * 
 	 * @param {Object}
 	 *            data
-	 * @param {Array.<function(Object)>} onSuccess
-	 * @param {Array.<function(Object)>} onError
+	 * @param {Array.
+	 *            <function(Object)>} onSuccess
+	 * @param {Array.
+	 *            <function(Object)>} onError
 	 */
-	this.sendRequest = function(data, onSuccess, onError) {
+	this.sendRequest = function(data, onSuccess, onError, cancelPrevious) {
 		// console.log('API.sendRequest');
 		// console.log(data);
-		// cancel any request in flight
-		$this.abort();
+
+		cancelPrevious = (typeof cancelPrevious === "undefined") ? allowMultipleRequests
+				: cancelPrevious;
+
+		// TODO
+		if (cancelPrevious) {
+			// cancel any request in flight
+			$this.abort();
+		}
 
 		// show the loading icon
 		$("#loading").show();
 		// console.log("progress");
 		$("#table").css("cursor", "progress");
 
-		$this.xhr = $.ajax({
-			'url' : url,
-			'data' : data,
-			'dataType' : 'json',
-			success : function(result) {
-				// console.log(result);
-				$this.doOnSuccess(result, onSuccess);
-			},
-			error : function(result) {
-				// console.log(result);
-				$this.doOnError(result, onError);
-			}
-		});
+		// if not in offline mode
+		if (!$this.offline) {
+			$this.xhr = $.ajax({
+				'url' : url,
+				'data' : data,
+				'dataType' : 'json',
+				success : function(result) {
+					// console.log(result);
+					$this.doOnSuccess(result, onSuccess);
+				},
+				error : function(result) {
+					// console.log(result);
+					$this.doOnError(result, onError);
+				}
+			});
+		}
+		// if in offline mode
+		else {
+			// just be successful
+			$this.doOnSuccess(result, onSuccess);
+		}
 	};
 }

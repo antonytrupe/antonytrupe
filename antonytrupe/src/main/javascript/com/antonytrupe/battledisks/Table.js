@@ -15,7 +15,8 @@
  *            scenario
  * @constructor holds states
  */
-function Table(maxPlayers, maxPoints, activations, startingDisks, reinforcements, alignmentRestriction, scenario) {
+function Table(maxPlayers, maxPoints, activations, startingDisks,
+		reinforcements, alignmentRestriction, scenario) {
 	"use strict";
 	/**
 	 * @type {Table}
@@ -53,7 +54,22 @@ function Table(maxPlayers, maxPoints, activations, startingDisks, reinforcements
 	};
 
 	// JOIN, REINFORCEMENTS, ACTIVATION, MISSILE,COMBAT,REMOVE_COUNTERS,FINISHED
-	this.memento.segment = "JOIN";
+	/**
+	 * Enum for segments.
+	 * 
+	 * @enum {string}
+	 */
+	this.SEGMENT = {
+		JOIN : "JOIN",
+		REINFORCEMENTS : "REINFORCEMENTS",
+		ACTIVATION : "ACTIVATION",
+		MISSILE : "MISSILE",
+		COMBAT : "COMBAT",
+		REMOVE_COUNTERS : "REMOVE_COUNTERS",
+		FINISHED : "FINISHED"
+	};
+
+	this.memento.segment = $this.SEGMENT.JOIN;
 
 	this.maxPlayers = maxPlayers;
 	this.maxPoints = maxPoints;
@@ -176,29 +192,31 @@ function Table(maxPlayers, maxPoints, activations, startingDisks, reinforcements
 
 		if (!$this.hasUnactivatedDisks(playerName)) {
 			// automatically set his segment to MISSILE
-			$this.getPlayerInfo(playerName).segment = "MISSILE";
+			$this.getPlayerInfo(playerName).segment = $this.SEGMENT.MISSILE;
 		}
 
 		// check to see how many disks we have flipped this segment
-		if (parseInt($this.getPlayerInfo(playerName).activations, 10) === parseInt($this.activations, 10)
-				|| $this.getPlayerInfo($this.getCurrentPlayer()).segment !== "ACTIVATION") {
+		if (parseInt($this.getPlayerInfo(playerName).activations, 10) === parseInt(
+				$this.activations, 10)
+				|| $this.getPlayerInfo($this.getCurrentPlayer()).segment !== $this.SEGMENT.ACTIVATION) {
 			// clear activations
 			$this.getPlayerInfo(playerName).activations = 0;
 			this.memento.currentPlayer = $this.getNextPlayer();
 			// check to make sure the next player is still in ACTIVATION
 			// check to make sure the next player has disks to activate
 
-			while ($this.anyPlayersIn("ACTIVATION")
-					&& ($this.getPlayerInfo($this.getCurrentPlayer()).segment !== "ACTIVATION" || !$this.hasUnactivatedDisks($this.getCurrentPlayer()))) {
+			while ($this.anyPlayersIn($this.SEGMENT.ACTIVATION)
+					&& ($this.getPlayerInfo($this.getCurrentPlayer()).segment !== $this.SEGMENT.ACTIVATION || !$this
+							.hasUnactivatedDisks($this.getCurrentPlayer()))) {
 
-				$this.getPlayerInfo($this.getCurrentPlayer()).segment = "MISSILE";
+				$this.getPlayerInfo($this.getCurrentPlayer()).segment = $this.SEGMENT.MISSILE;
 				$this.memento.currentPlayer = $this.getNextPlayer();
 			}
 
 		}
 
 		// if no more players are in the activation segment,
-		if (!$this.anyPlayersIn("ACTIVATION")) {
+		if (!$this.anyPlayersIn($this.SEGMENT.ACTIVATION)) {
 			// move the table to the MISSILE segment
 			$this.startMissileSegment();
 		}
@@ -213,8 +231,11 @@ function Table(maxPlayers, maxPoints, activations, startingDisks, reinforcements
 				function(diskNumber) {
 					var diskInfo = $this.getDiskInfo(diskNumber);
 
-					if (!diskInfo.mementoInfo.activated && diskInfo.mementoInfo.player === playerName && parseInt(diskInfo.mementoInfo.flips, 10) > 0
-							&& parseInt(diskNumber, 10) !== parseInt(movedDiskNumber, 10)) {
+					if (!diskInfo.mementoInfo.activated
+							&& diskInfo.mementoInfo.player === playerName
+							&& parseInt(diskInfo.mementoInfo.flips, 10) > 0
+							&& parseInt(diskNumber, 10) !== parseInt(
+									movedDiskNumber, 10)) {
 
 						$this.activateDisk2(diskNumber, playerName);
 						return true;
@@ -232,7 +253,8 @@ function Table(maxPlayers, maxPoints, activations, startingDisks, reinforcements
 		// }
 
 		// deep copy
-		$this.mementos[$this.mementoId + 1] = JSON.parse(JSON.stringify($this.memento));
+		$this.mementos[$this.mementoId + 1] = JSON.parse(JSON
+				.stringify($this.memento));
 		$this.mementoId++;
 	};
 
@@ -248,8 +270,10 @@ function Table(maxPlayers, maxPoints, activations, startingDisks, reinforcements
 
 		// check to make sure all the pinned disks have selected a defendee, or
 		// don't need to
-		if ($this.getDiskInfo(attacker).mementoInfo.pinning.some(function(defender) {
-			return $this.isPinnedByEnemy(defender) && $this.getDefendees(defender) === null;
+		if ($this.getDiskInfo(attacker).mementoInfo.pinning.some(function(
+				defender) {
+			return $this.isPinnedByEnemy(defender)
+					&& $this.getDefendees(defender) === null;
 		})) {
 			return -3;
 		}
@@ -258,25 +282,34 @@ function Table(maxPlayers, maxPoints, activations, startingDisks, reinforcements
 
 		// apply attack
 		// handle attackees being an array
-		attackees.forEach(function(attackee) {
-			$this.debug($this.getDiskInfo(attacker).disk.name + "(" + attacker + ")" + " does " + $this.getDiskInfo(attacker).disk.attack + " damage to "
-					+ $this.getDiskInfo(attackee).disk.name + "(" + attackee + ")");
+		attackees
+				.forEach(function(attackee) {
+					$this.debug($this.getDiskInfo(attacker).disk.name + "("
+							+ attacker + ")" + " does "
+							+ $this.getDiskInfo(attacker).disk.attack
+							+ " damage to "
+							+ $this.getDiskInfo(attackee).disk.name + "("
+							+ attackee + ")");
 
-			$this.getDiskInfo(attackee).mementoInfo.carryOverDamage += parseInt($this.getDiskInfo(attacker).disk.attack, 10);
+					$this.getDiskInfo(attackee).mementoInfo.carryOverDamage += parseInt(
+							$this.getDiskInfo(attacker).disk.attack, 10);
 
-			// convert carryoverdamage to wounds
-			$this.getDiskInfo(attackee).mementoInfo.wounds += Math.floor($this.getDiskInfo(attackee).mementoInfo.carryOverDamage
-					/ $this.getDiskInfo(attackee).disk.toughness);
+					// convert carryoverdamage to wounds
+					$this.getDiskInfo(attackee).mementoInfo.wounds += Math
+							.floor($this.getDiskInfo(attackee).mementoInfo.carryOverDamage
+									/ $this.getDiskInfo(attackee).disk.toughness);
 
-			// set the carryoverdamage to what is left after converting
-			// to wounds
-			$this.getDiskInfo(attackee).mementoInfo.carryOverDamage = $this.getDiskInfo(attackee).mementoInfo.carryOverDamage
-					% $this.getDiskInfo(attackee).disk.toughness;
+					// set the carryoverdamage to what is left after converting
+					// to wounds
+					$this.getDiskInfo(attackee).mementoInfo.carryOverDamage = $this
+							.getDiskInfo(attackee).mementoInfo.carryOverDamage
+							% $this.getDiskInfo(attackee).disk.toughness;
 
-		});
+				});
 
 		// all the pinned disks get to defend
-		$this.getDiskInfo(attacker).mementoInfo.pinning.forEach(function(defender) {
+		$this.getDiskInfo(attacker).mementoInfo.pinning.forEach(function(
+				defender) {
 
 			if (!$this.getDiskInfo(defender).mementoInfo.defended &&
 			// handle the result of getDefendees being null
@@ -288,20 +321,27 @@ function Table(maxPlayers, maxPoints, activations, startingDisks, reinforcements
 		});
 
 		// see if the attackee is dead
-		attackees.forEach(function(d) {
-			$this.debug($this.getDiskInfo(d).disk.name + "(" + d + ")" + "'s wounds:" + $this.getDiskInfo(d).mementoInfo.wounds + "/"
-					+ $this.getDiskInfo(d).disk.wounds);
-			if ($this.getDiskInfo(d).mementoInfo.wounds >= $this.getDiskInfo(d).disk.wounds) {
-				// the disk is dead
-				// remove the disk from the table and restack
-				$this.remove(d);
-			}
-		});
+		attackees
+				.forEach(function(d) {
+					$this.debug($this.getDiskInfo(d).disk.name + "(" + d + ")"
+							+ "'s wounds:"
+							+ $this.getDiskInfo(d).mementoInfo.wounds + "/"
+							+ $this.getDiskInfo(d).disk.wounds);
+					if ($this.getDiskInfo(d).mementoInfo.wounds >= $this
+							.getDiskInfo(d).disk.wounds) {
+						// the disk is dead
+						// remove the disk from the table and restack
+						$this.remove(d);
+					}
+				});
 
 		// see if the attacker is dead
-		$this.debug($this.getDiskInfo(attacker).disk.name + "(" + attacker + ")" + "'s wounds:" + $this.getDiskInfo(attacker).mementoInfo.wounds + "/"
+		$this.debug($this.getDiskInfo(attacker).disk.name + "(" + attacker
+				+ ")" + "'s wounds:"
+				+ $this.getDiskInfo(attacker).mementoInfo.wounds + "/"
 				+ $this.getDiskInfo(attacker).disk.wounds);
-		if ($this.getDiskInfo(attacker).mementoInfo.wounds >= parseInt($this.getDiskInfo(attacker).disk.wounds, 10)) {
+		if ($this.getDiskInfo(attacker).mementoInfo.wounds >= parseInt($this
+				.getDiskInfo(attacker).disk.wounds, 10)) {
 			// the disk is dead
 			// remove the disk from the table and restack
 			$this.remove(attacker);
@@ -316,10 +356,10 @@ function Table(maxPlayers, maxPoints, activations, startingDisks, reinforcements
 		if (playerName === null) {
 			return false;
 		}
-		if ($this.memento.segment !== "ACTIVATION") {
+		if ($this.memento.segment !== $this.SEGMENT.ACTIVATION) {
 			return false;
 		}
-		if ($this.getPlayerInfo(playerName).segment !== "ACTIVATION") {
+		if ($this.getPlayerInfo(playerName).segment !== $this.SEGMENT.ACTIVATION) {
 			return false;
 		}
 		if (playerName !== $this.getCurrentPlayer()) {
@@ -340,7 +380,8 @@ function Table(maxPlayers, maxPoints, activations, startingDisks, reinforcements
 	};
 
 	this.canCastSpell = function(playerName, diskNumber) {
-		if ($this.canActivate(playerName, diskNumber) && $this.getDiskInfo(diskNumber).disk.spellcaster >= 1) {
+		if ($this.canActivate(playerName, diskNumber)
+				&& $this.getDiskInfo(diskNumber).disk.spellcaster >= 1) {
 			return true;
 		}
 		return false;
@@ -351,11 +392,12 @@ function Table(maxPlayers, maxPoints, activations, startingDisks, reinforcements
 			return false;
 		}
 
-		return $this.getDiskInfo(diskNumber).mementoInfo.pinnedBy.some(function(pinningDiskNumber) {
-			if ($this.getDiskInfo(pinningDiskNumber).disk.type === 'creature') {
-				return true;
-			}
-		});
+		return $this.getDiskInfo(diskNumber).mementoInfo.pinnedBy
+				.some(function(pinningDiskNumber) {
+					if ($this.getDiskInfo(pinningDiskNumber).disk.type === 'creature') {
+						return true;
+					}
+				});
 
 	};
 
@@ -377,7 +419,8 @@ function Table(maxPlayers, maxPoints, activations, startingDisks, reinforcements
 		}
 
 		// make sure this disk has flips left
-		if ($this.getDiskInfo(diskNumber).mementoInfo.flips >= $this.getDiskInfo(diskNumber).disk.movement) {
+		if ($this.getDiskInfo(diskNumber).mementoInfo.flips >= $this
+				.getDiskInfo(diskNumber).disk.movement) {
 			// $this.debug("Table.canMove:" + "movement");
 			return false;
 		}
@@ -400,19 +443,20 @@ function Table(maxPlayers, maxPoints, activations, startingDisks, reinforcements
 		}
 
 		// make the table is still in the activation segment
-		if ($this.memento.segment !== "ACTIVATION") {
-			// $this.debug("Table.canMove:" + "ACTIVATION");
+		if ($this.memento.segment !== $this.SEGMENT.ACTIVATION) {
+			// $this.debug("Table.canMove:" + $this.SEGMENT.ACTIVATION);
 			return false;
 		}
 
 		// make sure this player is still in the activation segment
-		if ($this.getPlayerInfo(playerName).segment !== "ACTIVATION") {
-			// $this.debug("Table.canMove:" + "ACTIVATION");
+		if ($this.getPlayerInfo(playerName).segment !== $this.SEGMENT.ACTIVATION) {
+			// $this.debug("Table.canMove:" + $this.SEGMENT.ACTIVATION);
 			return false;
 		}
 
 		// make sure this player has activations left this turn
-		if (parseInt($this.activations, 10) <= parseInt($this.getPlayerInfo(playerName).activations, 10)) {
+		if (parseInt($this.activations, 10) <= parseInt($this
+				.getPlayerInfo(playerName).activations, 10)) {
 			// $this.debug("Table.canMove:" + "activations");
 			return false;
 		}
@@ -439,7 +483,7 @@ function Table(maxPlayers, maxPoints, activations, startingDisks, reinforcements
 			return false;
 		}
 
-		if (!($this.memento.segment === "JOIN" || $this.memento.segment === "REINFORCEMENTS")) {
+		if (!($this.memento.segment === $this.SEGMENT.JOIN || $this.memento.segment === $this.SEGMENT.REINFORCEMENTS)) {
 			// $this.debug('6');
 			return false;
 		}
@@ -501,18 +545,25 @@ function Table(maxPlayers, maxPoints, activations, startingDisks, reinforcements
 
 		// handle the result of getDefendees being an array
 		defendees.forEach(function(d) {
-			$this.debug($this.getDiskInfo(defender).disk.name + "(" + defender + ")" + " does " + $this.getDiskInfo(defender).disk.attack + " damage to "
-					+ $this.getDiskInfo(d).disk.name + "(" + d + ")");
+			$this.debug($this.getDiskInfo(defender).disk.name + "(" + defender
+					+ ")" + " does " + $this.getDiskInfo(defender).disk.attack
+					+ " damage to " + $this.getDiskInfo(d).disk.name + "(" + d
+					+ ")");
 
 			// apply defense
-			$this.getDiskInfo(d).mementoInfo.carryOverDamage += parseInt($this.getDiskInfo(defender).disk.defense, 10);
+			$this.getDiskInfo(d).mementoInfo.carryOverDamage += parseInt($this
+					.getDiskInfo(defender).disk.defense, 10);
 
 			// convert carryoverdamage to wounds
-			$this.getDiskInfo(d).mementoInfo.wounds += Math.floor($this.getDiskInfo(d).mementoInfo.carryOverDamage / $this.getDiskInfo(d).disk.toughness);
+			$this.getDiskInfo(d).mementoInfo.wounds += Math.floor($this
+					.getDiskInfo(d).mementoInfo.carryOverDamage
+					/ $this.getDiskInfo(d).disk.toughness);
 
 			// set the carryoverdamage to what is left after converting
 			// to wounds
-			$this.getDiskInfo(d).mementoInfo.carryOverDamage = $this.getDiskInfo(d).mementoInfo.carryOverDamage % $this.getDiskInfo(d).disk.toughness;
+			$this.getDiskInfo(d).mementoInfo.carryOverDamage = $this
+					.getDiskInfo(d).mementoInfo.carryOverDamage
+					% $this.getDiskInfo(d).disk.toughness;
 
 		});
 
@@ -524,7 +575,7 @@ function Table(maxPlayers, maxPoints, activations, startingDisks, reinforcements
 	 * 
 	 */
 	this.endActivations = function(playerName) {
-		$this.getPlayerInfo(playerName).segment = "MISSILE";
+		$this.getPlayerInfo(playerName).segment = $this.SEGMENT.MISSILE;
 
 		// clear activations
 		$this.getPlayerInfo(playerName).activations = 0;
@@ -535,14 +586,15 @@ function Table(maxPlayers, maxPoints, activations, startingDisks, reinforcements
 		// if it was this players turn, move to the next player
 		// get the index of the current player
 		if (playerName === $this.getCurrentPlayer()) {
-			while ($this.anyPlayersIn("ACTIVATION")
-					&& ($this.getPlayerInfo($this.getCurrentPlayer()).segment !== "ACTIVATION" || !$this.hasUnactivatedDisks($this.getCurrentPlayer()))) {
-				$this.getPlayerInfo($this.getCurrentPlayer()).segment = "MISSILE";
+			while ($this.anyPlayersIn($this.SEGMENT.ACTIVATION)
+					&& ($this.getPlayerInfo($this.getCurrentPlayer()).segment !== $this.SEGMENT.ACTIVATION || !$this
+							.hasUnactivatedDisks($this.getCurrentPlayer()))) {
+				$this.getPlayerInfo($this.getCurrentPlayer()).segment = $this.SEGMENT.MISSILE;
 				this.memento.currentPlayer = $this.getNextPlayer();
 			}
 		}
 
-		if (!$this.anyPlayersIn("ACTIVATION")) {
+		if (!$this.anyPlayersIn($this.SEGMENT.ACTIVATION)) {
 			// move the table to the MISSILE segment
 			$this.startMissileSegment();
 		}
@@ -552,12 +604,15 @@ function Table(maxPlayers, maxPoints, activations, startingDisks, reinforcements
 	};
 
 	this.endReinforcements = function(playerName) {
-		$this.getPlayerInfo(playerName).segment = "ACTIVATION";
+		$this.getPlayerInfo(playerName).segment = $this.SEGMENT.ACTIVATION;
 
 		// if all the players are done with reinforcements
-		var anyPlayersInReinforcement = $this.anyPlayersIn("REINFORCEMENTS");
+		var anyPlayersInReinforcement = $this
+				.anyPlayersIn($this.SEGMENT.REINFORCEMENTS);
 
-		if (!anyPlayersInReinforcement && Object.keys($this.memento.players).length === parseInt($this.maxPlayers, 10)) {
+		if (!anyPlayersInReinforcement
+				&& Object.keys($this.memento.players).length === parseInt(
+						$this.maxPlayers, 10)) {
 			// then proceed to the ACTIVATION segment
 			$this.startActivationSegment();
 		}
@@ -566,7 +621,7 @@ function Table(maxPlayers, maxPoints, activations, startingDisks, reinforcements
 	};
 
 	this.endMissiles = function(playerName) {
-		$this.getPlayerInfo(playerName).segment = "COMBAT";
+		$this.getPlayerInfo(playerName).segment = $this.SEGMENT.COMBAT;
 
 		// if all the players are done with missiles
 		var anyPlayersInMissile = $this.anyPlayersIn('MISSILE');
@@ -597,7 +652,8 @@ function Table(maxPlayers, maxPoints, activations, startingDisks, reinforcements
 	 * @param {Disk}
 	 *            missile
 	 */
-	this.fireMissiles = function(playerName, diskNumber, tableClickPoint, missile) {
+	this.fireMissiles = function(playerName, diskNumber, tableClickPoint,
+			missile) {
 		// Table.fireMissiles
 		$this.debug("Table.fireMissiles");
 		$this.debug("playerName:" + playerName);
@@ -612,12 +668,14 @@ function Table(maxPlayers, maxPoints, activations, startingDisks, reinforcements
 
 		var diskInfo = $this.getDiskInfo(diskNumber);
 
-		var tableLocation = $this.getPointInsideCircle(new Point(diskInfo.mementoInfo.location.x, diskInfo.mementoInfo.location.y), 12, tableClickPoint);
+		var tableLocation = $this.getPointInsideCircle(new Point(
+				diskInfo.mementoInfo.location.x,
+				diskInfo.mementoInfo.location.y), 12, tableClickPoint);
 
 		// $this.debug(missile.name.toLowerCase());
 		// $this.debug(diskInfo.disk[missile.name.toLowerCase() + 's']);
 
-		for ( var i = 0; i < diskInfo.disk[missile.name.toLowerCase() + 's']; i++) {
+		for (var i = 0; i < diskInfo.disk[missile.name.toLowerCase() + 's']; i++) {
 			// pick a random angle
 			var angle = getRandomInt(0, 360);
 
@@ -636,9 +694,11 @@ function Table(maxPlayers, maxPoints, activations, startingDisks, reinforcements
 			if (percent <= 68) {
 				distance = percent / 68 * innerRadius;
 			} else if (percent < 95) {
-				distance = (percent - 68) / (95 - 68) * (middleRadius - innerRadius) + innerRadius;
+				distance = (percent - 68) / (95 - 68)
+						* (middleRadius - innerRadius) + innerRadius;
 			} else if (percent < 99) {
-				distance = (percent - 99) / (99 - 95) * (outerRadius - middleRadius) + outerRadius;
+				distance = (percent - 99) / (99 - 95)
+						* (outerRadius - middleRadius) + outerRadius;
 			} else {
 				distance = outerRadius + getRandomFloat(0, 12);
 			}
@@ -659,20 +719,31 @@ function Table(maxPlayers, maxPoints, activations, startingDisks, reinforcements
 		$this.activateDisk2(diskNumber, playerName);
 
 		// record move action
-		$this.recordAction("fireMissiles", [ playerName, diskNumber, tableClickPoint ]);
+		$this.recordAction("fireMissiles", [ playerName, diskNumber,
+				tableClickPoint ]);
 
 	};
 
-	// given a circle defined by a center and radius and a second point, if the
-	// second point is inside the circle, return it, otherwise return the point
-	// on the circumference of the circle that intersects with the line defined
-	// by the second point and center of the circle
+	/**
+	 * @param {Point}
+	 *            circleCenter
+	 * @param {number}
+	 *            radius
+	 * @param {Point}
+	 *            point
+	 * 
+	 * given a circle defined by a center and radius and a second point, if the
+	 * second point is inside the circle, return it, otherwise return the point
+	 * on the circumference of the circle that intersects with the line defined
+	 * by the second point and center of the circle
+	 */
 	this.getPointInsideCircle = function(circleCenter, radius, point) {
 
 		var b = circleCenter.distance(point);
 		var distance = Math.min(radius, b);
 
-		var location = new Point(circleCenter.x, circleCenter.y).getEdge(point, distance);
+		var location = new Point(circleCenter.x, circleCenter.y).getEdge(point,
+				distance);
 		return location;
 	};
 
@@ -696,7 +767,8 @@ function Table(maxPlayers, maxPoints, activations, startingDisks, reinforcements
 		$this.debug('Table.canMissile');
 		$this.debug(projectile.toLowerCase());
 		$this.debug(JSON.stringify($this.getDiskInfo(diskNumber).disk));
-		$this.debug($this.getDiskInfo(diskNumber).disk[projectile.toLowerCase() + 's']);
+		$this.debug($this.getDiskInfo(diskNumber).disk[projectile.toLowerCase()
+				+ 's']);
 
 		// make sure it is this player's turn
 		if ($this.getCurrentPlayer() !== playerName) {
@@ -704,12 +776,12 @@ function Table(maxPlayers, maxPoints, activations, startingDisks, reinforcements
 		}
 
 		// make the table is still in the missile segment
-		if ($this.memento.segment !== "MISSILE") {
+		if ($this.memento.segment !== $this.SEGMENT.MISSILE) {
 			return false;
 		}
 
 		// make sure this player is still in the missile segment
-		if ($this.getPlayerInfo(playerName).segment !== "MISSILE") {
+		if ($this.getPlayerInfo(playerName).segment !== $this.SEGMENT.MISSILE) {
 			return false;
 		}
 
@@ -792,16 +864,19 @@ function Table(maxPlayers, maxPoints, activations, startingDisks, reinforcements
 	 */
 	this.getAttackees = function(attacker) {
 		if ($this.getDiskInfo(attacker).mementoInfo.attackee !== null) {
-			return [ parseInt($this.getDiskInfo(attacker).mementoInfo.attackee, 10) ];
+			return [ parseInt($this.getDiskInfo(attacker).mementoInfo.attackee,
+					10) ];
 		}
 		// only count enemy disks, not all disks
-		var enemyDisks = $this.getDiskInfo(attacker).mementoInfo.pinning.filter(function(diskNumber) {
-			if ($this.getDiskInfo(attacker).mementoInfo.player !== $this.getDiskInfo(diskNumber).mementoInfo.player
-					&& $this.getDiskInfo(diskNumber).disk.type === 'creature') {
-				return true;
-			}
-			return false;
-		});
+		var enemyDisks = $this.getDiskInfo(attacker).mementoInfo.pinning
+				.filter(function(diskNumber) {
+					if ($this.getDiskInfo(attacker).mementoInfo.player !== $this
+							.getDiskInfo(diskNumber).mementoInfo.player
+							&& $this.getDiskInfo(diskNumber).disk.type === 'creature') {
+						return true;
+					}
+					return false;
+				});
 
 		// swashbuckler
 		if ($this.getDiskInfo(attacker).disk.swashbuckler === true) {
@@ -826,16 +901,19 @@ function Table(maxPlayers, maxPoints, activations, startingDisks, reinforcements
 	 */
 	this.getDefendees = function(defender) {
 		if ($this.getDiskInfo(defender).mementoInfo.defendee !== null) {
-			return [ parseInt($this.getDiskInfo(defender).mementoInfo.defendee, 10) ];
+			return [ parseInt($this.getDiskInfo(defender).mementoInfo.defendee,
+					10) ];
 		}
 		// only count enemy disks, not all disks
-		var enemyDisks = $this.getDiskInfo(defender).mementoInfo.pinnedBy.filter(function(diskNumber) {
-			if ($this.getDiskInfo(defender).mementoInfo.player !== $this.getDiskInfo(diskNumber).mementoInfo.player
-					&& $this.getDiskInfo(diskNumber).disk.type === 'creature') {
-				return true;
-			}
-			return false;
-		});
+		var enemyDisks = $this.getDiskInfo(defender).mementoInfo.pinnedBy
+				.filter(function(diskNumber) {
+					if ($this.getDiskInfo(defender).mementoInfo.player !== $this
+							.getDiskInfo(diskNumber).mementoInfo.player
+							&& $this.getDiskInfo(diskNumber).disk.type === 'creature') {
+						return true;
+					}
+					return false;
+				});
 
 		// swashbuckler
 		if ($this.getDiskInfo(defender).disk.swashbuckler === true) {
@@ -858,14 +936,17 @@ function Table(maxPlayers, maxPoints, activations, startingDisks, reinforcements
 		var disks = [];
 
 		// loop over all the disks
-		$this.getDiskNumbers().forEach(
-				function(diskNumber) {
-					if (playerName === $this.getDiskInfo(diskNumber).mementoInfo.player && $this.isPinningEnemy(diskNumber)
-							&& $this.getAttackees(diskNumber) === null) {
+		$this
+				.getDiskNumbers()
+				.forEach(
+						function(diskNumber) {
+							if (playerName === $this.getDiskInfo(diskNumber).mementoInfo.player
+									&& $this.isPinningEnemy(diskNumber)
+									&& $this.getAttackees(diskNumber) === null) {
 
-						disks.push(diskNumber);
-					}
-				});
+								disks.push(diskNumber);
+							}
+						});
 		return disks;
 	};
 
@@ -873,14 +954,17 @@ function Table(maxPlayers, maxPoints, activations, startingDisks, reinforcements
 		// make sure we only count enemy disks
 		var disks = [];
 		// loop over all the disks
-		$this.getDiskNumbers().forEach(
-				function(diskNumber) {
-					if (playerName === $this.getDiskInfo(diskNumber).mementoInfo.player && $this.isPinnedByEnemy(diskNumber)
-							&& $this.getDefendees(diskNumber) === null) {
+		$this
+				.getDiskNumbers()
+				.forEach(
+						function(diskNumber) {
+							if (playerName === $this.getDiskInfo(diskNumber).mementoInfo.player
+									&& $this.isPinnedByEnemy(diskNumber)
+									&& $this.getDefendees(diskNumber) === null) {
 
-						disks.push(diskNumber);
-					}
-				});
+								disks.push(diskNumber);
+							}
+						});
 		return disks;
 	};
 
@@ -898,17 +982,23 @@ function Table(maxPlayers, maxPoints, activations, startingDisks, reinforcements
 		// get the highest disk
 		var attacker = null;
 		var topTier = 0;
-		Object.keys(stacks).forEach(function(diskNumber) {
+		Object
+				.keys(stacks)
+				.forEach(
+						function(diskNumber) {
 
-			var tier = stacks[diskNumber];
+							var tier = stacks[diskNumber];
 
-			// also check to make sure this disk has attack points left
-			// and is pinning an enemy
-			if (tier > topTier && !$this.getDiskInfo(diskNumber).mementoInfo.attacked && $this.isPinningEnemy(diskNumber)) {
-				attacker = diskNumber;
-				topTier = tier;
-			}
-		});
+							// also check to make sure this disk has attack
+							// points left
+							// and is pinning an enemy
+							if (tier > topTier
+									&& !$this.getDiskInfo(diskNumber).mementoInfo.attacked
+									&& $this.isPinningEnemy(diskNumber)) {
+								attacker = diskNumber;
+								topTier = tier;
+							}
+						});
 
 		// bug in JSDT
 		return {
@@ -943,22 +1033,30 @@ function Table(maxPlayers, maxPoints, activations, startingDisks, reinforcements
 	 */
 	this.getOverlappingDisks = function(diskNumber) {
 		var overlappingDisks = [];
-		$this.getDiskNumbers().forEach(function(loopDiskNumber) {
-			var info1 = $this.getDiskInfo(loopDiskNumber);
-			// ignore self
-			if (parseInt(loopDiskNumber, 10) !== parseInt(diskNumber, 10)
-			// only stack creature disks
-			&& info1.disk.type == 'creature') {
-				var location = new Point($this.getDiskInfo(diskNumber).mementoInfo.location.x, $this.getDiskInfo(diskNumber).mementoInfo.location.y);
+		$this
+				.getDiskNumbers()
+				.forEach(
+						function(loopDiskNumber) {
+							var info1 = $this.getDiskInfo(loopDiskNumber);
+							// ignore self
+							if (parseInt(loopDiskNumber, 10) !== parseInt(
+									diskNumber, 10)
+									// only stack creature disks
+									&& info1.disk.type == 'creature') {
+								var location = new Point(
+										$this.getDiskInfo(diskNumber).mementoInfo.location.x,
+										$this.getDiskInfo(diskNumber).mementoInfo.location.y);
 
-				var distance = location.distance(info1.mementoInfo.location);
-				var diameter = (parseFloat($this.getDiskInfo(diskNumber).disk.diameter) + parseFloat(info1.disk.diameter)) / 2.0;
+								var distance = location
+										.distance(info1.mementoInfo.location);
+								var diameter = (parseFloat($this
+										.getDiskInfo(diskNumber).disk.diameter) + parseFloat(info1.disk.diameter)) / 2.0;
 
-				if (distance < diameter) {
-					overlappingDisks.push(loopDiskNumber);
-				}
-			}
-		});
+								if (distance < diameter) {
+									overlappingDisks.push(loopDiskNumber);
+								}
+							}
+						});
 		return overlappingDisks;
 	};
 
@@ -969,26 +1067,30 @@ function Table(maxPlayers, maxPoints, activations, startingDisks, reinforcements
 
 	this.getOverlappingDisks1 = function(location, diameter) {
 		var overlappingDisks = [];
-		$this.getDiskNumbers().forEach(function(loopDiskNumber) {
-			var info1 = $this.getDiskInfo(loopDiskNumber);
-			// ignore self
-			// if (parseInt(loopDiskNumber, 10) !== parseInt(
-			// diskNumber, 10)) {
+		$this
+				.getDiskNumbers()
+				.forEach(
+						function(loopDiskNumber) {
+							var info1 = $this.getDiskInfo(loopDiskNumber);
+							// ignore self
+							// if (parseInt(loopDiskNumber, 10) !== parseInt(
+							// diskNumber, 10)) {
 
-			var distance = location.distance(info1.mementoInfo.location);
+							var distance = location
+									.distance(info1.mementoInfo.location);
 
-			// $this.debug(diameter);
-			// $this.debug(parseFloat(info1.disk.diameter));
+							// $this.debug(diameter);
+							// $this.debug(parseFloat(info1.disk.diameter));
 
-			var diameter2 = (parseFloat(diameter) + parseFloat(info1.disk.diameter)) / 2.0;
-			// $this.debug(distance);
-			// $this.debug(diameter2);
+							var diameter2 = (parseFloat(diameter) + parseFloat(info1.disk.diameter)) / 2.0;
+							// $this.debug(distance);
+							// $this.debug(diameter2);
 
-			if (distance < diameter2) {
-				overlappingDisks.push(loopDiskNumber);
-			}
-			// }
-		});
+							if (distance < diameter2) {
+								overlappingDisks.push(loopDiskNumber);
+							}
+							// }
+						});
 		return overlappingDisks;
 	};
 
@@ -998,35 +1100,42 @@ function Table(maxPlayers, maxPoints, activations, startingDisks, reinforcements
 		var k = 32;
 		var expectedScore = 0;
 		var actualScore = 0;
-		Object.keys($this.memento.players).forEach(function(opponentName) {
-			if (playerName === opponentName) {
-				// $this.debug('not rating against self');
-				return;
-			}
-			// $this.debug('opponent:' + opponentName);
-			var opponent = $this.getPlayerInfo(opponentName);
-			if (typeof $this.getPlayerInfo(playerName).rating === "undefined") {
-				$this.getPlayerInfo(playerName).rating = 0.0;
-			}
-			if (typeof opponent.rating === "undefined") {
-				opponent.rating = 0.0;
-			}
-			expectedScore += 1 / (1 + Math.pow(10, (opponent.rating - $this.getPlayerInfo(playerName).rating) / 400));
-			// $this.debug('expectedScore:' + expectedScore);
-			// if loss
-			if (winners.indexOf(playerName) === -1) {
-				actualScore += 0;
-			}
-			// if win
-			else if (winners.indexOf(opponent.name) === -1) {
-				actualScore += 1;
-			}
-			// else if draw
-			else {
-				actualScore += 0.5;
-			}
-			// $this.debug('actualScore:' + actualScore);
-		});
+		Object
+				.keys($this.memento.players)
+				.forEach(
+						function(opponentName) {
+							if (playerName === opponentName) {
+								// $this.debug('not rating against self');
+								return;
+							}
+							// $this.debug('opponent:' + opponentName);
+							var opponent = $this.getPlayerInfo(opponentName);
+							if (typeof $this.getPlayerInfo(playerName).rating === "undefined") {
+								$this.getPlayerInfo(playerName).rating = 0.0;
+							}
+							if (typeof opponent.rating === "undefined") {
+								opponent.rating = 0.0;
+							}
+							expectedScore += 1 / (1 + Math
+									.pow(
+											10,
+											(opponent.rating - $this
+													.getPlayerInfo(playerName).rating) / 400));
+							// $this.debug('expectedScore:' + expectedScore);
+							// if loss
+							if (winners.indexOf(playerName) === -1) {
+								actualScore += 0;
+							}
+							// if win
+							else if (winners.indexOf(opponent.name) === -1) {
+								actualScore += 1;
+							}
+							// else if draw
+							else {
+								actualScore += 0.5;
+							}
+							// $this.debug('actualScore:' + actualScore);
+						});
 		// $this.debug('total expectedScore:' + expectedScore);
 		// $this.debug('total actualScore:' + actualScore);
 		var adjustment = k * (actualScore - expectedScore);
@@ -1046,11 +1155,13 @@ function Table(maxPlayers, maxPoints, activations, startingDisks, reinforcements
 			reinforcementCount = parseInt($this.startingDisks, 10);
 		}
 		// $this.debug(playerName);
-		return Math.min(reinforcementCount, $this.getPlayerInfo(playerName).reinforcements.length);
+		return Math.min(reinforcementCount,
+				$this.getPlayerInfo(playerName).reinforcements.length);
 	};
 
 	this.getTier = function(diskNumber, stacks) {
-		if (diskNumber === undefined || $this.memento.diskInfo[diskNumber] === null) {
+		if (diskNumber === undefined
+				|| $this.memento.diskInfo[diskNumber] === null) {
 			return -1;
 		}
 		// else if we've already figured out this disk's tier
@@ -1066,7 +1177,8 @@ function Table(maxPlayers, maxPoints, activations, startingDisks, reinforcements
 
 		// get the highest tier of the pinned disks
 		var highest = 0;
-		$this.getDiskInfo(diskNumber).mementoInfo.pinning.forEach(function(number) {
+		$this.getDiskInfo(diskNumber).mementoInfo.pinning.forEach(function(
+				number) {
 			if (number === undefined) {
 				$this.debug("wtf 2");
 				highest = -1;
@@ -1116,13 +1228,16 @@ function Table(maxPlayers, maxPoints, activations, startingDisks, reinforcements
 	this.getUnactivatedDisks = function(playerName) {
 		var disks = [];
 		// loop over all the disks
-		$this.getDiskNumbers().forEach(
-				function(diskNumber) {
-					if (playerName === $this.getDiskInfo(diskNumber).mementoInfo.player && !$this.getDiskInfo(diskNumber).mementoInfo.activated
-							&& $this.getDiskInfo(diskNumber).mementoInfo.pinnedBy.length === 0) {
-						disks.push(diskNumber);
-					}
-				});
+		$this
+				.getDiskNumbers()
+				.forEach(
+						function(diskNumber) {
+							if (playerName === $this.getDiskInfo(diskNumber).mementoInfo.player
+									&& !$this.getDiskInfo(diskNumber).mementoInfo.activated
+									&& $this.getDiskInfo(diskNumber).mementoInfo.pinnedBy.length === 0) {
+								disks.push(diskNumber);
+							}
+						});
 		return disks;
 	};
 
@@ -1130,24 +1245,31 @@ function Table(maxPlayers, maxPoints, activations, startingDisks, reinforcements
 		var playersWithDisks = {};
 
 		// see if someone won
-		$this.getDiskNumbers().forEach(function(diskNumber) {
-			var diskInfo = $this.getDiskInfo(diskNumber);
-			if (Object.keys(playersWithDisks).indexOf(diskInfo.mementoInfo.player) === -1) {
-				playersWithDisks[diskInfo.mementoInfo.player] = 0;
-			}
-			playersWithDisks[diskInfo.mementoInfo.player]++;
+		$this.getDiskNumbers().forEach(
+				function(diskNumber) {
+					var diskInfo = $this.getDiskInfo(diskNumber);
+					if (Object.keys(playersWithDisks).indexOf(
+							diskInfo.mementoInfo.player) === -1) {
+						playersWithDisks[diskInfo.mementoInfo.player] = 0;
+					}
+					playersWithDisks[diskInfo.mementoInfo.player]++;
 
-		});
+				});
 
 		// loop over reinforcement stacks
-		Object.keys($this.memento.players).forEach(function(playerName) {
-			if ($this.getPlayerInfo(playerName).reinforcements.length > 0) {
-				if (Object.keys(playersWithDisks).indexOf(playerName) === -1) {
-					playersWithDisks[playerName] = 0;
-				}
-				playersWithDisks[playerName] += $this.getPlayerInfo(playerName).reinforcements.length;
-			}
-		});
+		Object
+				.keys($this.memento.players)
+				.forEach(
+						function(playerName) {
+							if ($this.getPlayerInfo(playerName).reinforcements.length > 0) {
+								if (Object.keys(playersWithDisks).indexOf(
+										playerName) === -1) {
+									playersWithDisks[playerName] = 0;
+								}
+								playersWithDisks[playerName] += $this
+										.getPlayerInfo(playerName).reinforcements.length;
+							}
+						});
 		if (Object.keys(playersWithDisks).length <= 1) {
 			return Object.keys(playersWithDisks);
 		}
@@ -1159,13 +1281,16 @@ function Table(maxPlayers, maxPoints, activations, startingDisks, reinforcements
 	 */
 	this.hasUnactivatedDisks = function(playerName) {
 		var foundUADisk = false;
-		$this.getDiskNumbers().some(function(diskNumber) {
-			var diskInfo = $this.getDiskInfo(diskNumber);
-			if (diskInfo.mementoInfo.player === playerName && !diskInfo.mementoInfo.activated && diskInfo.mementoInfo.pinnedBy.length === 0) {
-				foundUADisk = true;
-				return true;
-			}
-		});
+		$this.getDiskNumbers().some(
+				function(diskNumber) {
+					var diskInfo = $this.getDiskInfo(diskNumber);
+					if (diskInfo.mementoInfo.player === playerName
+							&& !diskInfo.mementoInfo.activated
+							&& diskInfo.mementoInfo.pinnedBy.length === 0) {
+						foundUADisk = true;
+						return true;
+					}
+				});
 		return foundUADisk;
 	};
 
@@ -1223,7 +1348,8 @@ function Table(maxPlayers, maxPoints, activations, startingDisks, reinforcements
 
 		// $this.debug('two.location:' + JSON.stringify(two.location));
 
-		var distance = new Point(one.mementoInfo.location.x, one.mementoInfo.location.y).distance(two.mementoInfo.location),
+		var distance = new Point(one.mementoInfo.location.x,
+				one.mementoInfo.location.y).distance(two.mementoInfo.location),
 		//
 		diameter = (parseFloat(one.disk.diameter) + parseFloat(two.disk.diameter)) / 2;
 
@@ -1238,10 +1364,12 @@ function Table(maxPlayers, maxPoints, activations, startingDisks, reinforcements
 		if (diskNumber === null) {
 			return false;
 		}
-		return $this.getDiskInfo(diskNumber).mementoInfo.pinnedBy.some(function(n) {
-			return $this.getDiskInfo(n).mementoInfo.player !== $this.getDiskInfo(diskNumber).mementoInfo.player
-					&& $this.getDiskInfo(n).disk.type === 'creature';
-		});
+		return $this.getDiskInfo(diskNumber).mementoInfo.pinnedBy
+				.some(function(n) {
+					return $this.getDiskInfo(n).mementoInfo.player !== $this
+							.getDiskInfo(diskNumber).mementoInfo.player
+							&& $this.getDiskInfo(n).disk.type === 'creature';
+				});
 	};
 
 	this.isPinningEnemy = function(diskNumber) {
@@ -1249,8 +1377,10 @@ function Table(maxPlayers, maxPoints, activations, startingDisks, reinforcements
 			return false;
 		}
 
-		return $this.getDiskInfo(diskNumber).mementoInfo.pinning.some(function(n) {
-			return $this.getDiskInfo(n).mementoInfo.player !== $this.getDiskInfo(diskNumber).mementoInfo.player
+		return $this.getDiskInfo(diskNumber).mementoInfo.pinning.some(function(
+				n) {
+			return $this.getDiskInfo(n).mementoInfo.player !== $this
+					.getDiskInfo(diskNumber).mementoInfo.player
 					&& $this.getDiskInfo(n).disk.type === 'creature';
 		});
 	};
@@ -1271,7 +1401,8 @@ function Table(maxPlayers, maxPoints, activations, startingDisks, reinforcements
 
 		if ($this.memento.segment !== 'JOIN') {
 			// 0 pass this to the user
-			result.messages.push("This table is no longer in the JOIN segment.");
+			result.messages
+					.push("This table is no longer in the JOIN segment.");
 			result.success = false;
 		}
 
@@ -1280,29 +1411,37 @@ function Table(maxPlayers, maxPoints, activations, startingDisks, reinforcements
 		// check army size
 		if (armyInfo.points > $this.maxPoints) {
 			// 0 pass this to the user
-			result.messages.push("This table's army point cap is lower then the size of this army.");
+			result.messages
+					.push("This table's army point cap is lower then the size of this army.");
 			result.success = false;
 		}
 
 		// check alignment restrictions
-		if ($this.alignmentRestriction === 'Single' && Object.keys(armyInfo.alignments).length > 2) {
+		if ($this.alignmentRestriction === 'Single'
+				&& Object.keys(armyInfo.alignments).length > 2) {
 			// 0 pass this to the user
 			// $this.debug('single faction but more then 2');
-			result.messages.push("This table is restricted to only single faction armies.");
+			result.messages
+					.push("This table is restricted to only single faction armies.");
 			result.success = false;
 		}
 
-		if ($this.alignmentRestriction === 'Single' && Object.keys(armyInfo.alignments).length == 2 && !armyInfo.alignments['Unaligned']) {
+		if ($this.alignmentRestriction === 'Single'
+				&& Object.keys(armyInfo.alignments).length == 2
+				&& !armyInfo.alignments['Unaligned']) {
 			// 0 pass this to the user
 			// $this.debug('single faction but 2 and one is not unaligned');
-			result.messages.push("This table is restricted to only single faction armies.");
+			result.messages
+					.push("This table is restricted to only single faction armies.");
 			result.success = false;
 		}
 
-		if ($this.alignmentRestriction === 'Neutral' && armyInfo.alignments['Good'] && armyInfo.alignments['Evil']) {
+		if ($this.alignmentRestriction === 'Neutral'
+				&& armyInfo.alignments['Good'] && armyInfo.alignments['Evil']) {
 			// 0 pass this to the user
 			// $this.debug('neutral faction allowed but has good and evil');
-			result.messages.push("This table does not allow armies with both Good and Evil alignments.");
+			result.messages
+					.push("This table does not allow armies with both Good and Evil alignments.");
 			result.success = false;
 		}
 
@@ -1313,7 +1452,8 @@ function Table(maxPlayers, maxPoints, activations, startingDisks, reinforcements
 		if (factionPoints / armyInfo.points < .5) {
 			// pass this to the user
 			// $this.debug('no majority faction');
-			result.messages.push("All armies must have one faction that is half or more of the army.");
+			result.messages
+					.push("All armies must have one faction that is half or more of the army.");
 			result.success = false;
 		}
 		return result;
@@ -1363,8 +1503,9 @@ function Table(maxPlayers, maxPoints, activations, startingDisks, reinforcements
 			}
 		});
 
-		if (Object.keys($this.memento.players).length === parseInt($this.maxPlayers, 10)) {
-			$this.memento.segment = "REINFORCEMENTS";
+		if (Object.keys($this.memento.players).length === parseInt(
+				$this.maxPlayers, 10)) {
+			$this.memento.segment = $this.SEGMENT.REINFORCEMENTS;
 		}
 
 		$this.placeReinforcements(playerName);
@@ -1381,15 +1522,20 @@ function Table(maxPlayers, maxPoints, activations, startingDisks, reinforcements
 	 *            tableClickPoint
 	 */
 	this.move = function(playerName, movedDiskNumber, tableClickPoint) {
-		// $this.debug("Table.move");
+		$this.debug("Table.move");
+		console.log(playerName);
+		console.log(movedDiskNumber);
+		console.log(tableClickPoint);
 
 		// make sure we got an x and y
-		if (typeof tableClickPoint === "undefined" || typeof tableClickPoint.x === "undefined" || typeof tableClickPoint.y === "undefined") {
+		if (typeof tableClickPoint === "undefined"
+				|| typeof tableClickPoint.x === "undefined"
+				|| typeof tableClickPoint.y === "undefined") {
 			// $this.debug(1);
 			return false;
 		}
 
-		// need to do this first so noone can activate 2 disks, move a third
+		// need to do this first so no one can activate 2 disks, move a third
 		// disk but not activate it, then move/activate a fourth disk
 		$this.activateMovedDisks(playerName, movedDiskNumber);
 
@@ -1401,9 +1547,12 @@ function Table(maxPlayers, maxPoints, activations, startingDisks, reinforcements
 
 		var diskInfo = $this.getDiskInfo(movedDiskNumber);
 
-		var currentLocation = new Point(diskInfo.mementoInfo.location.x, diskInfo.mementoInfo.location.y),
+		var currentLocation = new Point(diskInfo.mementoInfo.location.x,
+				diskInfo.mementoInfo.location.y),
 		//
-		newLocation = currentLocation.getEdge(new Point(tableClickPoint.x, tableClickPoint.y), $this.getDiskInfo(movedDiskNumber).disk.diameter),
+		newLocation = currentLocation.getEdge(new Point(tableClickPoint.x,
+				tableClickPoint.y),
+				$this.getDiskInfo(movedDiskNumber).disk.diameter),
 		//
 		rotation = 0,
 		//
@@ -1424,7 +1573,8 @@ function Table(maxPlayers, maxPoints, activations, startingDisks, reinforcements
 				rotation = 270;
 			}
 		} else {
-			a = (newLocation.y - diskInfo.mementoInfo.location.y) / (newLocation.x - $this.getDiskInfo(movedDiskNumber).mementoInfo.location.x);
+			a = (newLocation.y - diskInfo.mementoInfo.location.y)
+					/ (newLocation.x - $this.getDiskInfo(movedDiskNumber).mementoInfo.location.x);
 			rotation = Math.atan(a) * 180 / Math.PI;
 		}
 
@@ -1441,29 +1591,35 @@ function Table(maxPlayers, maxPoints, activations, startingDisks, reinforcements
 
 		// flying
 		// make sure none of the disks that are now pinned are new
-		diskInfo.mementoInfo.pinning.some(function(value) {
-			// if we are pinning a new disk and
-			if (previouslyPinning.indexOf(value) === -1
-					&& (
-					// they are both flying disks and enemies or
-					($this.getDiskInfo(movedDiskNumber).disk.flying === true && $this.getDiskInfo(value).disk.flying === true && $this
-							.getDiskInfo(movedDiskNumber).mementoInfo.player !== $this.getDiskInfo(value).mementoInfo.player) ||
-					// the moved disk is not a flying disk
-					$this.getDiskInfo(movedDiskNumber).disk.flying === false)) {
-				// then the moved disk needs to be activated
-				pinningNewDisk = true;
-				return true;
-			}
-		});
+		diskInfo.mementoInfo.pinning
+				.some(function(value) {
+					// if we are pinning a new disk and
+					if (previouslyPinning.indexOf(value) === -1
+							&& (
+							// they are both flying disks and enemies or
+							($this.getDiskInfo(movedDiskNumber).disk.flying === true
+									&& $this.getDiskInfo(value).disk.flying === true && $this
+									.getDiskInfo(movedDiskNumber).mementoInfo.player !== $this
+									.getDiskInfo(value).mementoInfo.player) ||
+							// the moved disk is not a flying disk
+							$this.getDiskInfo(movedDiskNumber).disk.flying === false)) {
+						// then the moved disk needs to be activated
+						pinningNewDisk = true;
+						return true;
+					}
+				});
 
 		// only call activateDisk once, so that we don't move out of activation
 		// then try to activate again
-		if (pinningNewDisk || $this.getDiskInfo(movedDiskNumber).mementoInfo.flips >= $this.getDiskInfo(movedDiskNumber).disk.movement) {
+		if (pinningNewDisk
+				|| $this.getDiskInfo(movedDiskNumber).mementoInfo.flips >= $this
+						.getDiskInfo(movedDiskNumber).disk.movement) {
 			$this.activateDisk2(movedDiskNumber, playerName);
 		}
 
 		// record move action
-		$this.recordAction("move", [ playerName, movedDiskNumber, tableClickPoint ]);
+		$this.recordAction("move", [ playerName, movedDiskNumber,
+				tableClickPoint ]);
 
 		return true;
 	};
@@ -1473,7 +1629,9 @@ function Table(maxPlayers, maxPoints, activations, startingDisks, reinforcements
 		var nextAttacker = $this.getNextAttacker();
 
 		if (nextAttacker.tier > 1) {
-			$this.debug('nextAttacker:' + $this.getDiskInfo(nextAttacker.attacker).disk.name + "(" + (nextAttacker.attacker) + ")(tier " + nextAttacker.tier
+			$this.debug('nextAttacker:'
+					+ $this.getDiskInfo(nextAttacker.attacker).disk.name + "("
+					+ (nextAttacker.attacker) + ")(tier " + nextAttacker.tier
 					+ ")");
 
 			// only go to the next fight if we didn't get an error code
@@ -1556,9 +1714,9 @@ function Table(maxPlayers, maxPoints, activations, startingDisks, reinforcements
 			}
 		} else if (stagingDisk.location.y === 0) {
 			if (stagingDisk.location.x > 0) {
-				angle = 180 * TO_RADIANS;
+				angle = 0 * TO_RADIANS;
 			} else {
-				angle = 0;
+				angle = 180 * TO_RADIANS;
 			}
 		} else {
 			// $this.debug(JSON.stringify(stagingDisk.location));
@@ -1569,26 +1727,32 @@ function Table(maxPlayers, maxPoints, activations, startingDisks, reinforcements
 		// $this.debug('angle:' + angle);
 
 		// place each disk on the table
-		disks.forEach(function(diskName, diskNumber) {
+		disks
+				.forEach(function(diskName, diskNumber) {
 
-			var diskInfo = {};
-			diskInfo.disk = $this.disks[diskName];
+					var diskInfo = {};
+					diskInfo.disk = $this.disks[diskName];
 
-			// find the right default location for this disk
-			var angleOffset = Math.ceil(diskNumber / 2) * (360 / reinforcementCount) * (diskNumber % 2 === 0 ? 1 : -1) * TO_RADIANS;
+					// find the right default location for this disk
+					var angleOffset = Math.ceil(diskNumber / 2)
+							* (360 / reinforcementCount)
+							* (diskNumber % 2 === 0 ? 1 : -1) * TO_RADIANS;
 
-			// $this.debug('angleOffset:' + angleOffset);
+					// $this.debug('angleOffset:' + angleOffset);
 
-			var x = ((parseFloat(stagingDisk.disk.diameter) + parseFloat(diskInfo.disk.diameter)) / 2) * Math.cos(angle + angleOffset);
-			var y = ((parseFloat(stagingDisk.disk.diameter) + parseFloat(diskInfo.disk.diameter)) / 2) * Math.sin(angle + angleOffset);
+					var x = ((parseFloat(stagingDisk.disk.diameter) + parseFloat(diskInfo.disk.diameter)) / 2)
+							* Math.cos(angle + angleOffset);
+					var y = ((parseFloat(stagingDisk.disk.diameter) + parseFloat(diskInfo.disk.diameter)) / 2)
+							* Math.sin(angle + angleOffset);
 
-			// $this.debug('x:' + x);
-			// $this.debug('y:' + y);
+					// $this.debug('x:' + x);
+					// $this.debug('y:' + y);
 
-			var location = new Point(stagingDisk.location.x - x, stagingDisk.location.y - y);
+					var location = new Point(stagingDisk.location.x - x,
+							stagingDisk.location.y - y);
 
-			$this.place(diskInfo.disk, location, player.name);
-		});
+					$this.place(diskInfo.disk, location, player.name);
+				});
 
 	};
 
@@ -1617,7 +1781,8 @@ function Table(maxPlayers, maxPoints, activations, startingDisks, reinforcements
 		// per Legion's "Tides of War" scenario
 		stagingDistance = 18,
 		//
-		stagingDiameter = stagingDistance / Math.sin(Math.PI / $this.maxPlayers),
+		stagingDiameter = stagingDistance
+				/ Math.sin(Math.PI / $this.maxPlayers),
 		//
 		x, y;
 
@@ -1630,8 +1795,11 @@ function Table(maxPlayers, maxPoints, activations, startingDisks, reinforcements
 			y = Math.sin(Math.PI * 2 / $this.maxPlayers * i) * stagingDiameter;
 
 			$this.stagingDisks.push({
-				disk : new Disk(name, type, attack, defense, toughness, movement, wounds, flying, swashbuckler, archer, arrows, bolts, fireballs, boulders,
-						missileImmunity, firstblow, spellcaster, limit, cost, faction, alignment, diameter, description, price),
+				disk : new Disk(name, type, attack, defense, toughness,
+						movement, wounds, flying, swashbuckler, archer, arrows,
+						bolts, fireballs, boulders, missileImmunity, firstblow,
+						spellcaster, limit, cost, faction, alignment, diameter,
+						description, price),
 				location : new Point(x, y)
 			});
 		}
@@ -1677,62 +1845,85 @@ function Table(maxPlayers, maxPoints, activations, startingDisks, reinforcements
 	 */
 	this.remove = function(diskNumber, disregardMemento) {
 		if (!disregardMemento) {
-			$this.debug($this.getDiskInfo(diskNumber).disk.name + "(" + diskNumber + ") has been killed.");
+			$this.debug($this.getDiskInfo(diskNumber).disk.name + "("
+					+ diskNumber + ") has been killed.");
 		}
 
 		// get the disks that are pinning this disk
-		$this.getDiskInfo(diskNumber).mementoInfo.pinnedBy.forEach(function(pinningDisk) {
+		$this.getDiskInfo(diskNumber).mementoInfo.pinnedBy.forEach(function(
+				pinningDisk) {
 
 			// remove the disk from pinning
-			$this.getDiskInfo(pinningDisk).mementoInfo.pinning.splice($this.getDiskInfo(pinningDisk).mementoInfo.pinning.indexOf(diskNumber), 1);
+			$this.getDiskInfo(pinningDisk).mementoInfo.pinning.splice($this
+					.getDiskInfo(pinningDisk).mementoInfo.pinning
+					.indexOf(diskNumber), 1);
 			if (!disregardMemento) {
-				$this.debug($this.getDiskInfo(pinningDisk).disk.name + "(" + pinningDisk + ") is no longer pinning " + $this.getDiskInfo(diskNumber).disk.name
-						+ "(" + diskNumber + ")");
+				$this.debug($this.getDiskInfo(pinningDisk).disk.name + "("
+						+ pinningDisk + ") is no longer pinning "
+						+ $this.getDiskInfo(diskNumber).disk.name + "("
+						+ diskNumber + ")");
 			}
 
-			$this.getDiskInfo(diskNumber).mementoInfo.pinning.forEach(function(pinnedDisk) {
+			$this.getDiskInfo(diskNumber).mementoInfo.pinning.forEach(function(
+					pinnedDisk) {
 				// remove the disk from pinnedBy
 
-				$this.getDiskInfo(pinnedDisk).mementoInfo.pinnedBy.splice($this.getDiskInfo(pinnedDisk).mementoInfo.pinnedBy.indexOf(parseInt(diskNumber, 10)),
-						1);
+				$this.getDiskInfo(pinnedDisk).mementoInfo.pinnedBy.splice($this
+						.getDiskInfo(pinnedDisk).mementoInfo.pinnedBy
+						.indexOf(parseInt(diskNumber, 10)), 1);
 				if (!disregardMemento) {
-					$this.debug($this.getDiskInfo(pinnedDisk).disk.name + "(" + pinnedDisk + ") is no longer pinned by "
-							+ $this.getDiskInfo(diskNumber).disk.name + "(" + diskNumber + ")");
+					$this.debug($this.getDiskInfo(pinnedDisk).disk.name + "("
+							+ pinnedDisk + ") is no longer pinned by "
+							+ $this.getDiskInfo(diskNumber).disk.name + "("
+							+ diskNumber + ")");
 				}
 
-				var overlapping = $this.isOverLapping($this.getDiskInfo(pinningDisk), $this.getDiskInfo(pinnedDisk));
+				var overlapping = $this.isOverLapping($this
+						.getDiskInfo(pinningDisk), $this
+						.getDiskInfo(pinnedDisk));
 				if (overlapping) {
 					// make sure we always use the same data type for
 					// pinning and pinnedBy, either string or number
-					if ($this.getDiskInfo(pinningDisk).mementoInfo.pinning.indexOf(pinnedDisk) === -1) {
-						$this.getDiskInfo(pinningDisk).mementoInfo.pinning.push(pinnedDisk);
+					if ($this.getDiskInfo(pinningDisk).mementoInfo.pinning
+							.indexOf(pinnedDisk) === -1) {
+						$this.getDiskInfo(pinningDisk).mementoInfo.pinning
+								.push(pinnedDisk);
 					}
-					$this.getDiskInfo(pinnedDisk).mementoInfo.pinnedBy.push(pinningDisk);
+					$this.getDiskInfo(pinnedDisk).mementoInfo.pinnedBy
+							.push(pinningDisk);
 					if (!disregardMemento) {
-						$this.debug($this.getDiskInfo(pinningDisk).disk.name + "(" + pinningDisk + ") is now pinning "
-								+ $this.getDiskInfo(pinnedDisk).disk.name + "(" + pinnedDisk + ")");
+						$this.debug($this.getDiskInfo(pinningDisk).disk.name
+								+ "(" + pinningDisk + ") is now pinning "
+								+ $this.getDiskInfo(pinnedDisk).disk.name + "("
+								+ pinnedDisk + ")");
 					}
 				}
 			});
 		});
 
 		// get the disks that are pinned by this disk
-		$this.getDiskInfo(diskNumber).mementoInfo.pinning.forEach(function(pinnedDisk) {
+		$this.getDiskInfo(diskNumber).mementoInfo.pinning.forEach(function(
+				pinnedDisk) {
 
-			if ($this.getDiskInfo(pinnedDisk).mementoInfo.pinnedBy.indexOf(parseInt(diskNumber, 10)) > -1) {
+			if ($this.getDiskInfo(pinnedDisk).mementoInfo.pinnedBy
+					.indexOf(parseInt(diskNumber, 10)) > -1) {
 				// remove the disk from pinning
-				$this.getDiskInfo(pinnedDisk).mementoInfo.pinnedBy.splice($this.getDiskInfo(pinnedDisk).mementoInfo.pinnedBy.indexOf(parseInt(diskNumber, 10)),
-						1);
+				$this.getDiskInfo(pinnedDisk).mementoInfo.pinnedBy.splice($this
+						.getDiskInfo(pinnedDisk).mementoInfo.pinnedBy
+						.indexOf(parseInt(diskNumber, 10)), 1);
 				if (!disregardMemento) {
-					$this.debug($this.getDiskInfo(pinnedDisk).disk.name + "(" + pinnedDisk + ") is no longer pinned by "
-							+ $this.getDiskInfo(diskNumber).disk.name + "(" + diskNumber + ")");
+					$this.debug($this.getDiskInfo(pinnedDisk).disk.name + "("
+							+ pinnedDisk + ") is no longer pinned by "
+							+ $this.getDiskInfo(diskNumber).disk.name + "("
+							+ diskNumber + ")");
 				}
 			}
 		});
 
 		// remove the disk from the table
 		if (!disregardMemento) {
-			$this.debug('removed ' + $this.getDiskInfo(diskNumber).disk.name + "(" + diskNumber + ")");
+			$this.debug('removed ' + $this.getDiskInfo(diskNumber).disk.name
+					+ "(" + diskNumber + ")");
 		}
 
 		$this.memento.diskInfo[diskNumber] = null;
@@ -1759,7 +1950,8 @@ function Table(maxPlayers, maxPoints, activations, startingDisks, reinforcements
 		$this.slide(location, diskNumber);
 
 		// record save reinforcements command
-		$this.recordAction("saveReinforcement", [ playerName, diskNumber, location ]);
+		$this.recordAction("saveReinforcement", [ playerName, diskNumber,
+				location ]);
 
 	};
 
@@ -1797,7 +1989,8 @@ function Table(maxPlayers, maxPoints, activations, startingDisks, reinforcements
 	 */
 	this.slide = function(location, diskNumber) {
 		// deep copy of the current diskInfo
-		var mementoInfo = JSON.parse(JSON.stringify($this.getDiskInfo(diskNumber).mementoInfo));
+		var mementoInfo = JSON.parse(JSON.stringify($this
+				.getDiskInfo(diskNumber).mementoInfo));
 		mementoInfo.pinning.length = 0;
 		mementoInfo.pinnedBy.length = 0;
 		$this.remove(diskNumber, true);
@@ -1817,16 +2010,20 @@ function Table(maxPlayers, maxPoints, activations, startingDisks, reinforcements
 	this.stack = function(movedDiskNumber) {
 		// unpin previously pinned disks
 		// loop over all the disks this disk was pinning
-		$this.getDiskInfo(movedDiskNumber).mementoInfo.pinning.forEach(function(diskNumber) {
+		$this.getDiskInfo(movedDiskNumber).mementoInfo.pinning
+				.forEach(function(diskNumber) {
 
-			// remove the entry from the pinned disk's pinning list
-			var index = $this.getDiskInfo(diskNumber).mementoInfo.pinnedBy.indexOf(movedDiskNumber);
-			$this.getDiskInfo(diskNumber).mementoInfo.pinnedBy.splice(index, 1);
-		});
+					// remove the entry from the pinned disk's pinning list
+					var index = $this.getDiskInfo(diskNumber).mementoInfo.pinnedBy
+							.indexOf(movedDiskNumber);
+					$this.getDiskInfo(diskNumber).mementoInfo.pinnedBy.splice(
+							index, 1);
+				});
 		$this.getDiskInfo(movedDiskNumber).mementoInfo.pinning.length = 0;
 
 		// see if we are now pinning any disks
-		var overlappingDisks = $this.getOverlappingDisks(parseInt(movedDiskNumber, 10));
+		var overlappingDisks = $this.getOverlappingDisks(parseInt(
+				movedDiskNumber, 10));
 
 		// remove disks that have an overlapping disk between the moved disk and
 		// the overlapped disk
@@ -1837,8 +2034,10 @@ function Table(maxPlayers, maxPoints, activations, startingDisks, reinforcements
 		overlappingDisks.forEach(function(loopDiskNumber) {
 			// make sure we always use the same data type for pinning
 			// and pinnedBy, either string or number
-			$this.getDiskInfo(movedDiskNumber).mementoInfo.pinning.push(loopDiskNumber);
-			$this.getDiskInfo(loopDiskNumber).mementoInfo.pinnedBy.push(movedDiskNumber);
+			$this.getDiskInfo(movedDiskNumber).mementoInfo.pinning
+					.push(loopDiskNumber);
+			$this.getDiskInfo(loopDiskNumber).mementoInfo.pinnedBy
+					.push(movedDiskNumber);
 		});
 	};
 
@@ -1854,28 +2053,28 @@ function Table(maxPlayers, maxPoints, activations, startingDisks, reinforcements
 			$this.getDiskInfo(diskNumber).mementoInfo.reinforcement = false;
 		});
 
-		this.memento.segment = "ACTIVATION";
+		this.memento.segment = $this.SEGMENT.ACTIVATION;
 		this.memento.currentPlayer = $this.memento.firstPlayer;
 
 		Object.keys($this.memento.players).forEach(function(player) {
-			player.segment = "ACTIVATION";
+			player.segment = $this.SEGMENT.ACTIVATION;
 		});
 
 		// skip players that have no disks available to activate
 		while (!$this.hasUnactivatedDisks($this.getCurrentPlayer())) {
 			$this.debug('skipping ' + $this.getCurrentPlayer());
 
-			$this.getPlayerInfo($this.getCurrentPlayer()).segment = "MISSILE";
+			$this.getPlayerInfo($this.getCurrentPlayer()).segment = $this.SEGMENT.MISSILE;
 			this.memento.currentPlayer = $this.getNextPlayer();
 		}
 	};
 
 	this.startCombatSegment = function() {
 		$this.debug("startCombatSegment");
-		this.memento.segment = "COMBAT";
+		this.memento.segment = $this.SEGMENT.COMBAT;
 		this.memento.currentPlayer = $this.memento.firstPlayer;
 		Object.keys($this.memento.players).forEach(function(playerName) {
-			$this.getPlayerInfo(playerName).segment = "COMBAT";
+			$this.getPlayerInfo(playerName).segment = $this.SEGMENT.COMBAT;
 		});
 
 		// only move to the next segment if we resolved all the stacks to a
@@ -1888,21 +2087,21 @@ function Table(maxPlayers, maxPoints, activations, startingDisks, reinforcements
 	this.startMissileSegment = function() {
 		$this.debug("startMissileSegment");
 
-		this.memento.segment = "MISSILE";
+		this.memento.segment = $this.SEGMENT.MISSILE;
 		this.memento.currentPlayer = $this.memento.firstPlayer;
 
 		Object.keys($this.memento.players).forEach(function(playerName) {
-			$this.getPlayerInfo(playerName).segment = "MISSILE";
+			$this.getPlayerInfo(playerName).segment = $this.SEGMENT.MISSILE;
 
 			// we're skipping players we're not supposed to, I think
 			if (!$this.hasUnactivatedArcherDisks(playerName)) {
 				$this.debug('moving ' + playerName + ' to COMBAT');
-				$this.getPlayerInfo(playerName).segment = "COMBAT";
+				$this.getPlayerInfo(playerName).segment = $this.SEGMENT.COMBAT;
 			}
 		});
 
 		// if all players are past the missile segment then start combat
-		if (!$this.anyPlayersIn("MISSILE")) {
+		if (!$this.anyPlayersIn($this.SEGMENT.MISSILE)) {
 			$this.debug('moving table to COMBAT');
 			$this.startCombatSegment();
 		}
@@ -1912,39 +2111,46 @@ function Table(maxPlayers, maxPoints, activations, startingDisks, reinforcements
 			// skip players that have no archer disks to shoot with
 			while (!$this.hasUnactivatedArcherDisks($this.getCurrentPlayer())) {
 				$this.memento.currentPlayer = $this.getNextPlayer();
-				$this.debug('moved currentPlayer to ' + $this.memento.currentPlayer);
+				$this.debug('moved currentPlayer to '
+						+ $this.memento.currentPlayer);
 			}
 		}
 	};
 
 	this.startReinforcementSegment = function() {
 		$this.debug("startReinforcementSegment");
-		this.memento.segment = "REINFORCEMENTS";
+		this.memento.segment = $this.SEGMENT.REINFORCEMENTS;
 
 		this.round = parseInt($this.round, 10) + 1;
 
 		this.memento.currentPlayer = $this.memento.firstPlayer;
-		Object.keys($this.memento.players).forEach(function(playerName) {
-			$this.getPlayerInfo(playerName).segment = "REINFORCEMENTS";
+		Object
+				.keys($this.memento.players)
+				.forEach(
+						function(playerName) {
+							$this.getPlayerInfo(playerName).segment = $this.SEGMENT.REINFORCEMENTS;
 
-			// check if the player has any reinforcements and react accordingly
-			if ($this.getPlayerInfo(playerName).reinforcements.length === 0) {
-				$this.getPlayerInfo(playerName).segment = "ACTIVATION";
-			} else {
-				// place reinforcements in default location
-				$this.placeReinforcements(playerName);
-			}
-		});
+							// check if the player has any reinforcements and
+							// react accordingly
+							if ($this.getPlayerInfo(playerName).reinforcements.length === 0) {
+								$this.getPlayerInfo(playerName).segment = $this.SEGMENT.ACTIVATION;
+							} else {
+								// place reinforcements in default location
+								$this.placeReinforcements(playerName);
+							}
+						});
 
 		// check if we need to immediately go to the next segment
-		if (!$this.anyPlayersIn("REINFORCEMENTS") && Object.keys($this.memento.players).length === parseInt($this.maxPlayers, 10)) {
+		if (!$this.anyPlayersIn($this.SEGMENT.REINFORCEMENTS)
+				&& Object.keys($this.memento.players).length === parseInt(
+						$this.maxPlayers, 10)) {
 			$this.startActivationSegment();
 		}
 	};
 
 	this.startRemoveCountersSegment = function() {
 		$this.debug("startRemoveCountersSegment");
-		this.memento.segment = "REMOVE_COUNTERS";
+		this.memento.segment = $this.SEGMENT.REMOVE_COUNTERS;
 
 		$this.getDiskNumbers().forEach(function(diskNumber) {
 			// clear carryoverdamage
@@ -1964,9 +2170,12 @@ function Table(maxPlayers, maxPoints, activations, startingDisks, reinforcements
 
 		});
 
-		Object.keys($this.memento.players).forEach(function(playerName) {
-			$this.getPlayerInfo(playerName).segment = "REMOVE_COUNTERS";
-		});
+		Object
+				.keys($this.memento.players)
+				.forEach(
+						function(playerName) {
+							$this.getPlayerInfo(playerName).segment = $this.SEGMENT.REMOVE_COUNTERS;
+						});
 
 		// move the firstPlayer
 		this.memento.firstPlayer = $this.getNextPlayer();
@@ -1975,10 +2184,10 @@ function Table(maxPlayers, maxPoints, activations, startingDisks, reinforcements
 		var winners = $this.getWinners();
 
 		if (winners.length > 0 || $this.getDiskNumbers().length === 0) {
-			this.memento.segment = "FINISHED";
+			this.memento.segment = $this.SEGMENT.FINISHED;
 		}
 
-		if ($this.memento.segment !== "FINISHED") {
+		if ($this.memento.segment !== $this.SEGMENT.FINISHED) {
 			$this.startReinforcementSegment();
 		}
 	};
@@ -1990,7 +2199,10 @@ function Table(maxPlayers, maxPoints, activations, startingDisks, reinforcements
 		return JSON.stringify($this, function(key, value) {
 			// $this.debug("typeof " + key + ":" + typeof key);
 			// $this.debug("typeof value" + ":" + typeof value);
-			if (typeof value === "function" || (typeof excludedKeys !== "undefined" && excludedKeys !== null && excludedKeys.indexOf(key) !== -1)) {
+			if (typeof value === "function"
+					|| (typeof excludedKeys !== "undefined"
+							&& excludedKeys !== null && excludedKeys
+							.indexOf(key) !== -1)) {
 				// $this.debug("not including " + key);
 				return undefined;
 			}
@@ -2031,5 +2243,6 @@ function Table(maxPlayers, maxPoints, activations, startingDisks, reinforcements
 	};
 
 	// record table creation command
-	$this.recordAction("createTable", [ maxPlayers, maxPoints, activations, startingDisks, reinforcements, alignmentRestriction, scenario ]);
+	$this.recordAction("createTable", [ maxPlayers, maxPoints, activations,
+			startingDisks, reinforcements, alignmentRestriction, scenario ]);
 }

@@ -17,6 +17,7 @@ function TableUI(api, table, container) {
 
 	var PIXELS_PER_INCH = 128;
 	var TO_RADIANS = Math.PI / 180;
+
 	/**
 	 * @type {Table}
 	 */
@@ -55,7 +56,8 @@ function TableUI(api, table, container) {
 	 */
 	this.initialized = false;
 
-	this.highlightsCtx = $(".highlights", $this.container).get(0).getContext('2d');
+	this.highlightsCtx = $(".highlights", $this.container).get(0).getContext(
+			'2d');
 	this.disksCtx = $(".disks", $this.container).get(0).getContext('2d');
 	this.moveCtx = $(".move", $this.container).get(0).getContext('2d');
 	this.tooltipsCtx = $(".tooltips", $this.container).get(0).getContext('2d');
@@ -67,47 +69,44 @@ function TableUI(api, table, container) {
 	this.woundCounterImage.src = $this.api.baseUrl + 'i/Wound.png';
 
 	/*
-	$(window).mouseout(function() {
-		console.log('window.out');
-	});
+	 * $(window).mouseout(function() { console.log('window.out'); });
+	 * 
+	 * $(document).mouseout(function() { console.log('document.out'); });
+	 * 
+	 * window.addEventListener("mouseout", function() {
+	 * console.log('window.out2'); }, false);
+	 * 
+	 * document.addEventListener("mouseout", function() {
+	 * console.log('document.out2'); }, false);
+	 */
 
-	$(document).mouseout(function() {
-		console.log('document.out');
-	});
+	$("#slider").slider(
+			{
+				"min" : 0,
+				"change" : function(event, ui) {
+					$(ui.handle).text(ui.value);
+				},
+				"slide" : function(event, ui) {
+					// console.log(ui.value);
+					if (ui.value === $this.table.mementoId) {
+						$this.mementoId = null;
 
-	window.addEventListener("mouseout", function() {
-		console.log('window.out2');
-	}, false);
+					} else {
+						$this.mementoId = ui.value;
+					}
 
-	document.addEventListener("mouseout", function() {
-		console.log('document.out2');
-	}, false);
-	*/
-
-	$("#slider").slider({
-		"min" : 0,
-		"change" : function(event, ui) {
-			$(ui.handle).text(ui.value);
-		},
-		"slide" : function(event, ui) {
-			// console.log(ui.value);
-			if (ui.value === $this.table.mementoId) {
-				$this.mementoId = null;
-
-			} else {
-				$this.mementoId = ui.value;
-			}
-
-			$(ui.handle).text(ui.value);
-			var memento = $this.api.getMemento($this.table.getId(), $this.mementoId != null ? $this.mementoId : $this.table.mementoId);
-			if (memento) {
-				$this.table.restoreMemento(memento);
-				$this.draw();
-				// update table info
-				$this.displayBoardInfo();
-			}
-		}
-	});
+					$(ui.handle).text(ui.value);
+					var memento = $this.api.getMemento($this.table.getId(),
+							$this.mementoId != null ? $this.mementoId
+									: $this.table.mementoId);
+					if (memento) {
+						$this.table.restoreMemento(memento);
+						$this.draw();
+						// update table info
+						$this.displayBoardInfo();
+					}
+				}
+			});
 
 	$("#contextMenu").mouseleave(function() {
 		// console.log("contextMenu mouseleave");
@@ -119,14 +118,16 @@ function TableUI(api, table, container) {
 		$(this).hide();
 	});
 
-	$("#loading, #refresh").click(function(e) {
-		// manual update link
-		// this should also restart the polling
-		// console.log('reload');
-		$this.api.getTable($this.table.getId(), $this.onSuccess, $this.onError, 5000);
-		e.preventDefault();
-		return false;
-	});
+	$("#loading, #refresh").click(
+			function(e) {
+				// manual update link
+				// this should also restart the polling
+				// console.log('reload');
+				$this.api.getTable($this.table.getId(), $this.onSuccess,
+						$this.onError, 5000);
+				e.preventDefault();
+				return false;
+			});
 
 	// context menu handlers
 
@@ -237,19 +238,25 @@ function TableUI(api, table, container) {
 	};
 
 	// attach the click handler
-	$(container).click(function(v) {
-		$this.mouseClickHandler($this.getTableLocation(v.pageX, v.pageY), v.which);
-	});
+	$(container).click(
+			function(v) {
+				$this.mouseClickHandler($this
+						.getTableLocation(v.pageX, v.pageY), v.which);
+			});
 
 	// attach the mousedown handler
-	$(container).mousedown(function(v) {
-		$this.mouseDownHandler($this.getTableLocation(v.pageX, v.pageY), v.which, v);
-	});
+	$(container).mousedown(
+			function(v) {
+				$this.mouseDownHandler(
+						$this.getTableLocation(v.pageX, v.pageY), v.which, v);
+			});
 
 	// attach the mouseup handler
-	$(container).mouseup(function(v) {
-		$this.mouseUpHandler($this.getTableLocation(v.pageX, v.pageY), v.which);
-	});
+	$(container).mouseup(
+			function(v) {
+				$this.mouseUpHandler($this.getTableLocation(v.pageX, v.pageY),
+						v.which);
+			});
 
 	// capture and ignore right clicks
 	$(container).bind("contextmenu", function(v) {
@@ -289,7 +296,8 @@ function TableUI(api, table, container) {
 		});
 
 		// console.log("TableUI.activateDisk");
-		$this.api.activateDisk($this.table.getId(), $this.selectedDisk, $this.onSuccess, $this.onError);
+		$this.api.activateDisk($this.table.getId(), $this.selectedDisk,
+				$this.onSuccess, $this.onError);
 	};
 
 	/**
@@ -304,7 +312,9 @@ function TableUI(api, table, container) {
 	 */
 	this.addHint = function(name, hint, parent, dismissible) {
 		dismissible = (dismissible == undefined ? true : false);
-		var hintToggles = typeof localStorage["hintToggles"] !== "undefined" ? JSON.parse(localStorage["hintToggles"]) : {};
+		var hintToggles = typeof localStorage["hintToggles"] !== "undefined" ? JSON
+				.parse(localStorage["hintToggles"])
+				: {};
 		if (hintToggles[name]) {
 			return;
 		}
@@ -350,7 +360,8 @@ function TableUI(api, table, container) {
 			"table" : $this.table
 		});
 
-		$this.api.setAttackee($this.table.getId(), attacker, attackee, $this.onSuccess, $this.onError);
+		$this.api.setAttackee($this.table.getId(), attacker, attackee,
+				$this.onSuccess, $this.onError);
 
 		$this.action = null;
 		$this.selectedDisk = null;
@@ -377,13 +388,16 @@ function TableUI(api, table, container) {
 		if ($this.selectedDisk !== null) {
 			// console.log('show disk info');
 			$("#contextMenu .DISK_INFO").css("display", "block");
-			$("#contextMenu .DISK_INFO .text").text($this.table.getDiskInfo($this.selectedDisk).disk.name);
+			$("#contextMenu .DISK_INFO .text").text(
+					$this.table.getDiskInfo($this.selectedDisk).disk.name);
 			show = true;
 		}
 
 		// END_REINFORCEMENTS
-		if (($this.table.getSegment() === "JOIN" || $this.table.getSegment() === "REINFORCEMENTS") && $this.currentPlayer !== null
-				&& $this.currentPlayer !== "" && $this.table.getPlayerInfo($this.currentPlayer).segment === "REINFORCEMENTS") {
+		if (($this.table.getSegment() === "JOIN" || $this.table.getSegment() === "REINFORCEMENTS")
+				&& $this.currentPlayer !== null
+				&& $this.currentPlayer !== ""
+				&& $this.table.getPlayerInfo($this.currentPlayer).segment === "REINFORCEMENTS") {
 			$("#contextMenu .END_REINFORCEMENTS").css("display", "block");
 			show = true;
 		}
@@ -407,36 +421,48 @@ function TableUI(api, table, container) {
 		}
 
 		// MISSILEs
-		if ($this.table.getSegment() === 'MISSILE' && $this.selectedDisk !== null) {
+		if ($this.table.getSegment() === 'MISSILE'
+				&& $this.selectedDisk !== null) {
 
 			// console.log(1);
 
 			// ARROW
 			console.log($this.selectedDisk);
-			if ($this.table.canMissile($this.currentPlayer, $this.selectedDisk, 'arrow')) {
+			if ($this.table.canMissile($this.currentPlayer, $this.selectedDisk,
+					'arrow')) {
 				$("#contextMenu .ARROW").css("display", "block");
-				$("#contextMenu .ARROW .count").text($this.table.getDiskInfo($this.selectedDisk).disk.arrows);
+				$("#contextMenu .ARROW .count")
+						.text(
+								$this.table.getDiskInfo($this.selectedDisk).disk.arrows);
 				show = true;
 			}
 
 			// BOLTS
-			if ($this.table.canMissile($this.currentPlayer, $this.selectedDisk, 'BOLT')) {
+			if ($this.table.canMissile($this.currentPlayer, $this.selectedDisk,
+					'BOLT')) {
 				$("#contextMenu .BOLT").css("display", "block");
-				$("#contextMenu .BOLT .count").text($this.table.getDiskInfo($this.selectedDisk).disk.bolts);
+				$("#contextMenu .BOLT .count").text(
+						$this.table.getDiskInfo($this.selectedDisk).disk.bolts);
 				show = true;
 			}
 
 			// FIREBALLS
-			if ($this.table.canMissile($this.currentPlayer, $this.selectedDisk, 'FIREBALL')) {
+			if ($this.table.canMissile($this.currentPlayer, $this.selectedDisk,
+					'FIREBALL')) {
 				$("#contextMenu .FIREBALL").css("display", "block");
-				$("#contextMenu .FIREBALL .count").text($this.table.getDiskInfo($this.selectedDisk).disk.fireballs);
+				$("#contextMenu .FIREBALL .count")
+						.text(
+								$this.table.getDiskInfo($this.selectedDisk).disk.fireballs);
 				show = true;
 			}
 
 			// BOULDERS
-			if ($this.table.canMissile($this.currentPlayer, $this.selectedDisk, 'BOULDER')) {
+			if ($this.table.canMissile($this.currentPlayer, $this.selectedDisk,
+					'BOULDER')) {
 				$("#contextMenu .BOULDER").css("display", "block");
-				$("#contextMenu .BOULDER .count").text($this.table.getDiskInfo($this.selectedDisk).disk.boulders);
+				$("#contextMenu .BOULDER .count")
+						.text(
+								$this.table.getDiskInfo($this.selectedDisk).disk.boulders);
 				show = true;
 			}
 		}
@@ -457,28 +483,36 @@ function TableUI(api, table, container) {
 		}
 
 		// END_ACTIVATIONS
-		if ($this.currentPlayer !== null && $this.table.getSegment() === "ACTIVATION"
+		if ($this.currentPlayer !== null
+				&& $this.table.getSegment() === "ACTIVATION"
 				&& $this.table.getPlayerInfo($this.currentPlayer).segment === "ACTIVATION") {
 			$("#contextMenu .END_ACTIVATIONS").css("display", "block");
 			show = true;
 		}
 
 		// END_MISSILES
-		if ($this.currentPlayer !== null && $this.table.getSegment() === "MISSILE" && $this.table.getPlayerInfo($this.currentPlayer).segment === "MISSILE") {
+		if ($this.currentPlayer !== null
+				&& $this.table.getSegment() === "MISSILE"
+				&& $this.table.getPlayerInfo($this.currentPlayer).segment === "MISSILE") {
 			$("#contextMenu .END_MISSILES").css("display", "block");
 			show = true;
 		}
 
 		// SELECT_DEFENDEE
-		if ($this.currentPlayer !== null && $this.table.getSegment() === "COMBAT" && $this.table.isPinnedByEnemy($this.selectedDisk)
+		if ($this.currentPlayer !== null
+				&& $this.table.getSegment() === "COMBAT"
+				&& $this.table.isPinnedByEnemy($this.selectedDisk)
 				&& $this.table.getDefendees($this.selectedDisk) === null
-				&& $this.currentPlayer === $this.table.getDiskInfo($this.selectedDisk).mementoInfo.player) {
+				&& $this.currentPlayer === $this.table
+						.getDiskInfo($this.selectedDisk).mementoInfo.player) {
 			$("#contextMenu .SELECT_DEFENDEE").css("display", "block");
 			show = true;
 		}
 
 		// SELECT_ATTACKEE
-		if ($this.currentPlayer !== null && $this.table.getSegment() === "COMBAT" && $this.table.isPinningEnemy($this.selectedDisk)
+		if ($this.currentPlayer !== null
+				&& $this.table.getSegment() === "COMBAT"
+				&& $this.table.isPinningEnemy($this.selectedDisk)
 				&& $this.table.getAttackees($this.selectedDisk) === null) {
 			$("#contextMenu .SELECT_ATTACKEE").css("display", "block");
 			show = true;
@@ -488,8 +522,10 @@ function TableUI(api, table, container) {
 			screenLocation.x = $(container).width() - $("#contextMenu").width();
 		}
 
-		if ($(container).height() < screenLocation.y + $("#contextMenu").height()) {
-			screenLocation.y = $(container).height() - $("#contextMenu").height();
+		if ($(container).height() < screenLocation.y
+				+ $("#contextMenu").height()) {
+			screenLocation.y = $(container).height()
+					- $("#contextMenu").height();
 		}
 
 		$("#contextMenu").css("top", screenLocation.y - 0);
@@ -517,7 +553,8 @@ function TableUI(api, table, container) {
 			"table" : $this.table
 		});
 
-		$this.api.setDefendee($this.table.getId(), defender, defendee, $this.onSuccess, $this.onError);
+		$this.api.setDefendee($this.table.getId(), defender, defendee,
+				$this.onSuccess, $this.onError);
 
 		$this.action = null;
 		$this.selectedDisk = null;
@@ -529,12 +566,19 @@ function TableUI(api, table, container) {
 		$("#tableId").text($this.table.getId());
 
 		$("#boardSegment .currentSegment").removeClass("currentSegment");
-		$("#boardSegment ." + $this.table.getSegment()).addClass("currentSegment");
+		$("#boardSegment ." + $this.table.getSegment()).addClass(
+				"currentSegment");
 
-		$("#boardSegment .currentPlayerSegment").removeClass("currentPlayerSegment");
+		$("#boardSegment .currentPlayerSegment").removeClass(
+				"currentPlayerSegment");
 
-		if ($this.currentPlayer && Object.keys($this.table.memento.players).indexOf($this.currentPlayer) > -1) {
-			$("#boardSegment ." + $this.table.getPlayerInfo($this.currentPlayer).segment).addClass("currentPlayerSegment");
+		if ($this.currentPlayer
+				&& Object.keys($this.table.memento.players).indexOf(
+						$this.currentPlayer) > -1) {
+			$(
+					"#boardSegment ."
+							+ $this.table.getPlayerInfo($this.currentPlayer).segment)
+					.addClass("currentPlayerSegment");
 		}
 
 		$("#round").text($this.table.getRound());
@@ -546,7 +590,8 @@ function TableUI(api, table, container) {
 
 		var playerName = $this.table.getFirstPlayer();
 
-		for ( var i = 0; i < $this.table.playerOrder.length; i++, playerName = $this.table.getNextPlayer(playerName)) {
+		for (var i = 0; i < $this.table.playerOrder.length; i++, playerName = $this.table
+				.getNextPlayer(playerName)) {
 
 			// console.log(playerName);
 
@@ -573,7 +618,9 @@ function TableUI(api, table, container) {
 			// console.log('.' + $this.table.getSegment() + " .playerOrder");
 			// handle a player not having joined at this point yet
 			if ($this.table.getPlayerInfo(playerName)) {
-				$('.' + $this.table.getPlayerInfo(playerName).segment + " .playerOrder").append(li);
+				$(
+						'.' + $this.table.getPlayerInfo(playerName).segment
+								+ " .playerOrder").append(li);
 			} else {
 				$('.JOIN' + " .playerOrder").append(li);
 			}
@@ -591,7 +638,8 @@ function TableUI(api, table, container) {
 		$("#wounds").text(diskInfo.disk.wounds);
 		$("#movement").text(diskInfo.disk.movement);
 		$("#diameter").text(diskInfo.disk.diameter);
-		$("#speed").text(String(diskInfo.disk.diameter * diskInfo.disk.movement));
+		$("#speed").text(
+				String(diskInfo.disk.diameter * diskInfo.disk.movement));
 		$("#cost").text(diskInfo.disk.cost);
 
 		// position diskInfo div
@@ -599,7 +647,8 @@ function TableUI(api, table, container) {
 
 		// check to see if the div would be off the side of the screen, and
 		// adjust
-		if ($(container).width() < p.left + $("#contextMenu").width() + $("#diskInfo").width()) {
+		if ($(container).width() < p.left + $("#contextMenu").width()
+				+ $("#diskInfo").width()) {
 			p.left -= ($("#diskInfo").width() - 7);
 		} else {
 			p.left += ($("#contextMenu").width() + 1);
@@ -633,7 +682,9 @@ function TableUI(api, table, container) {
 
 		}
 		// logged in but not in this table
-		if ($this.currentPlayer !== "" && $this.table.playerOrder.indexOf($this.currentPlayer) === -1 && $this.table.getId() !== "") {
+		if ($this.currentPlayer !== ""
+				&& $this.table.playerOrder.indexOf($this.currentPlayer) === -1
+				&& $this.table.getId() !== "") {
 
 			var hint = $("<span>");
 			hint.css('margin-left', '1em');
@@ -693,7 +744,9 @@ function TableUI(api, table, container) {
 		}
 
 		// logged in but no table selected
-		if ($this.currentPlayer !== "" && $this.table.playerOrder.indexOf($this.currentPlayer) === -1 && $this.table.getId() === "") {
+		if ($this.currentPlayer !== ""
+				&& $this.table.playerOrder.indexOf($this.currentPlayer) === -1
+				&& $this.table.getId() === "") {
 
 			var list = $(".table_list").clone();
 
@@ -713,24 +766,40 @@ function TableUI(api, table, container) {
 		}
 
 		// logged in, joined, and join or reinforcements
-		if ($this.currentPlayer !== "" && $this.table.playerOrder.indexOf($this.currentPlayer) > -1
-				&& ($this.table.getSegment() === "REINFORCEMENTS" || $this.table.getSegment() === "JOIN")
+		if ($this.currentPlayer !== ""
+				&& $this.table.playerOrder.indexOf($this.currentPlayer) > -1
+				&& ($this.table.getSegment() === "REINFORCEMENTS" || $this.table
+						.getSegment() === "JOIN")
 				&& $this.table.getPlayerInfo($this.currentPlayer).segment === "REINFORCEMENTS") {
-			$this.addHint("place_reinforcements", $("<span>").append(
-					"During the Reinforcements segment, you should place " + $this.table.getReinforcementCount($this.currentPlayer)
-							+ ' disks from your reinforcement stack around your staging disk.'));
+			$this
+					.addHint(
+							"place_reinforcements",
+							$("<span>")
+									.append(
+											"During the Reinforcements segment, you should place "
+													+ $this.table
+															.getReinforcementCount($this.currentPlayer)
+													+ ' disks from your reinforcement stack around your staging disk.'));
 		}
 
 		// already placed reinforcements
-		if ($this.currentPlayer !== "" && $this.table.playerOrder.indexOf($this.currentPlayer) > -1
-				&& ($this.table.getSegment() === "REINFORCEMENTS" || $this.table.getSegment() === "JOIN")
+		if ($this.currentPlayer !== ""
+				&& $this.table.playerOrder.indexOf($this.currentPlayer) > -1
+				&& ($this.table.getSegment() === "REINFORCEMENTS" || $this.table
+						.getSegment() === "JOIN")
 				&& $this.table.getPlayerInfo($this.currentPlayer).segment !== "REINFORCEMENTS") {
-			$this.addHint("all_players_reinforcement", $("<span>").append(
-					'You have saved your reinforcements, but all players must also do so before starting the Activation segment.'));
+			$this
+					.addHint(
+							"all_players_reinforcement",
+							$("<span>")
+									.append(
+											'You have saved your reinforcements, but all players must also do so before starting the Activation segment.'));
 		}
 
 		// done activating disks and waiting for other players to activate disks
-		if ($this.currentPlayer !== "" && $this.table.playerOrder.indexOf($this.currentPlayer) > -1 && $this.table.getSegment() === "ACTIVATION"
+		if ($this.currentPlayer !== ""
+				&& $this.table.playerOrder.indexOf($this.currentPlayer) > -1
+				&& $this.table.getSegment() === "ACTIVATION"
 				&& $this.table.getPlayerInfo($this.currentPlayer).segment !== "ACTIVATION") {
 			$this
 					.addHint(
@@ -743,26 +812,39 @@ function TableUI(api, table, container) {
 		}
 
 		// have more disks to activate and waiting for turn
-		if ($this.currentPlayer !== "" && $this.table.playerOrder.indexOf($this.currentPlayer) > -1 && $this.table.getSegment() === "ACTIVATION"
+		if ($this.currentPlayer !== ""
+				&& $this.table.playerOrder.indexOf($this.currentPlayer) > -1
+				&& $this.table.getSegment() === "ACTIVATION"
 				&& $this.table.getPlayerInfo($this.currentPlayer).segment === "ACTIVATION") {
-			$this.addHint("activation_turns", $("<span>").append(
-					"During the Activation segment, each player takes turns activating disks until all players have finished activation their disks."));
+			$this
+					.addHint(
+							"activation_turns",
+							$("<span>")
+									.append(
+											"During the Activation segment, each player takes turns activating disks until all players have finished activation their disks."));
 		}
 
 		// activate disks
-		if ($this.currentPlayer !== "" && $this.table.playerOrder.indexOf($this.currentPlayer) > -1 && $this.table.getSegment() === "ACTIVATION"
-				&& $this.table.getPlayerInfo($this.currentPlayer).segment === "ACTIVATION" && $this.currentPlayer === $this.table.getCurrentPlayer()) {
+		if ($this.currentPlayer !== ""
+				&& $this.table.playerOrder.indexOf($this.currentPlayer) > -1
+				&& $this.table.getSegment() === "ACTIVATION"
+				&& $this.table.getPlayerInfo($this.currentPlayer).segment === "ACTIVATION"
+				&& $this.currentPlayer === $this.table.getCurrentPlayer()) {
 
-			$this.addHint("activate", $("<span>").append("It is now your turn to Activate disks."));
+			$this.addHint("activate", $("<span>").append(
+					"It is now your turn to Activate disks."));
 		}
 
 		if ($this.table.getSegment() === "COMBAT") {
 
-			var disksThatNeedAttackee = $this.table.getDisksThatNeedAttackee($this.currentPlayer);
-			var disksThatNeedDefendee = $this.table.getDisksThatNeedDefendee($this.currentPlayer);
+			var disksThatNeedAttackee = $this.table
+					.getDisksThatNeedAttackee($this.currentPlayer);
+			var disksThatNeedDefendee = $this.table
+					.getDisksThatNeedDefendee($this.currentPlayer);
 
 			// need to select which disk to defend
-			if ($this.currentPlayer !== "" && $this.table.playerOrder.indexOf($this.currentPlayer) > -1
+			if ($this.currentPlayer !== ""
+					&& $this.table.playerOrder.indexOf($this.currentPlayer) > -1
 					&& (disksThatNeedDefendee.length > 0 || disksThatNeedAttackee.length > 0)) {
 				// combat hints
 				$this
@@ -775,58 +857,87 @@ function TableUI(api, table, container) {
 
 			var nextAttacker = $this.table.getNextAttacker();
 
-			if ($this.selectedDisk !== null && $this.selectedDisk === nextAttacker.attacker) {
-				$this.addHint("attack_choice", $("<span>").append(
-						"When one of your disks is attacking more then one enemy disk, you must specify which disk to attack before combat can be resolved."));
+			if ($this.selectedDisk !== null
+					&& $this.selectedDisk === nextAttacker.attacker) {
+				$this
+						.addHint(
+								"attack_choice",
+								$("<span>")
+										.append(
+												"When one of your disks is attacking more then one enemy disk, you must specify which disk to attack before combat can be resolved."));
 			}
 
-			if ($this.table.getDiskInfo(nextAttacker.attacker).mementoInfo.player === $this.currentPlayer && $this.table.isPinningEnemy(nextAttacker.attacker)
+			if ($this.table.getDiskInfo(nextAttacker.attacker).mementoInfo.player === $this.currentPlayer
+					&& $this.table.isPinningEnemy(nextAttacker.attacker)
 					&& $this.table.getAttackees(nextAttacker.attacker) === null) {
-				hints.append("Disk " + $this.table.getDiskInfo(nextAttacker.attacker).disk.name + "(" + nextAttacker.attacker
-						+ ") needs to select an attackee. ");
+				hints
+						.append("Disk "
+								+ $this.table
+										.getDiskInfo(nextAttacker.attacker).disk.name
+								+ "(" + nextAttacker.attacker
+								+ ") needs to select an attackee. ");
 			}
 
 			// waiting on someone else to select which disk to attack/defend
-			if ($this.currentPlayer !== "" && $this.table.playerOrder.indexOf($this.currentPlayer) > -1 && $this.table.getSegment() === "COMBAT"
+			if ($this.currentPlayer !== ""
+					&& $this.table.playerOrder.indexOf($this.currentPlayer) > -1
+					&& $this.table.getSegment() === "COMBAT"
 					&& !(disksThatNeedDefendee.length > 0 || disksThatNeedAttackee.length > 0)) {
 				// combat hint
-				$this.addHint("opponent_combat_choice", $("<span>").append(
-						"When one of your opponents' disks is attacking or defending against more then one enemy disk, "
-								+ "they must specify which disk to attack or defend against before combat can be resolved."));
+				$this
+						.addHint(
+								"opponent_combat_choice",
+								$("<span>")
+										.append(
+												"When one of your opponents' disks is attacking or defending against more then one enemy disk, "
+														+ "they must specify which disk to attack or defend against before combat can be resolved."));
 			}
 		}
 
 		// someone else won
-		if ($this.table.getSegment() === "FINISHED" && $this.table.getWinners().indexOf($this.currentPlayer) === -1) {
+		if ($this.table.getSegment() === "FINISHED"
+				&& $this.table.getWinners().indexOf($this.currentPlayer) === -1) {
 			hints.text($this.table.getWinners() + " won.");
 		}
 
 		// current player won
-		if ($this.table.getSegment() === "FINISHED" && $this.table.getWinners().indexOf($this.currentPlayer) !== -1) {
+		if ($this.table.getSegment() === "FINISHED"
+				&& $this.table.getWinners().indexOf($this.currentPlayer) !== -1) {
 			hints.text("You won!");
 		}
 	};
 
 	this.drawStagingDisks = function() {
-		$.each($this.table.stagingDisks, function(i, stagingDiskInfo) {
+		// console.log('TableUI.drawStagingDisks');
+		$.each($this.table.stagingDisks,
+				function(i, stagingDiskInfo) {
 
-			// console.log($this.table.playerOrder[i]);
+					// console.log($this.table.playerOrder[i]);
 
-			// //////////////////
-			var screenLocation = $this.getScreenLocation(stagingDiskInfo.location.x, stagingDiskInfo.location.y);
+					// //////////////////
+					var screenLocation = $this.getScreenLocation(
+							stagingDiskInfo.location.x,
+							stagingDiskInfo.location.y);
 
-			// ctx, location, radius, options
-			$this.drawCircle($this.disksCtx, screenLocation, PIXELS_PER_INCH * stagingDiskInfo.disk.diameter / $this.scale / 2);
+					// ctx, location, radius, options
+					$this.drawCircle($this.disksCtx, screenLocation,
+							PIXELS_PER_INCH * stagingDiskInfo.disk.diameter
+									/ $this.scale / 2);
 
-			// label the staging disk
-			if (table.playerOrder.length > i) {
-				screenLocation = $this.getScreenLocation(stagingDiskInfo.location.x, stagingDiskInfo.location.y);
+					// label the staging disk
+					if (table.playerOrder.length > i) {
+						screenLocation = $this.getScreenLocation(
+								stagingDiskInfo.location.x,
+								stagingDiskInfo.location.y);
 
-				$this.printCenterMiddle($this.disksCtx, table.playerOrder[i], screenLocation.x, screenLocation.y, 0, {
-					"font" : (1 / $this.scale) * 4 + "em OpenSans"
+						$this.printCenterMiddle($this.disksCtx,
+								table.playerOrder[i], screenLocation.x,
+								screenLocation.y, 0, {
+									"font" : (1 / $this.scale) * 4
+											+ "em OpenSans"
+								});
+					}
 				});
-			}
-		});
 	};
 
 	this.draw = function() {
@@ -904,28 +1015,43 @@ function TableUI(api, table, container) {
 
 		if ($this.action === "MOVE" && $this.selectedDisk !== null) {
 
-			overlappingDisks = table.getOverlappingDisks1(new Point(table.getDiskInfo($this.selectedDisk).mementoInfo.location.x, table
-					.getDiskInfo($this.selectedDisk).mementoInfo.location.y).getEdge($this.getTableLocation($this.mouseScreenLocation.x,
-					$this.mouseScreenLocation.y), table.getDiskInfo($this.selectedDisk).disk.diameter), table.getDiskInfo($this.selectedDisk).disk.diameter);
+			overlappingDisks = table
+					.getOverlappingDisks1(
+							new Point(
+									table.getDiskInfo($this.selectedDisk).mementoInfo.location.x,
+									table.getDiskInfo($this.selectedDisk).mementoInfo.location.y)
+									.getEdge(
+											$this
+													.getTableLocation(
+															$this.mouseScreenLocation.x,
+															$this.mouseScreenLocation.y),
+											table
+													.getDiskInfo($this.selectedDisk).disk.diameter),
+							table.getDiskInfo($this.selectedDisk).disk.diameter);
 
 			// remove selected disk
 			if (overlappingDisks.indexOf($this.selectedDisk) > 0) {
-				overlappingDisks.splice(overlappingDisks.indexOf($this.selectedDisk), 1);
+				overlappingDisks.splice(overlappingDisks
+						.indexOf($this.selectedDisk), 1);
 			}
 			overlappingDisks = table.getTopDisks(overlappingDisks);
 		}
 
 		var hoveredDisk = null;
 
-		if (($this.action === "SELECT_ATTACKEE" || $this.action === "SELECT_DEFENDEE") && this.selectedDisk !== null) {
-			hoveredDisk = $this.selectDisk($this.getTableLocation($this.mouseScreenLocation.x, $this.mouseScreenLocation.y));
+		if (($this.action === "SELECT_ATTACKEE" || $this.action === "SELECT_DEFENDEE")
+				&& this.selectedDisk !== null) {
+			hoveredDisk = $this.selectDisk($this.getTableLocation(
+					$this.mouseScreenLocation.x, $this.mouseScreenLocation.y));
 		}
 
 		// dark gray
 		var highlightColor = "rgba(55,55,55,1)";
 
 		// pinned by moving disk
-		if (table.getSegment() === "ACTIVATION" && $this.action === "MOVE" && $this.selectedDisk !== null && overlappingDisks.indexOf(diskNumber) > -1
+		if (table.getSegment() === "ACTIVATION" && $this.action === "MOVE"
+				&& $this.selectedDisk !== null
+				&& overlappingDisks.indexOf(diskNumber) > -1
 				&& $this.selectedDisk !== diskNumber) {
 
 			// friendly disk
@@ -941,7 +1067,9 @@ function TableUI(api, table, container) {
 		}
 
 		// selected during combat resolution
-		else if (info.mementoInfo.player === $this.currentPlayer && table.getSegment() === "COMBAT" && $this.selectedDisk === diskNumber
+		else if (info.mementoInfo.player === $this.currentPlayer
+				&& table.getSegment() === "COMBAT"
+				&& $this.selectedDisk === diskNumber
 				&& ($this.action === "SELECT_DEFENDEE" || $this.action === "SELECT_ATTACKEE")) {
 			// red
 			highlightColor = 'rgba(0,0,255,1)';
@@ -949,29 +1077,42 @@ function TableUI(api, table, container) {
 
 		// combat resolution intervention needed
 		else if (info.mementoInfo.player === $this.currentPlayer
-				&& ((table.isPinningEnemy(diskNumber) && table.getAttackees(diskNumber) === null) || (table.isPinnedByEnemy(diskNumber) && table
+				&& ((table.isPinningEnemy(diskNumber) && table
+						.getAttackees(diskNumber) === null) || (table
+						.isPinnedByEnemy(diskNumber) && table
 						.getDefendees(diskNumber) === null))) {
 			// green
 			highlightColor = 'rgba(0,255,0,1)';
 		}
 
 		// possible target during combat resolution and currently hovered
-		else if ($this.action === "SELECT_DEFENDEE" && $this.selectedDisk !== null && diskNumber === hoveredDisk
-				&& table.getDiskInfo($this.selectedDisk).mementoInfo.pinnedBy.indexOf(parseInt(diskNumber, 10)) !== -1 &&
+		else if ($this.action === "SELECT_DEFENDEE"
+				&& $this.selectedDisk !== null
+				&& diskNumber === hoveredDisk
+				&& table.getDiskInfo($this.selectedDisk).mementoInfo.pinnedBy
+						.indexOf(parseInt(diskNumber, 10)) !== -1
+				&&
 				// make sure its an enemy disk
-				table.getDiskInfo($this.selectedDisk).mementoInfo.player != table.getDiskInfo(hoveredDisk).mementoInfo.player) {
+				table.getDiskInfo($this.selectedDisk).mementoInfo.player != table
+						.getDiskInfo(hoveredDisk).mementoInfo.player) {
 			// red
 			highlightColor = 'rgba(255,0,0,1)';
 		}
 
 		// possible target during combat resolution
-		else if ($this.action === "SELECT_DEFENDEE" && $this.selectedDisk !== null &&
-		//
-		$this.table.memento.diskInfo[$this.selectedDisk] !== null &&
-		//
-		table.getDiskInfo($this.selectedDisk).mementoInfo.pinnedBy.indexOf(parseInt(diskNumber, 10)) !== -1 &&
-		// make sure its an enemy disk
-		table.getDiskInfo($this.selectedDisk).mementoInfo.player != table.getDiskInfo(diskNumber).mementoInfo.player) {
+		else if ($this.action === "SELECT_DEFENDEE"
+				&& $this.selectedDisk !== null
+				&&
+				//
+				$this.table.memento.diskInfo[$this.selectedDisk] !== null
+				&&
+				//
+				table.getDiskInfo($this.selectedDisk).mementoInfo.pinnedBy
+						.indexOf(parseInt(diskNumber, 10)) !== -1
+				&&
+				// make sure its an enemy disk
+				table.getDiskInfo($this.selectedDisk).mementoInfo.player != table
+						.getDiskInfo(diskNumber).mementoInfo.player) {
 			// blue
 			highlightColor = 'rgba(0,255,0,1)';
 		}
@@ -983,7 +1124,8 @@ function TableUI(api, table, container) {
 		}
 
 		// this needs to be before adding the activation and wound counters
-		$this.drawDisk($this.disksCtx, info, $this.highlightsCtx, highlightColor);
+		$this.drawDisk($this.disksCtx, info, $this.highlightsCtx,
+				highlightColor);
 
 		// activation counter
 		if (info.mementoInfo.activated) {
@@ -991,15 +1133,19 @@ function TableUI(api, table, container) {
 			// convert to radians
 			var radius = 0;
 
-			var f = $this.getScreenLocation(info.mementoInfo.location.x + radius * Math.cos(info.mementoInfo.rotation), info.mementoInfo.location.y + radius
-					* Math.sin(info.mementoInfo.rotation));
+			var f = $this.getScreenLocation(info.mementoInfo.location.x
+					+ radius * Math.cos(info.mementoInfo.rotation),
+					info.mementoInfo.location.y + radius
+							* Math.sin(info.mementoInfo.rotation));
 
-			$this.drawRotatedImage($this.disksCtx, $this.activationCounterImage, f.x, f.y, PIXELS_PER_INCH * 0.5 / $this.scale, PIXELS_PER_INCH * 0.5
-					/ $this.scale, info.mementoInfo.rotation, 1);
+			$this.drawRotatedImage($this.disksCtx,
+					$this.activationCounterImage, f.x, f.y, PIXELS_PER_INCH
+							* 0.5 / $this.scale, PIXELS_PER_INCH * 0.5
+							/ $this.scale, info.mementoInfo.rotation, 1);
 		}
 
 		// wound counters
-		for ( var i = 0; i < info.mementoInfo.wounds; i++) {
+		for (var i = 0; i < info.mementoInfo.wounds; i++) {
 			var radius = 0.2 * info.disk.diameter;
 
 			var rotation = info.mementoInfo.rotation - 90;
@@ -1022,27 +1168,36 @@ function TableUI(api, table, container) {
 
 			// console.log(rotation);
 
-			var f = $this.getScreenLocation(info.mementoInfo.location.x + radius * Math.cos(rotation * TO_RADIANS), info.mementoInfo.location.y + radius
-					* Math.sin(rotation * TO_RADIANS));
+			var f = $this.getScreenLocation(info.mementoInfo.location.x
+					+ radius * Math.cos(rotation * TO_RADIANS),
+					info.mementoInfo.location.y + radius
+							* Math.sin(rotation * TO_RADIANS));
 
-			$this.drawRotatedImage($this.disksCtx, $this.woundCounterImage, f.x, f.y, PIXELS_PER_INCH * 0.5 / $this.scale, PIXELS_PER_INCH * 0.5 / $this.scale,
+			$this.drawRotatedImage($this.disksCtx, $this.woundCounterImage,
+					f.x, f.y, PIXELS_PER_INCH * 0.5 / $this.scale,
+					PIXELS_PER_INCH * 0.5 / $this.scale,
 					info.mementoInfo.rotation, 1);
 		}
 
 		// show disk number
 		var radius = 0.45 * info.disk.diameter;
 		var rotation = info.mementoInfo.rotation + 90;
-		var numberLocation = $this.getScreenLocation(info.mementoInfo.location.x + radius * Math.cos(rotation * TO_RADIANS), info.mementoInfo.location.y
-				+ radius * Math.sin(rotation * TO_RADIANS));
-		$this.print($this.disksCtx, diskNumber, numberLocation.x, numberLocation.y, info.mementoInfo.rotation, {
-			"font" : (1 / $this.scale) * 0.5 + "em OpenSans"
-		});
+		var numberLocation = $this.getScreenLocation(
+				info.mementoInfo.location.x + radius
+						* Math.cos(rotation * TO_RADIANS),
+				info.mementoInfo.location.y + radius
+						* Math.sin(rotation * TO_RADIANS));
+		$this.print($this.disksCtx, diskNumber, numberLocation.x,
+				numberLocation.y, info.mementoInfo.rotation, {
+					"font" : (1 / $this.scale) * 0.5 + "em OpenSans"
+				});
 
 	};
 
 	this.drawMissileTarget = function(location, missile) {
 
-		var missileScreenLocation = $this.getScreenLocation(location.x, location.y);
+		var missileScreenLocation = $this.getScreenLocation(location.x,
+				location.y);
 
 		// these increments need to be in sync with the increments in
 		// Table.fireMissiles
@@ -1051,21 +1206,24 @@ function TableUI(api, table, container) {
 		var outerRadius = 6;
 
 		// outer bullseye circle, radius:4
-		$this.drawCircle($this.moveCtx, missileScreenLocation, PIXELS_PER_INCH * outerRadius / $this.scale, {
+		$this.drawCircle($this.moveCtx, missileScreenLocation, PIXELS_PER_INCH
+				* outerRadius / $this.scale, {
 			'fillStyle' : 'rgba(255,0,0,.2)',// '#FFBBBB',
 			'strokeStyle' : 'black',
 			'lineWidth' : 4 / $this.scale
 		});
 
 		// 99%
-		$this.printCenterMiddle($this.moveCtx, "99%", missileScreenLocation.x, missileScreenLocation.y - PIXELS_PER_INCH * (outerRadius - 1 / 2) / $this.scale,
-				0, {
+		$this.printCenterMiddle($this.moveCtx, "99%", missileScreenLocation.x,
+				missileScreenLocation.y - PIXELS_PER_INCH
+						* (outerRadius - 1 / 2) / $this.scale, 0, {
 					"font" : (1 / this.scale) * 1.5 + "em OpenSans",
 					"lineHeight" : (1 / this.scale) * 20
 				});
 
 		// middle bullseye circle, radius:2
-		$this.drawCircle($this.moveCtx, missileScreenLocation, PIXELS_PER_INCH * middleRadius / $this.scale, {
+		$this.drawCircle($this.moveCtx, missileScreenLocation, PIXELS_PER_INCH
+				* middleRadius / $this.scale, {
 			'fillStyle' : 'rgba(255,0,0,.4)',// '#FF6666',
 			'strokeStyle' : 'black',
 			'lineWidth' : 4 / $this.scale
@@ -1073,21 +1231,24 @@ function TableUI(api, table, container) {
 
 		// 95%
 		$this.printCenterMiddle($this.moveCtx, "95%", missileScreenLocation.x,
-				missileScreenLocation.y - PIXELS_PER_INCH * (middleRadius - 1 / 2) / $this.scale, 0, {
+				missileScreenLocation.y - PIXELS_PER_INCH
+						* (middleRadius - 1 / 2) / $this.scale, 0, {
 					"font" : (1 / this.scale) * 1.5 + "em OpenSans",
 					"lineHeight" : (1 / this.scale) * 20
 				});
 
 		// inner bullseye circle, radius:1
-		$this.drawCircle($this.moveCtx, missileScreenLocation, PIXELS_PER_INCH * innerRadius / $this.scale, {
+		$this.drawCircle($this.moveCtx, missileScreenLocation, PIXELS_PER_INCH
+				* innerRadius / $this.scale, {
 			'fillStyle' : 'rgba(255,0,0,.6)',// '#FF0000',
 			'strokeStyle' : 'black',
 			'lineWidth' : 4 / $this.scale
 		});
 
 		// 68%
-		$this.printCenterMiddle($this.moveCtx, "68%", missileScreenLocation.x, missileScreenLocation.y - PIXELS_PER_INCH * (innerRadius - 1 / 2) / $this.scale,
-				0, {
+		$this.printCenterMiddle($this.moveCtx, "68%", missileScreenLocation.x,
+				missileScreenLocation.y - PIXELS_PER_INCH
+						* (innerRadius - 1 / 2) / $this.scale, 0, {
 					"font" : (1 / this.scale) * 1.5 + "em OpenSans",
 					"lineHeight" : (1 / this.scale) * 20
 				});
@@ -1123,22 +1284,30 @@ function TableUI(api, table, container) {
 			return;
 		}
 
-		if (Object.keys($this.table.memento.players).indexOf($this.currentPlayer) === -1) {
+		if (Object.keys($this.table.memento.players).indexOf(
+				$this.currentPlayer) === -1) {
 			return;
 		}
 
 		// draw missiles
-		if (($this.action === "ARROW" || $this.action === "BOLT" || $this.action === "FIREBALL" || $this.action === "BOULDER")
-				&& ($this.table.getPlayerInfo($this.currentPlayer).segment === "MISSILE" && $this.table.getSegment() === "MISSILE")) {
+		if (($this.action === "ARROW" || $this.action === "BOLT"
+				|| $this.action === "FIREBALL" || $this.action === "BOULDER")
+				&& ($this.table.getPlayerInfo($this.currentPlayer).segment === "MISSILE" && $this.table
+						.getSegment() === "MISSILE")) {
 
 			// console.log('draw missile 1');
 
 			$this.moveCtx.canvas.height = $($this.container).height();
 			$this.moveCtx.canvas.width = $($this.container).width();
 
-			var newTableLocation = $this.table.getPointInsideCircle(new Point($this.table.getDiskInfo($this.selectedDisk).mementoInfo.location.x, $this.table
-					.getDiskInfo($this.selectedDisk).mementoInfo.location.y), 12, $this.getTableLocation($this.mouseScreenLocation.x,
-					$this.mouseScreenLocation.y));
+			var newTableLocation = $this.table
+					.getPointInsideCircle(
+							new Point(
+									$this.table.getDiskInfo($this.selectedDisk).mementoInfo.location.x,
+									$this.table.getDiskInfo($this.selectedDisk).mementoInfo.location.y),
+							12, $this.getTableLocation(
+									$this.mouseScreenLocation.x,
+									$this.mouseScreenLocation.y));
 
 			// console.log(newLocation);
 			// abstract to drawMissile function
@@ -1152,19 +1321,27 @@ function TableUI(api, table, container) {
 		}
 
 		// draw movement
-		if ($this.action === "MOVE" && ($this.table.getPlayerInfo($this.currentPlayer).segment === "ACTIVATION" && $this.table.getSegment() === "ACTIVATION")) {
+		if ($this.action === "MOVE"
+				&& ($this.table.getPlayerInfo($this.currentPlayer).segment === "ACTIVATION" && $this.table
+						.getSegment() === "ACTIVATION")) {
 
 			$this.moveCtx.canvas.height = $($this.container).height();
 			$this.moveCtx.canvas.width = $($this.container).width();
 
-			var newLocation = new Point($this.table.getDiskInfo($this.selectedDisk).mementoInfo.location.x,
-					$this.table.getDiskInfo($this.selectedDisk).mementoInfo.location.y).getEdge($this.getTableLocation($this.mouseScreenLocation.x,
-					$this.mouseScreenLocation.y), $this.table.getDiskInfo($this.selectedDisk).disk.diameter);
+			var newLocation = new Point(
+					$this.table.getDiskInfo($this.selectedDisk).mementoInfo.location.x,
+					$this.table.getDiskInfo($this.selectedDisk).mementoInfo.location.y)
+					.getEdge($this.getTableLocation(
+							$this.mouseScreenLocation.x,
+							$this.mouseScreenLocation.y), $this.table
+							.getDiskInfo($this.selectedDisk).disk.diameter);
 
 			// console.log(newLocation);
 
-			var a = (newLocation.y - $this.table.getDiskInfo($this.selectedDisk).mementoInfo.location.y)
-					/ (newLocation.x - $this.table.getDiskInfo($this.selectedDisk).mementoInfo.location.x);
+			var a = (newLocation.y - $this.table
+					.getDiskInfo($this.selectedDisk).mementoInfo.location.y)
+					/ (newLocation.x - $this.table
+							.getDiskInfo($this.selectedDisk).mementoInfo.location.x);
 
 			var rotation = Math.atan(a) * 180 / Math.PI;
 
@@ -1174,31 +1351,51 @@ function TableUI(api, table, container) {
 
 			// create a new object and copy everything from diskInfo, then
 			// overright some of that with the tentative location
-			$.extend(moveInfo, diskInfo, {
-				'mementoInfo' : {
-					"location" : newLocation,
-					"rotation" : $this.table.getDiskInfo($this.selectedDisk).mementoInfo.rotation + rotation * 2
-				}
-			});
+			$
+					.extend(
+							moveInfo,
+							diskInfo,
+							{
+								'mementoInfo' : {
+									"location" : newLocation,
+									"rotation" : $this.table
+											.getDiskInfo($this.selectedDisk).mementoInfo.rotation
+											+ rotation * 2
+								}
+							});
 
 			// console.log(moveInfo);
 			$this.drawDisk($this.moveCtx, moveInfo);
 
-			var centerPoint = $this.getScreenLocation($this.table.getDiskInfo($this.selectedDisk).mementoInfo.location.x, $this.table
-					.getDiskInfo($this.selectedDisk).mementoInfo.location.y);
+			var centerPoint = $this
+					.getScreenLocation(
+							$this.table.getDiskInfo($this.selectedDisk).mementoInfo.location.x,
+							$this.table.getDiskInfo($this.selectedDisk).mementoInfo.location.y);
 
 			$this.moveCtx.beginPath();
 
 			$this.moveCtx.lineWidth = 6 / $this.scale;
 
-			var start = centerPoint.getEdge($this.mouseScreenLocation, PIXELS_PER_INCH / $this.scale
-					* $this.table.getDiskInfo($this.selectedDisk).disk.diameter / 4);
+			var start = centerPoint
+					.getEdge(
+							$this.mouseScreenLocation,
+							PIXELS_PER_INCH
+									/ $this.scale
+									* $this.table
+											.getDiskInfo($this.selectedDisk).disk.diameter
+									/ 4);
 
 			$this.moveCtx.moveTo(start.x, start.y);
 
 			// make this be the edge of the disk
-			var end = centerPoint.getEdge($this.mouseScreenLocation, PIXELS_PER_INCH / $this.scale * $this.table.getDiskInfo($this.selectedDisk).disk.diameter
-					/ 4 * 3);
+			var end = centerPoint
+					.getEdge(
+							$this.mouseScreenLocation,
+							PIXELS_PER_INCH
+									/ $this.scale
+									* $this.table
+											.getDiskInfo($this.selectedDisk).disk.diameter
+									/ 4 * 3);
 
 			$this.moveCtx.lineTo(end.x, end.y);
 
@@ -1217,7 +1414,8 @@ function TableUI(api, table, container) {
 			"table" : $this.table
 		});
 
-		$this.api.endActivations($this.table.getId(), $this.onSuccess, $this.onError);
+		$this.api.endActivations($this.table.getId(), $this.onSuccess,
+				$this.onError);
 	};
 
 	this.endMissiles = function() {
@@ -1231,7 +1429,8 @@ function TableUI(api, table, container) {
 		});
 
 		$this.selectedDisk = null;
-		$this.api.endMissiles($this.table.getId(), $this.onSuccess, $this.onError);
+		$this.api.endMissiles($this.table.getId(), $this.onSuccess,
+				$this.onError);
 	};
 
 	this.endReinforcements = function() {
@@ -1245,7 +1444,8 @@ function TableUI(api, table, container) {
 		});
 
 		$this.selectedDisk = null;
-		$this.api.endReinforcements($this.table.getId(), $this.onSuccess, $this.onError);
+		$this.api.endReinforcements($this.table.getId(), $this.onSuccess,
+				$this.onError);
 	};
 
 	this.getHashId = function() {
@@ -1393,8 +1593,10 @@ function TableUI(api, table, container) {
 
 		var tableHeight = bottom - top;
 
-		var xRatio = (tableWidth * PIXELS_PER_INCH) / $($this.container).width();
-		var yRatio = (tableHeight * PIXELS_PER_INCH) / $($this.container).height();
+		var xRatio = (tableWidth * PIXELS_PER_INCH)
+				/ $($this.container).width();
+		var yRatio = (tableHeight * PIXELS_PER_INCH)
+				/ $($this.container).height();
 
 		return Math.max(xRatio, yRatio);
 
@@ -1437,21 +1639,24 @@ function TableUI(api, table, container) {
 		var clickedDisk = $this.selectDisk(tableClickPoint);
 
 		// click during JOIN or REINFORCEMENTS
-		if (($this.table.getSegment() === "JOIN" || $this.table.getSegment() === "REINFORCEMENTS") && $this.selectedDisk !== null
-				&& $this.action === "REINFORCE") {
+		if (($this.table.getSegment() === "JOIN" || $this.table.getSegment() === "REINFORCEMENTS")
+				&& $this.selectedDisk !== null && $this.action === "REINFORCE") {
 			// save the position
 			$this.saveReinforcement($this.selectedDisk);
 		}
 
 		// click during ACTIVATION and if there is a selected disk
-		else if ($this.table.getSegment() === "ACTIVATION" && $this.table.getCurrentPlayer() === $this.currentPlayer && $this.selectedDisk !== null
-				&& $this.action === "MOVE") {
+		else if ($this.table.getSegment() === "ACTIVATION"
+				&& $this.table.getCurrentPlayer() === $this.currentPlayer
+				&& $this.selectedDisk !== null && $this.action === "MOVE") {
 			// move
 			$this.move($this.selectedDisk, tableClickPoint);
 		}
 
 		// click during MISSILE
-		else if ($this.table.getSegment() === "MISSILE" && $this.table.getCurrentPlayer() === $this.currentPlayer && $this.selectedDisk !== null) {
+		else if ($this.table.getSegment() === "MISSILE"
+				&& $this.table.getCurrentPlayer() === $this.currentPlayer
+				&& $this.selectedDisk !== null) {
 			// console.log('shooting something');
 			if ($this.action === "ARROW") {
 				// console.log('ARROW');
@@ -1469,38 +1674,47 @@ function TableUI(api, table, container) {
 			}
 			if ($this.action === "FIREBALL") {
 				// console.log('FIREBALL');
-				$this.fireMissiles($this.selectedDisk, tableClickPoint, 'Fireball');
+				$this.fireMissiles($this.selectedDisk, tableClickPoint,
+						'Fireball');
 			}
 			if ($this.action === "BOULDER") {
 				// console.log('BOULDER');
-				$this.fireMissiles($this.selectedDisk, tableClickPoint, 'Boulder');
+				$this.fireMissiles($this.selectedDisk, tableClickPoint,
+						'Boulder');
 			}
 		}
 
 		// click during COMBAT
 		else if ($this.table.getSegment() === "COMBAT"
-		// and a disk has just been clicked on
-		&& clickedDisk !== null
-		// and one of the current player's disks is already selected
-		&& $this.selectedDisk !== null
-		// and the previously selecte disk is the current player's disk
-		&& $this.table.getDiskInfo($this.selectedDisk).mementoInfo.player === $this.currentPlayer
-		// and the disk just clicked on is an enemy disk
-		&& $this.table.getDiskInfo(clickedDisk).mementoInfo.player !== $this.currentPlayer
-		// and the action is attack
-		&& (($this.action === "SELECT_ATTACKEE" && $this.table.getDiskInfo($this.selectedDisk).mementoInfo.pinning.indexOf(clickedDisk) > -1) ||
-		// or the action is defend
-		($this.action === "SELECT_DEFENDEE" && $this.table.getDiskInfo($this.selectedDisk).mementoInfo.pinnedBy.indexOf(parseInt(clickedDisk, 10)) > -1))) {
+				// and a disk has just been clicked on
+				&& clickedDisk !== null
+				// and one of the current player's disks is already selected
+				&& $this.selectedDisk !== null
+				// and the previously selecte disk is the current player's disk
+				&& $this.table.getDiskInfo($this.selectedDisk).mementoInfo.player === $this.currentPlayer
+				// and the disk just clicked on is an enemy disk
+				&& $this.table.getDiskInfo(clickedDisk).mementoInfo.player !== $this.currentPlayer
+				// and the action is attack
+				&& (($this.action === "SELECT_ATTACKEE" && $this.table
+						.getDiskInfo($this.selectedDisk).mementoInfo.pinning
+						.indexOf(clickedDisk) > -1) ||
+				// or the action is defend
+				($this.action === "SELECT_DEFENDEE" && $this.table
+						.getDiskInfo($this.selectedDisk).mementoInfo.pinnedBy
+						.indexOf(parseInt(clickedDisk, 10)) > -1))) {
 
 			// if the first disk is attacking the second disk
-			if ($this.action === "SELECT_ATTACKEE" && $this.table.getDiskInfo($this.selectedDisk).mementoInfo.pinning.indexOf(clickedDisk) > -1) {
+			if ($this.action === "SELECT_ATTACKEE"
+					&& $this.table.getDiskInfo($this.selectedDisk).mementoInfo.pinning
+							.indexOf(clickedDisk) > -1) {
 				// then tell the server which disk is being attacked
 				$this.setAttackee($this.selectedDisk, clickedDisk);
 			}
 			// if the second disk is attacking the first disk,
 			// ie, the first disk is defending against the second disk
 			else if ($this.action === "SELECT_DEFENDEE"
-					&& $this.table.getDiskInfo($this.selectedDisk).mementoInfo.pinnedBy.indexOf(parseInt(clickedDisk, 10)) > -1) {
+					&& $this.table.getDiskInfo($this.selectedDisk).mementoInfo.pinnedBy
+							.indexOf(parseInt(clickedDisk, 10)) > -1) {
 				// then tell the server which disk is being defended against
 				$this.setDefendee($this.selectedDisk, clickedDisk);
 			}
@@ -1511,7 +1725,8 @@ function TableUI(api, table, container) {
 			// then select it
 			$this.action = null;
 			$this.selectedDisk = clickedDisk;
-			$this.contextMenu($this.getScreenLocation(tableClickPoint.x, tableClickPoint.y));
+			$this.contextMenu($this.getScreenLocation(tableClickPoint.x,
+					tableClickPoint.y));
 		}
 
 		$this.draw();
@@ -1560,7 +1775,8 @@ function TableUI(api, table, container) {
 		$this.mouseMoveHandler.call(this, event);
 		// this.draw();
 
-		var hoveredDisk = $this.selectDisk($this.getTableLocation(screenLocation.x, screenLocation.y));
+		var hoveredDisk = $this.selectDisk($this.getTableLocation(
+				screenLocation.x, screenLocation.y));
 
 		if (hoveredDisk === null) {
 			$this.tooltipsCtx.canvas.height = $($this.container).height();
@@ -1569,7 +1785,8 @@ function TableUI(api, table, container) {
 
 		// if there is no selected disk, and we are not sliding the table, and
 		// we are over a disk, switch to the click pointer
-		if ($this.selectedDisk === null && event.which === 0 && hoveredDisk !== null) {
+		if ($this.selectedDisk === null && event.which === 0
+				&& hoveredDisk !== null) {
 			$(container).css("cursor", "pointer");
 
 			// draw the disk on top of everything
@@ -1581,26 +1798,31 @@ function TableUI(api, table, container) {
 		}
 
 		// if this player is allowed to move reinforcement disks
-		if ($this.table.canReinforce($this.currentPlayer, $this.selectedDisk) && $this.action === "REINFORCE") {
+		if ($this.table.canReinforce($this.currentPlayer, $this.selectedDisk)
+				&& $this.action === "REINFORCE") {
 
-			var location = $this.getReinforcementLocation($this.selectedDisk, $this.getTableLocation(screenLocation.x, screenLocation.y));
+			var location = $this.getReinforcementLocation($this.selectedDisk,
+					$this.getTableLocation(screenLocation.x, screenLocation.y));
 
 			$this.table.getDiskInfo($this.selectedDisk).mementoInfo.location = location;
 
 			$this.draw();
 
-		} else if ($this.table.getSegment() === "ACTIVATION" && $this.selectedDisk !== null) {
+		} else if ($this.table.getSegment() === "ACTIVATION"
+				&& $this.selectedDisk !== null) {
 
 			$this.draw();
 			$this.drawMovement();
 		}
 
-		else if ($this.action === "SELECT_ATTACKEE" || $this.action === "SELECT_DEFENDEE") {
+		else if ($this.action === "SELECT_ATTACKEE"
+				|| $this.action === "SELECT_DEFENDEE") {
 			$this.draw();
 		}
 
 		else if ($this.table.getSegment() === "MISSILE"
-				&& ($this.action === "ARROW" || $this.action === "BOLT" || $this.action === "FIREBALL" || $this.action === "BOULDER")) {
+				&& ($this.action === "ARROW" || $this.action === "BOLT"
+						|| $this.action === "FIREBALL" || $this.action === "BOULDER")) {
 			// console.log('mousemove missile draw');
 			$this.drawMovement();
 		}
@@ -1627,7 +1849,8 @@ function TableUI(api, table, container) {
 
 	this.fireMissiles = function(diskIndex, tablePoint, missile) {
 
-		$this.table.fireMissiles($this.currentPlayer, diskIndex, tablePoint, missile);
+		$this.table.fireMissiles($this.currentPlayer, diskIndex, tablePoint,
+				missile);
 
 		// if the disk is now activated, deselect it
 		if ($this.table.getDiskInfo(diskIndex).mementoInfo.activated) {
@@ -1643,7 +1866,8 @@ function TableUI(api, table, container) {
 			"table" : $this.table
 		});
 
-		$this.api.fireMissiles($this.table.getId(), diskIndex, missile.name, tablePoint, $this.onSuccess, $this.onError);
+		$this.api.fireMissiles($this.table.getId(), diskIndex, missile.name,
+				tablePoint, $this.onSuccess, $this.onError);
 	};
 
 	this.move = function(diskIndex, tableClickPoint) {
@@ -1667,7 +1891,8 @@ function TableUI(api, table, container) {
 			"table" : $this.table
 		});
 
-		$this.api.move($this.table.getId(), diskIndex, tableClickPoint, $this.onSuccess, $this.onError);
+		$this.api.move($this.table.getId(), diskIndex, tableClickPoint,
+				$this.onSuccess, $this.onError);
 
 	};
 
@@ -1676,7 +1901,8 @@ function TableUI(api, table, container) {
 		// handle a server error: throw away optimistic updates on the client
 
 		var lastMementoId = $this.api.getLastMementoId($this.table.getId());
-		var lastMemento = $this.api.getMemento($this.table.getId(), lastMementoId);
+		var lastMemento = $this.api.getMemento($this.table.getId(),
+				lastMementoId);
 
 		// console.log($this.table.mementoId);
 		// console.log(lastMementoId);
@@ -1695,7 +1921,8 @@ function TableUI(api, table, container) {
 		// throw result;
 		// restart the polling
 		setTimeout(function() {
-			$this.api.getTable($this.table.getId(), $this.onSuccess, $this.onError, 5000);
+			$this.api.getTable($this.table.getId(), $this.onSuccess,
+					$this.onError, 5000);
 		}, 5000);
 	};
 
@@ -1728,7 +1955,8 @@ function TableUI(api, table, container) {
 		clearTimeout($this.api.timeoutID);
 
 		$this.api.timeoutID = setTimeout(function() {
-			$this.api.getTable($this.table.getId(), $this.onSuccess, $this.onError);
+			$this.api.getTable($this.table.getId(), $this.onSuccess,
+					$this.onError);
 		}, 5000);
 	};
 
@@ -1740,7 +1968,9 @@ function TableUI(api, table, container) {
 	 * @return
 	 */
 	this.pointOnDisk = function(tablePoint, diskInfo) {
-		var distance = Math.sqrt(Math.pow(diskInfo.mementoInfo.location.x - tablePoint.x, 2) + Math.pow(diskInfo.mementoInfo.location.y - tablePoint.y, 2));
+		var distance = Math.sqrt(Math.pow(diskInfo.mementoInfo.location.x
+				- tablePoint.x, 2)
+				+ Math.pow(diskInfo.mementoInfo.location.y - tablePoint.y, 2));
 		if (distance <= diskInfo.disk.diameter / 2) {
 			return true;
 		}
@@ -1753,7 +1983,8 @@ function TableUI(api, table, container) {
 	this.saveReinforcement = function(diskNumber) {
 		// console.log("TableUI.saveReinforcment");
 
-		$this.table.saveReinforcement($this.currentPlayer, diskNumber, $this.table.getDiskInfo(diskNumber).mementoInfo.location);
+		$this.table.saveReinforcement($this.currentPlayer, diskNumber,
+				$this.table.getDiskInfo(diskNumber).mementoInfo.location);
 		$this.mementoId = null;
 
 		// optimistic update
@@ -1762,7 +1993,9 @@ function TableUI(api, table, container) {
 			"table" : $this.table
 		});
 
-		$this.api.saveReinforcement($this.table.getId(), diskNumber, $this.table.getDiskInfo(diskNumber).mementoInfo.location, $this.onSuccess, $this.onError);
+		$this.api.saveReinforcement($this.table.getId(), diskNumber,
+				$this.table.getDiskInfo(diskNumber).mementoInfo.location,
+				$this.onSuccess, $this.onError);
 
 		$this.selectedDisk = null;
 		$this.action = null;
@@ -1780,13 +2013,15 @@ function TableUI(api, table, container) {
 		// console.log("this.selectDisk");
 		var clickedDisks = [];
 
-		$this.table.getDiskNumbers().forEach(function(diskNumber) {
+		$this.table.getDiskNumbers().forEach(
+				function(diskNumber) {
 
-			// if the disk is at this point
-			if ($this.pointOnDisk(tablePoint, $this.table.getDiskInfo(diskNumber))) {
-				clickedDisks.push(diskNumber);
-			}
-		});
+					// if the disk is at this point
+					if ($this.pointOnDisk(tablePoint, $this.table
+							.getDiskInfo(diskNumber))) {
+						clickedDisks.push(diskNumber);
+					}
+				});
 
 		if (clickedDisks.length === 0) {
 			return null;
@@ -1815,7 +2050,9 @@ function TableUI(api, table, container) {
 					// if its the current player's disk, and the disk is not
 					// activated,
 					// and the disk is not pinned, and the disk is at this point
-					if (diskInfo.mementoInfo.player === $this.currentPlayer && !diskInfo.mementoInfo.activated && diskInfo.mementoInfo.pinnedBy.length === 0
+					if (diskInfo.mementoInfo.player === $this.currentPlayer
+							&& !diskInfo.mementoInfo.activated
+							&& diskInfo.mementoInfo.pinnedBy.length === 0
 							&& $this.pointOnDisk(tablePoint, diskInfo)) {
 						clickedDisks.push(diskNumber);
 					}
@@ -1845,7 +2082,8 @@ function TableUI(api, table, container) {
 		}
 
 		if (mementoId !== $this.table.mementoId) {
-			$this.table.restoreMemento($this.api.getMemento($this.table.getId(), mementoId));
+			$this.table.restoreMemento($this.api.getMemento(
+					$this.table.getId(), mementoId));
 		}
 
 		// update slider
@@ -1857,7 +2095,8 @@ function TableUI(api, table, container) {
 
 		// show how long ago the board was updated,
 		// maybe as a tooltip on the reload icon
-		$("#loading, #refresh").attr("title", "Last Updated\n" + new Date().toLocaleString());
+		$("#loading, #refresh").attr("title",
+				"Last Updated\n" + new Date().toLocaleString());
 
 		$this.currentPlayer = result.user;
 
@@ -1878,8 +2117,10 @@ function TableUI(api, table, container) {
 		// if the player is in the middle of placing a reinforcement disk
 		if ($this.action === "REINFORCE") {
 			// reposition the in-motion reinforcement disk
-			$this.table.getDiskInfo($this.selectedDisk).mementoInfo.location = $this.getReinforcementLocation($this.selectedDisk, $this.getTableLocation(
-					$this.mouseScreenLocation.x, $this.mouseScreenLocation.y));
+			$this.table.getDiskInfo($this.selectedDisk).mementoInfo.location = $this
+					.getReinforcementLocation($this.selectedDisk, $this
+							.getTableLocation($this.mouseScreenLocation.x,
+									$this.mouseScreenLocation.y));
 		}
 
 		$this.draw();
@@ -1891,7 +2132,9 @@ function TableUI(api, table, container) {
 
 		var stagingDisk = $this.table.getStagingDisk($this.currentPlayer);
 
-		var a = parseFloat(stagingDisk.disk.diameter) / 2 + parseFloat($this.table.getDiskInfo(diskNumber).disk.diameter) / 2;
+		var a = parseFloat(stagingDisk.disk.diameter) / 2
+				+ parseFloat($this.table.getDiskInfo(diskNumber).disk.diameter)
+				/ 2;
 		// var b = tableLocation.distance(stagingDisk.location);
 		// console.log(a);
 		// console.log(b);
@@ -1903,7 +2146,9 @@ function TableUI(api, table, container) {
 		// stagingDisk.location.y).getEdge(tableLocation, distance);
 		// console.log(JSON.stringify(location));
 
-		return $this.table.getPointInsideCircle(new Point(stagingDisk.location.x, stagingDisk.location.y), a, tableLocation);
+		return $this.table.getPointInsideCircle(new Point(
+				stagingDisk.location.x, stagingDisk.location.y), a,
+				tableLocation);
 		// return location;
 	};
 }

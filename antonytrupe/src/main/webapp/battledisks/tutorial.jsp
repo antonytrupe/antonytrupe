@@ -3,16 +3,16 @@
 <head>
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=9">
-<title>battledisks - antonytrupe.com</title>
+<title>tutorial - battledisks - antonytrupe.com</title>
 <link rel="canonical" href="http://www.antonytrupe.com/battledisks/">
 
 <script src="//cdnjs.cloudflare.com/ajax/libs/headjs/1.0.3/head.load.min.js"></script>
 
 <script type="text/javascript">
-	head.js("https://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js",
+	head.load("https://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js",
 			"https://ajax.googleapis.com/ajax/libs/jqueryui/1/jquery-ui.min.js",
 			"/ca/jimr/gae/profiler/resources/jquery.tmpl.min.js",
-			/*"/ca/jimr/gae/profiler/resources/mini_profiler.js",*/
+			"/ca/jimr/gae/profiler/resources/mini_profiler.js",
 			//prod
 			//"/battledisks/battledisks.min.js",
 			//dev
@@ -24,6 +24,7 @@
 			"/com/antonytrupe/battledisks/TableUI.js", 
 			"/com/antonytrupe/battledisks/UI.js", 
 			"/com/antonytrupe/battledisks/API.js", 
+			"/com/antonytrupe/battledisks/AI.js", 
 			function() {
 				//wait for the template iframe to load
 				$("mini-profiler-templates").ready(function (){
@@ -32,7 +33,7 @@
 					    baseURL: '/gae_mini_profile/'
 					});
 				});
-				new Main().table();
+				new Main().tutorial();
 			});
 </script>
 
@@ -64,7 +65,9 @@
 
 	<div class="sidebar" id="navigation">
 		<a href="/battledisks/" class="tab">battledisks</a><br />
+		
 		<a id="log_in" href="/login.html?return_to=battledisks%2Fapi%3Faction%3DLOG_IN">log in</a><br />
+		 
 		<a id="shop" href="shop.html">shop</a><br />
 		<a class="table_list" href="table_list.html">table list</a><br />
 		<a class="new_table" href="/login.html?return_to=battledisks%2Fnew_table.html">new table</a><br />

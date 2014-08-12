@@ -74,6 +74,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
+@SuppressWarnings("unused")
 class API {
 
 	static enum Action {
@@ -2440,10 +2441,13 @@ class API {
 	private void uploadDisks(BlobKey zipBlobKey) throws GameEngineException {
 		Step step = MiniProfiler.step("API.uploadDisks");
 		try {
+
 			if (zipBlobKey == null) {
 				return;
 			}
+
 			final ZipInputStream zis;
+
 			try {
 
 				zis = getZipFile(zipBlobKey);
@@ -2452,13 +2456,15 @@ class API {
 
 				CSVParser p = new CSVParser();
 
-				while ((ze = zis.getNextEntry()) != null) {
+				ze = zis.getNextEntry();
+				while (ze != null) {
 
-					final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+					ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
 					final byte[] b = new byte[2048];
 
 					int size = 0;
+
 					while ((size = zis.read(b, 0, b.length)) != -1) {
 						baos.write(b, 0, size);
 					}
@@ -2608,7 +2614,10 @@ class API {
 							}
 						}
 					}
+					// get the next file in the zip
+					ze = zis.getNextEntry();
 				}
+
 				zis.close();
 			} catch (FileNotFoundException fnf) {
 				fnf.printStackTrace();

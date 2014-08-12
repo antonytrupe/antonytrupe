@@ -1,5 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
 	pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <!DOCTYPE html>
 <html>
 <head>
@@ -48,12 +49,13 @@ body,table td,select,button {
 	font-size: small;
 }
 </style>
-<title>${title}</title>
+<title><c:if test="${title !='home'}">${title}|</c:if>antonytrupe.com</title>
 </head>
 <body>${content}
 	<div class="footer">
-		<a href="/edit/${title}" style="font-weight:bold;" title="edit">&#8601;</a>
-		<a href="login.html?return_to=/${title}" style="font-weight:bold;" title="log in">&#8658;</a>
+		<a href="/edit/${title}" style="font-weight: bold;" title="edit">&#8601;</a>
+		<a href="login.html?return_to=/${title}" style="font-weight: bold;"
+			title="log in">&#8658;</a>
 	</div>
 </body>
 </html>
