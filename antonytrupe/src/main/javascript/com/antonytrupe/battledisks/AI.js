@@ -5,18 +5,32 @@
  * @param {Player}
  *            player
  */
-function AI(table, ui) {
+function AI(table) {
 	"use strict";
 
 	var $this = this;
 	this.table = table;
-	this.ui = ui;
 
 	/**
 	 * 
 	 */
 	this.go = function() {
+
+		// console.log($this.table.getCurrentPlayer());
+
+		if ($this.table.getCurrentPlayer() === ""
+				|| $this.table.getCurrentPlayer() === null
+				|| typeof $this.table.getCurrentPlayer() === "undefined") {
+			return;
+		}
 		//
+		// if the player who's turn it is is not a ai, then don't move for them
+		// console.log($this.table.getPlayerInfo($this.table.getCurrentPlayer()));
+
+		if ($this.table.getPlayerInfo($this.table.getCurrentPlayer()).type != 'ai') {
+			return;
+		}
+
 		if ($this.table.getSegment() == $this.table.SEGMENT.REINFORCEMENTS) {
 		} else if ($this.table.getSegment() == $this.table.SEGMENT.ACTIVATION) {
 
@@ -37,7 +51,8 @@ function AI(table, ui) {
 								if (!$this.table.canActivate(
 										$this.table.memento.currentPlayer,
 										diskNumber)) {
-									console.log('cant activate ' + diskNumber);
+									// console.log('cant activate ' +
+									// diskNumber);
 									return;
 								}
 
@@ -50,25 +65,25 @@ function AI(table, ui) {
 								}
 							});
 
-			console.log(maxDistanceDiskNumber);
+			// console.log(maxDistanceDiskNumber);
 
 			// find the closest enemy disk
 			Object
 					.keys($this.table.memento.diskInfo)
 					.forEach(
 							function(diskNumber) {
-								console.log(diskNumber);
+								// console.log(diskNumber);
 
 								// only look for enemy disks
 								if ($this.table.getDiskInfo(diskNumber).mementoInfo.player === $this.table.memento.currentPlayer) {
 									return;
 								}
 
-								console.log(diskNumber);
-								console
-										.log($this.table.memento.diskInfo[diskNumber]);
-								console.log($this.table
-										.getDiskInfo(maxDistanceDiskNumber));
+								// console.log(diskNumber);
+								// console
+								// .log($this.table.memento.diskInfo[diskNumber]);
+								// console.log($this.table
+								// .getDiskInfo(maxDistanceDiskNumber));
 
 								var distance = $this.table.memento.diskInfo[diskNumber].location
 										.distance($this.table
@@ -80,7 +95,7 @@ function AI(table, ui) {
 								}
 							});
 
-			console.log(closestEnemyDiskNumber);
+			// console.log(closestEnemyDiskNumber);
 
 			// move that disk towards the closes enemy disk
 			$this.table

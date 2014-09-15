@@ -17,11 +17,12 @@ function TableUI(api, table, container) {
 
 	var PIXELS_PER_INCH = 128;
 	var TO_RADIANS = Math.PI / 180;
+	var REFRESH_DELAY = 5000;
 
 	/**
 	 * @type {Table}
 	 */
-	$this.table = table;
+	this.table = table;
 	/**
 	 * @type {API}
 	 */
@@ -31,6 +32,16 @@ function TableUI(api, table, container) {
 	 * @type {Player}
 	 */
 	this.player = new Player();
+
+	this.playbackTimeoutID = null;
+
+	this.MODE = {
+		PLAY : "PLAY",
+		PAUSE : "PAUSE",
+		STOP : "STOP"
+	};
+
+	this.mode = this.MODE.PLAY;
 
 	/**
 	 * @type {?number}
@@ -87,7 +98,7 @@ function TableUI(api, table, container) {
 					$(ui.handle).text(ui.value);
 				},
 				"slide" : function(event, ui) {
-					// console.log(ui.value);
+					console.log(ui.value);
 					if (ui.value === $this.table.mementoId) {
 						$this.mementoId = null;
 
@@ -108,6 +119,11 @@ function TableUI(api, table, container) {
 				}
 			});
 
+	// start the playback pump
+	this.playbackTimeoutID = setTimeout(function() {
+		$this.displayNextMemento();
+	}, $this.REFRESH_DELAY);
+
 	$("#contextMenu").mouseleave(function() {
 		// console.log("contextMenu mouseleave");
 		if ($this.action === null) {
@@ -124,7 +140,7 @@ function TableUI(api, table, container) {
 				// this should also restart the polling
 				// console.log('reload');
 				$this.api.getTable($this.table.getId(), $this.onSuccess,
-						$this.onError, 5000);
+						$this.onError, REFRESH_DELAY);
 				e.preventDefault();
 				return false;
 			});
@@ -374,7 +390,8 @@ function TableUI(api, table, container) {
 		$("#contextMenu .menuItem").css("display", "none");
 
 		if (!($this.mementoId === $this.table.mementoId || $this.mementoId === null)) {
-			console.log('jumping out early 1');
+			console
+					.log('not displaying context menu because ui is not at most current memento.');
 			console.log($this.mementoId);
 			console.log($this.table.mementoId);
 			return;
@@ -941,7 +958,8 @@ function TableUI(api, table, container) {
 	};
 
 	this.draw = function() {
-		// console.log("TableUI.draw");
+		console.log("TableUI.draw");
+		console.log($this.mementoId);
 
 		$this.disksCtx.canvas.height = $($this.container).height();
 		$this.disksCtx.canvas.width = $($this.container).width();
@@ -1922,17 +1940,29 @@ function TableUI(api, table, container) {
 		// restart the polling
 		setTimeout(function() {
 			$this.api.getTable($this.table.getId(), $this.onSuccess,
-					$this.onError, 5000);
-		}, 5000);
+					$this.onError, REFRESH_DELAY);
+		}, REFRESH_DELAY);
 	};
 
+	/*
+	 * saves who the logged in user is, saves mementos to local storage,
+	 * continues remote polling
+	 */
 	this.onSuccess = function(result) {
-		// console.log(result);
+		console.log('TableUI.onSuccess');
+		console.log(result);
 
 		$this.player.update(result.player);
 
+		if (typeof result.table == "undefined"
+				|| typeof result.table.id == "undefined") {
+			console.log('figure out how we lost track of the table id');
+		}
+
 		// save the mementos
 		$this.api.saveMementos(result.table.id, result.table.mementos);
+
+		// save the most recent memento
 		var a = {};
 		a[result.table.mementoId] = result.table.memento;
 		$this.api.saveMementos(result.table.id, a);
@@ -1941,23 +1971,57 @@ function TableUI(api, table, container) {
 		// console.log($this.table.mementoId);
 		// console.log(result.table.mementoId);
 
-		// restore the table
-		// if()
-		{
-			$this.table.restore(result.table);
-
-			// ui update
-			$this.update(result);
-		}
-
-		// restart the polling
-
+		// continue the polling
 		clearTimeout($this.api.timeoutID);
+		$this.api.timeoutID = null;
 
-		$this.api.timeoutID = setTimeout(function() {
-			$this.api.getTable($this.table.getId(), $this.onSuccess,
-					$this.onError);
-		}, 5000);
+		// console.log(api.getMemento($this.table.getId(),
+		// $this.table.mementoId).segment);
+		// console.log($this.table);
+		// console.log($this.table.SEGMENT.FINISHED);
+
+		// only if the game isn't over
+		if (api.getMemento($this.table.getId(), $this.table.mementoId).segment != $this.table.SEGMENT.FINISHED) {
+			$this.api.timeoutID = setTimeout(function() {
+				$this.api.getTable($this.table.getId(), $this.onSuccess,
+						$this.onError);
+			}, REFRESH_DELAY);
+		}
+	};
+
+	this.pausePlayback = function() {
+		$this.mode = MODE.PAUSE;
+	};
+
+	this.startPlayback = function() {
+		// cancel any current playback pump
+		$this.stopPlayback();
+		$this.mode = MODE.PLAY;
+
+		$this.playbackTimeoutID = setTimeout(function() {
+			$this.displayNextMemento();
+		}, 2000);
+	};
+
+	// TODO
+	this.displayNextMemento = function() {
+		// if we're not already at the last memento
+		if ($this.table.mementoId !== $this.mementoId) {
+			// restore the next memento
+			$this.table.restore($this.api.getMemento($this.table.getId(),
+					$this.mementoId + 1));
+			// display it
+			$this.update({});
+			// pause
+			$this.playbackTimeoutID = setTimeout(function() {
+				$this.displayNextMemento();
+			}, 2000);
+		}
+	};
+
+	this.stopPlayback = function() {
+		$this.mode = MODE.STOP;
+		clearTimeout($this.playbackTimeoutID);
 	};
 
 	/**
@@ -2069,24 +2133,40 @@ function TableUI(api, table, container) {
 	};
 
 	/**
+	 * updates the slider's max, updates the loading icon, updates board info,
+	 * updates navigation links, updates current player
+	 * 
 	 * @param {{user}}
 	 *            result
 	 */
 	this.update = function(result) {
-		// console.log('TableUI.update');
-		// console.log(result);
+		console.log('TableUI.update');
+		console.log(result);
 
+		// TODO take into account the playback mode
+
+		console.log('ui mementoId:' + $this.mementoId);
+		console.log('table mementoId:' + $this.table.mementoId);
+
+		// get the ui's mementoId
 		var mementoId = $this.mementoId;
+		// if the ui doesn't know what mementoId to use
 		if (mementoId === null) {
+			// use the table's most recent mementoId
 			mementoId = $this.table.mementoId;
 		}
 
+		// if the table is at a different memementoId
+
 		if (mementoId !== $this.table.mementoId) {
+			// restore the ui's mementoId
+			console.log('restored mementoId:' + mementoId);
 			$this.table.restoreMemento($this.api.getMemento(
 					$this.table.getId(), mementoId));
 		}
 
 		// update slider
+		console.log($this.table.mementoId);
 		$("#slider").slider({
 			// "min" : 0,
 			"max" : $this.table.mementoId,

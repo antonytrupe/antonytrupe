@@ -1,7 +1,7 @@
 /**
  * @constructor
  */
-function API(allowMultipleRequests, offline) {
+function API(options) {
 	"use strict";
 
 	var $this = this;
@@ -11,10 +11,15 @@ function API(allowMultipleRequests, offline) {
 	var url = this.baseUrl + "api";
 	$this.timeoutID = null;
 
-	$this.allowMultipleRequests = (typeof allowMultipleRequests === "undefined") ? false
-			: allowMultipleRequests;
+	// console.log(options);
 
-	$this.offline = (typeof offline === "undefined") ? false : offline;
+	$this.cancelPreviousRequests = (typeof options.cancelPreviousRequests === "undefined") ? false
+			: options.cancelPreviousRequests;
+
+	$this.offline = (typeof options.offline === "undefined") ? false
+			: options.offline;
+
+	// console.log($this.offline);
 
 	this.abort = function() {
 		// console.log('API.abort');
@@ -102,8 +107,9 @@ function API(allowMultipleRequests, offline) {
 	this.doOnSuccess = function(result, onSuccess) {
 		// console.log("API.doOnSuccess");
 		// console.log(result);
+		// console.log(onSuccess);
 
-		if (onSuccess === undefined) {
+		if (typeof onSuccess === "undefined") {
 			return;
 		}
 
@@ -113,7 +119,9 @@ function API(allowMultipleRequests, offline) {
 
 		$.each(onSuccess, function(index, f) {
 			if (typeof f !== "function") {
-				console.log(f);
+				// console.log(f);
+				// console.log(new Error().stack);
+				return;
 			}
 			f(result);
 		});
@@ -168,12 +176,12 @@ function API(allowMultipleRequests, offline) {
 		$this.sendRequest(data, onSuccess, onError);
 	};
 
-	this.getDisk = function(diskName, onSuccess, onError) {
+	this.getDisk = function(diskName, onSuccess, onError, options) {
 		var data = {
 			"action" : "GET_DISK",
 			"diskName" : diskName
 		};
-		$this.sendRequest(data, onSuccess, onError);
+		$this.sendRequest(data, onSuccess, onError, options);
 	};
 
 	/**
@@ -245,7 +253,44 @@ function API(allowMultipleRequests, offline) {
 			"mementoId" : mementoId
 		};
 
-		$this.sendRequest(data, onSuccess, onError);
+		if ($this.offline(options)) {
+			// TODO get the table info from local storage
+
+			// table.mementos
+			// table.memento
+			var result = {
+				'table' : {
+					'mementoId' : mementoId,
+					'memento' : $this.getMemento(tableId, mementoId),
+					'id' : tableId,
+					'mementos' : {}
+				}
+			};
+
+			$this.doOnSuccess(result, onSuccess);
+		} else {
+			$this.sendRequest(data, onSuccess, onError);
+		}
+	};
+
+	this.offline = function(options) {
+		var offline = false;
+
+		// if the local parameter is defined
+		if (typeof options !== "undefined"
+				&& typeof options.offline !== "undefined") {
+			// and true
+			if (options.offline === true) {
+				offline = true;
+			}
+			// and false
+			else {
+				offline = false;
+			}
+		} else {
+			offline = $this.offline;
+		}
+		return offline;
 	};
 
 	this.getLastMementoId = function(tableId) {
@@ -262,6 +307,8 @@ function API(allowMultipleRequests, offline) {
 	};
 
 	this.saveMementos = function(tableId, mementos) {
+		// console.log('API.saveMementos');
+		// console.log('tableId:' + tableId);
 		var lastMementoId = $this.getLastMementoId(tableId);
 		if (mementos === undefined || mementos === null) {
 			return;
@@ -387,26 +434,41 @@ function API(allowMultipleRequests, offline) {
 	 * @param {Array.
 	 *            <function(Object)>} onError
 	 */
-	this.sendRequest = function(data, onSuccess, onError, cancelPrevious) {
+	this.sendRequest = function(data, onSuccess, onError, options) {
 		// console.log('API.sendRequest');
-		// console.log(data);
-
-		cancelPrevious = (typeof cancelPrevious === "undefined") ? allowMultipleRequests
-				: cancelPrevious;
 
 		// TODO
-		if (cancelPrevious) {
+
+		var cancelPreviousRequests = false;
+
+		// if the local parameter is defined
+		if (typeof options !== "undefined"
+				&& typeof options.cancelPreviousRequests !== "undefined") {
+			// and true
+			if (options.cancelPreviousRequests === true) {
+				cancelPreviousRequests = true;
+			}
+			// and false
+			else {
+				cancelPreviousRequests = false;
+			}
+		} else {
+			cancelPreviousRequests = $this.cancelPreviousRequests;
+		}
+
+		if (cancelPreviousRequests) {
 			// cancel any request in flight
 			$this.abort();
 		}
 
-		// show the loading icon
-		$("#loading").show();
-		// console.log("progress");
-		$("#table").css("cursor", "progress");
-
 		// if not in offline mode
-		if (!$this.offline) {
+		if (!$this.offline(options)) {
+
+			// show the loading icon
+			$("#loading").show();
+			// console.log("progress");
+			$("#table").css("cursor", "progress");
+
 			$this.xhr = $.ajax({
 				'url' : url,
 				'data' : data,
@@ -424,7 +486,7 @@ function API(allowMultipleRequests, offline) {
 		// if in offline mode
 		else {
 			// just be successful
-			$this.doOnSuccess(result, onSuccess);
+			$this.doOnSuccess({}, onSuccess);
 		}
 	};
 }

@@ -9,6 +9,9 @@ function Player(name) {
 	this.name = name;
 	this.rating = 0.0;
 
+	// player or ai
+	this.type = 'player';
+
 	// {"diskName": diskInfo,...}
 	this.disks = {};
 

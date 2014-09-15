@@ -19,6 +19,16 @@
 		<to type="redirect">%{context-path}/rewrite-status</to>
 	</rule>
 
+	<rule>
+		<from>^/$</from>
+		<to last="true">/p/home</to>
+	</rule>
+
+	<rule>
+		<from>^(?:\/)++(?:wiki(?:Edit)*\.jsp)*+([^\/]+)$</from>
+		<to last="true">/p/$1</to>
+	</rule>
+
 	<outbound-rule>
 		<note>
 			The outbound-rule specifies that when response.encodeURL is

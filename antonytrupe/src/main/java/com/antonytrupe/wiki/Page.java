@@ -46,23 +46,40 @@ public class Page implements Serializable {
 	}
 
 	public Page(String name) {
-		this.setName(name);
+		this(name, null, null, null, new Date());
 	}
 
 	public Page(String name, String content) {
-		this(name);
-		this.content = content;
+		this(name, content, null, null, new Date());
 	}
 
 	public Page(String name, String content, Boolean update) {
-		this(name, content);
-		this.setUpdate(update);
+		this(name, content, null, null, new Date());
 	}
 
-	public Page(String name, String content, Date date, String remoteIP) {
-		this(name, content);
+	public Page(String name, String content, Date date, String user,
+			String remoteIP) {
+		this(name, content, user, null, new Date());
+	}
+
+	public Page(String name, String content, String user) {
+		this(name, content, user, null, new Date());
+	}
+
+	/*
+	 * the main constructor
+	 */
+	public Page(String name, String content, String user, String remoteAddr,
+			Date date) {
+		this.name = name;
+		this.content = content;
+		// private String style = "";
 		this.date = date;
-		this.remoteIp = remoteIP;
+		this.update = false;
+		this.remoteIp = remoteAddr;
+		this.diff = "";
+
+		this.user = user;
 	}
 
 	public String getContent() {

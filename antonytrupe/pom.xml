@@ -7,7 +7,7 @@
 	<packaging>war</packaging>
 
 	<properties>
-		<appengine.target.version>1.9.6</appengine.target.version>
+		<appengine.target.version>1.9.10</appengine.target.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<jersey.version>1.17.1</jersey.version>
 	</properties>
@@ -90,6 +90,15 @@
 			<artifactId>urlrewritefilter</artifactId>
 			<version>4.0.3</version>
 		</dependency>
+
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.11</version>
+			<scope>test</scope>
+		</dependency>
+
+
 	</dependencies>
 
 	<build>

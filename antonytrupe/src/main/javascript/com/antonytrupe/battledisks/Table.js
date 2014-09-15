@@ -38,8 +38,11 @@ function Table(maxPlayers, maxPoints, activations, startingDisks,
 	 */
 	this.id = null;
 
+	this.ai = new AI($this);
+
 	/**
-	 * this changes per memento. we need to know the latest version.
+	 * each memento has a unique it, but its always the most recent one because we
+	 * need to know the latest version.
 	 */
 	this.mementoId = null;
 
@@ -155,10 +158,12 @@ function Table(maxPlayers, maxPoints, activations, startingDisks,
 	 * activateDisk2, which does the grunt work.
 	 */
 	this.activateDisk = function(diskNumber, playerName) {
-		if ($this.activateDisk2(diskNumber, playerName)) {
+		if ($this.canActivate(playerName, diskNumber)) {
+			$this.activateDisk2(diskNumber, playerName);
 			// record action
 			$this.recordAction("activateDisk", [ diskNumber, playerName ]);
 		}
+
 	};
 
 	/**
@@ -171,20 +176,19 @@ function Table(maxPlayers, maxPoints, activations, startingDisks,
 	 *            diskNumber
 	 * @param {string}
 	 *            playerName
-	 * @returns boolean
 	 */
 	this.activateDisk2 = function(diskNumber, playerName) {
 		// check to make sure this player can activate this disk
 		if ($this.getDiskInfo(diskNumber).mementoInfo.activated) {
-			return false;
+			return;
 		}
 
 		if ($this.getDiskInfo(diskNumber).mementoInfo.player !== playerName) {
-			return false;
+			return;
 		}
 
 		if ($this.getCurrentPlayer() !== playerName) {
-			return false;
+			return;
 		}
 
 		$this.getDiskInfo(diskNumber).mementoInfo.activated = true;
@@ -221,7 +225,6 @@ function Table(maxPlayers, maxPoints, activations, startingDisks,
 			$this.startMissileSegment();
 		}
 
-		return true;
 	};
 
 	this.activateMovedDisks = function(playerName, movedDiskNumber) {
@@ -721,7 +724,6 @@ function Table(maxPlayers, maxPoints, activations, startingDisks,
 		// record move action
 		$this.recordAction("fireMissiles", [ playerName, diskNumber,
 				tableClickPoint ]);
-
 	};
 
 	/**
@@ -1522,10 +1524,10 @@ function Table(maxPlayers, maxPoints, activations, startingDisks,
 	 *            tableClickPoint
 	 */
 	this.move = function(playerName, movedDiskNumber, tableClickPoint) {
-		$this.debug("Table.move");
-		console.log(playerName);
-		console.log(movedDiskNumber);
-		console.log(tableClickPoint);
+		// $this.debug("Table.move");
+		// console.log(playerName);
+		// console.log(movedDiskNumber);
+		// console.log(tableClickPoint);
 
 		// make sure we got an x and y
 		if (typeof tableClickPoint === "undefined"
@@ -1541,7 +1543,7 @@ function Table(maxPlayers, maxPoints, activations, startingDisks,
 
 		var canMove = $this.canMove(playerName, movedDiskNumber);
 		if (canMove !== true) {
-			$this.debug("Table.move canMove:" + canMove);
+			// $this.debug("Table.move canMove:" + canMove);
 			return canMove;
 		}
 
@@ -1620,7 +1622,6 @@ function Table(maxPlayers, maxPoints, activations, startingDisks,
 		// record move action
 		$this.recordAction("move", [ playerName, movedDiskNumber,
 				tableClickPoint ]);
-
 		return true;
 	};
 
@@ -1834,6 +1835,7 @@ function Table(maxPlayers, maxPoints, activations, startingDisks,
 		if (methodName !== "createTable") {
 			$this.addMemento();
 		}
+		$this.ai.go();
 	};
 
 	/**

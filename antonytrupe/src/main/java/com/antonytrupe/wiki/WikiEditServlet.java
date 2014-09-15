@@ -1,6 +1,8 @@
 package com.antonytrupe.wiki;
 
 import java.io.IOException;
+import java.security.Principal;
+import java.util.Date;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -16,7 +18,17 @@ public class WikiEditServlet extends HttpServlet {
 		String title = getTitle(request);
 		String content = (String) request.getParameter("content");
 
-		new WikiDao().save(new Page(title, content));
+		// make sure someone is logged in first
+		Principal userPrincipal = request.getUserPrincipal();
+
+		if (userPrincipal != null) {
+			String userName = userPrincipal.getName();
+
+			String remoteAddr = request.getRemoteAddr();
+
+			new WikiDao().save(new Page(title, content, remoteAddr, userName,
+					new Date()));
+		}
 		response.sendRedirect("/" + title);
 	}
 

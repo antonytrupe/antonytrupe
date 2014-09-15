@@ -7,31 +7,69 @@ function Main() {
 
 	$this.tutorial = function() {
 		console.log('Main.tutorial');
+
 		var table = new Table(2, 10, 1, 1, 1, "", "");
 		window['table'] = table;
 		table.placeStagingDisks();
+		table.id = 1;
 
-		var api = new API(true, true);
+		var api = new API({
+			'offline' : true
+		});
 		window['api'] = api;
 
 		var bot = new Player("bot");
+		bot.type = 'ai';
 		window['bot'] = bot;
 
-		var ai = new AI(table, ui);
-		window['ai'] = ai;
-
 		var ui = new TableUI(api, table, '#table');
+		ui.init();
 		window['ui'] = ui;
 
 		var player = new Player("player");
 		window['player'] = player;
 
-		setupPlayer();
+		ui.mementoId = 0;
 
-		function setupPlayer() {
+		setupBot(null, setupPlayer);
+
+		function setupBot(result, callback) {
+			console.log('Main.setupBot');
+
+			// console.log(callback);
+			// get the bot's disk
+			api.getDisk("Grugs", [ function(result) {
+				// console.log(result);
+				// give the ai a disk
+				var diskNumber = bot.addDisk(result.disk);
+
+				// give the ai an army
+				bot.addDiskToArmy("1", diskNumber);
+
+				// have the ai join the table
+				table.join(bot, "1");
+				table.endReinforcements("bot");
+
+				ui.mementoId += 2;
+
+				ui.onSuccess({
+					'player' : 'player',
+					'table' : table
+				});
+				ui.draw();
+
+			}, callback ], null, {
+				'offline' : false
+			});
+		}
+
+		function setupPlayer(result, callback) {
+			console.log('Main.setupPlayer');
+
+			// console.log(callback);
 
 			// get the player's disk
-			api.getDisk("Pikemen", [ setupBot, function(result) {
+			api.getDisk("Pikemen", [ function(result) {
 				// console.log(result);
 				// give the player a disk
 				var diskNumber = player.addDisk(result.disk);
@@ -42,46 +80,30 @@ function Main() {
 				// have the player join the table
 				table.join(player, "1");
 				table.endReinforcements("player");
-				ui.init();
+
+				// TODO set the mementoId to 4
+				console.log('setting ui.mementoId to 4');
+				ui.mementoId += 2;
+
+				// var memento = $this.api.getMemento($this.table.getId(),
+				// ui.mementoId);
+
+				// table.restoreMemento(memento);
+
+				// I think onSuccess restores the correct memento
+				ui.onSuccess({
+					'player' : 'player',
+					'table' : table
+				});
+				console.log('after ui.onSuccess in Main');
+
 				ui.draw();
+				console.log('after ui.draw in Main');
 
-			} ], null);
+			}, callback ], null, {
+				'offline' : false
+			});
 
-		}
-
-		function setupBot() {
-			// get the bot's disk
-			api.getDisk("Grugs", function(result) {
-				console.log(result);
-				// give the ai a disk
-				var diskNumber = bot.addDisk(result.disk);
-
-				// give the ai an army
-				bot.addDiskToArmy("1", diskNumber);
-
-				// have the ai join the table
-				table.join(bot, "1");
-				table.endReinforcements("bot");
-				ui.draw();
-
-				// fake the current user's name
-				ui.currentPlayer = player.name;
-
-				// swap the order of the players so the ai goes first
-				table.playerOrder.push(table.playerOrder.splice(0, 1)[0]);
-				table.stagingDisks.push(table.stagingDisks.splice(0, 1)[0]);
-
-				table.memento.firstPlayer = "bot";
-
-				table.memento.currentPlayer = "bot";
-
-				ui.displayBoardInfo();
-
-				ai.go();
-				ui.draw();
-				ui.displayBoardInfo();
-
-			}, null);
 		}
 
 	};

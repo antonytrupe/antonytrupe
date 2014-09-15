@@ -6,10 +6,7 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.regex.Matcher;
@@ -33,8 +30,6 @@ import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Query.FilterPredicate;
 import com.google.appengine.api.datastore.Query.SortDirection;
 import com.google.appengine.api.datastore.Text;
-import com.google.appengine.api.modules.ModulesService;
-import com.google.appengine.api.modules.ModulesServiceFactory;
 
 class WikiPageNotFoundException extends Throwable {
 
@@ -49,24 +44,6 @@ public class WikiDao {
 	// @Deprecated
 	public static String parseServerContent(String content) {
 
-		ModulesService modulesApi = ModulesServiceFactory.getModulesService();
-
-		Set<String> modules = modulesApi.getModules();
-		Map<String, String> moduleHostnames = new HashMap<String, String>();
-
-		String jsModuleHostnames = "<script>var moduleHostNames={};";
-
-		for (String module : modules) {
-			String versionHostname = modulesApi.getVersionHostname(module,
-					modulesApi.getDefaultVersion(module));
-			moduleHostnames.put(module, versionHostname);
-			jsModuleHostnames += "moduleHostNames['" + module + "']='"
-					+ versionHostname + "'";
-		}
-		jsModuleHostnames += "</script>";
-
-		content += jsModuleHostnames;
-
 		Pattern p = Pattern.compile("\\[{2}((?:.)*?)\\]{2}");
 		Matcher m = p.matcher(content);
 		StringBuffer sb = new StringBuffer();
@@ -79,11 +56,7 @@ public class WikiDao {
 			sb.append(content.substring(beginIndex, endIndex));
 			try {
 				String url;
-				if (moduleHostnames.containsKey(split[0])) {
-					url = "//" + moduleHostnames.get(split[0]);
-				} else {
-					url = URLEncoder.encode(split[0], "UTF-8");
-				}
+				url = URLEncoder.encode(split[0], "UTF-8");
 
 				// urlquery encode, not urlencode
 				sb.append("<a href=\"" + url + "\">"
@@ -100,7 +73,7 @@ public class WikiDao {
 	}
 
 	@SuppressWarnings("unchecked")
-	public Page get(String name) throws WikiPageNotFoundException   {
+	public Page get(String name) throws WikiPageNotFoundException {
 
 		Cache cache;
 
@@ -125,17 +98,12 @@ public class WikiDao {
 					Page.class.getSimpleName(), name));
 			page = new Page(e.getKey().getName(),
 					((Text) e.getProperty(Page.CONTENT)).getValue());
-			// Text style = (Text) e.getProperty(Page.STYLE);
-			// if (style != null) {
-			// page.setStyle(style.getValue());
-			// }
 			Text diff = (Text) e.getProperty(Page.DIFF);
 			if (diff != null) {
 				page.setDiff(diff.getValue());
 			}
 
 		} catch (EntityNotFoundException e) {
-			// e.printStackTrace();
 			throw new WikiPageNotFoundException();
 		}
 		try {
@@ -167,11 +135,9 @@ public class WikiDao {
 		for (Entity result : pq.asIterable()) {
 			String content = ((Text) result.getProperty(Page.CONTENT))
 					.getValue();
-			// String style = ((Text)
-			// result.getProperty(Page.STYLE)).getValue();
 			Date date = (Date) result.getProperty(Page.DATE);
 			String ipaddress = (String) result.getProperty(Page.REMOTE_IP);
-			Page e = new Page(name, content, date, ipaddress);
+			Page e = new Page(name, content, null, ipaddress, date);
 			e.setUser((String) result.getProperty(Page.USER));
 			Text diff = (Text) result.getProperty(Page.DIFF);
 			if (diff != null) {
@@ -204,7 +170,7 @@ public class WikiDao {
 			// String identity = HttpCookies.getCookieValue(
 			// perThreadRequest.get(), "identity");
 			Object remoteAddr = null;
-			String identity = null;
+			String identity = p.getUser();
 			{
 				Entity page = new Entity(KeyFactory.createKey(Page.PAGE,
 						URLDecoder.decode(p.getName(), "UTF-8")));
@@ -213,7 +179,7 @@ public class WikiDao {
 				page.setProperty(Page.CONTENT, new Text(p.getContent()));
 				page.setProperty(Page.DATE, now);
 
-				// page.setProperty(Page.USER, identity);
+				page.setProperty(Page.USER, identity);
 				// page.setProperty(Page.REMOTE_IP, remoteAddr);
 
 				try {
