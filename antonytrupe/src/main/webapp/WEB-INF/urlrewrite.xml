@@ -25,7 +25,7 @@
 	</rule>
 
 	<rule>
-		<from>^(?:\/)++(?:wiki(?:Edit)*\.jsp)*+([^\/]+)$</from>
+		<from>^(?:\/)++(?:wiki(?:Edit|History)*\.jsp)*+([^\/]+)$</from>
 		<to last="true">/p/$1</to>
 	</rule>
 

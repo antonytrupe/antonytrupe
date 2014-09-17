@@ -51,6 +51,17 @@
 		<servlet-name>BattledisksServlet</servlet-name>
 		<url-pattern>/battledisks/api</url-pattern>
 	</servlet-mapping>
+	
+	<servlet>
+		<description>WikiHistoryServlet</description>
+		<display-name>WikiHistoryServlet</display-name>
+		<servlet-name>WikiHistoryServlet</servlet-name>
+		<servlet-class>com.antonytrupe.wiki.WikiHistoryServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>WikiHistoryServlet</servlet-name>
+		<url-pattern>/history/*</url-pattern>
+	</servlet-mapping>
 
 	<servlet>
 		<description>WikiEditServlet</description>

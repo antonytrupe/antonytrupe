@@ -52,7 +52,16 @@ body,table td,select,button {
 </style>
 <title><c:if test="${title !='home'}">${title}|</c:if>antonytrupe.com</title>
 </head>
-<body>${content}
+<body>
+	<table>
+		<c:forEach items="${history}" var="version">
+			<tr>
+				<td>${version.user}</td>
+				<td>${version.date}</td>
+				<td>${version.content}</td>
+			</tr>
+		</c:forEach>
+	</table>
 	<w:footer title="${title}"></w:footer>
 </body>
 </html>
