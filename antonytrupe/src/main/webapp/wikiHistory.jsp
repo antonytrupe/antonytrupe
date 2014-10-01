@@ -56,9 +56,12 @@ body,table td,select,button {
 	<table>
 		<c:forEach items="${history}" var="version">
 			<tr>
-				<td>${version.user}</td>
 				<td>${version.date}</td>
-				<td>${version.content}</td>
+				<td>${version.user}</td>
+				<td>${version.ipAddress}</td>
+				<td><pre>
+						<code>${version.content}</code>
+					</pre></td>
 			</tr>
 		</c:forEach>
 	</table>

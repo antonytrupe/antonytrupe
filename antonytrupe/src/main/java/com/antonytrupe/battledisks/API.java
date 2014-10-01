@@ -74,7 +74,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
-@SuppressWarnings("unused")
 class API {
 
 	static enum Action {
@@ -123,6 +122,7 @@ class API {
 				"/com/antonytrupe/battledisks/Table.js",
 				"/com/antonytrupe/battledisks/Disk.js",
 				"/com/antonytrupe/battledisks/Point.js",
+				"/com/antonytrupe/battledisks/AI.js",
 				"/com/antonytrupe/battledisks/Player.js" });
 
 		final String av = SystemProperty.applicationVersion.get();

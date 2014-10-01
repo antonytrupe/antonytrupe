@@ -5,38 +5,149 @@ function API(options) {
 	"use strict";
 
 	var $this = this;
-	$this.xhr = null;
-	$this.baseUrl = "/battledisks/";
-	$this.images = [];
-	var url = this.baseUrl + "api";
-	$this.timeoutID = null;
 
 	// console.log(options);
 
-	$this.cancelPreviousRequests = (typeof options.cancelPreviousRequests === "undefined") ? false
-			: options.cancelPreviousRequests;
+	// initialize options
+	$this.options = (typeof options === "undefined") ? {} : options;
 
-	$this.offline = (typeof options.offline === "undefined") ? false
-			: options.offline;
+	// initialize cancelPreviousRequests flag
+	$this.options.cancelPreviousRequests = (typeof $this.options.cancelPreviousRequests === "undefined") ? false
+			: $this.options.cancelPreviousRequests;
+
+	// initialize offline flag
+	$this.options.offline = (typeof $this.options.offline === "undefined") ? false
+			: $this.options.offline;
 
 	// console.log($this.offline);
 
-	this.abort = function() {
-		// console.log('API.abort');
-		// console.log($this.timeoutID);
-		// cancel any existing timeouts
-		clearTimeout($this.timeoutID);
-		// console.log('clearTimeout:' + $this.timeoutID);
-		$this.timeoutID = null;
+	var RemoteAPI = function() {
+		"use strict";
+		// var $thisRemote = this;
+		// private variable
+		var xhr = null;
+		var timeoutID = null;
+		this.baseUrl = "/battledisks/";
+		this.apiUrl = this.baseUrl + "api";
 
-		if ($this.xhr) {
-			try {
-				$this.xhr.abort();
-			} catch (e) {
-				console.log(e);
+		var cancelPreviousRequests = function() {
+			return true;
+		};
+
+		// private method
+		var abort = function() {
+			"use strict";
+			clearTimeout(timeoutID);
+			// console.log('clearTimeout:' + $this.timeoutID);
+			timeoutID = null;
+
+			if (xhr) {
+				try {
+					xhr.abort();
+				} catch (e) {
+					console.log(e);
+				}
+				xhr = null;
 			}
-			$this.xhr = null;
-		}
+		};
+
+		/**
+		 * 
+		 * @param {Object}
+		 *            data
+		 * @param {Array.
+		 *            <function(Object)>} onSuccess
+		 * @param {Array.
+		 *            <function(Object)>} onError
+		 */
+		var sendRequest = function(data, onSuccess, onError, options) {
+			"use strict";
+			// console.log('API.sendRequest');
+
+			// TODO
+
+			if (cancelPreviousRequests(options)) {
+				// cancel any request in flight
+				abort();
+			}
+			// show the loading icon
+			$("#loading").show();
+			// console.log("progress");
+			$("#table").css("cursor", "progress");
+
+			xhr = $.ajax({
+				'url' : remoteApi.apiUrl,
+				'data' : data,
+				'dataType' : 'json',
+				success : function(result) {
+					// console.log(result);
+					$this.doOnSuccess(result, onSuccess);
+				},
+				error : function(result) {
+					// console.log(result);
+					this.doOnError(result, onError);
+				}
+			});
+		};
+
+		this.getProfile = function(onSuccess, onError) {
+			var data = {
+				"action" : "PROFILE"
+			};
+			sendRequest(data, onSuccess, onError);
+		};
+
+		this.getAllDisks = function(onSuccess, onError) {
+			var data = {
+				"action" : "GET_ALL_DISKS"
+			};
+			sendRequest(data, onSuccess, onError);
+		};
+
+		this.getDisk = function(diskName, onSuccess, onError) {
+			var data = {
+				"action" : "GET_DISK",
+				"diskName" : diskName
+			};
+
+			sendRequest(data, onSuccess, onError);
+		};
+	};
+	var remoteApi = new RemoteAPI();
+
+	var LocalAPI = function() {
+		this.getTable = function() {
+		};
+
+		this.getDisk = function(diskName) {
+			var disk = localStorage[diskName];
+			if (typeof disk == "undefined") {
+				return null;
+			}
+			// check the ttl
+			if (new Date(disk.ttl) > new Date()) {
+				// purge the cache
+				delete localStorage[diskName];
+				return null;
+			}
+			return disk;
+		};
+
+		this.getMemento = function(tableId, mementoId) {
+			var memento = localStorage['tableMemento:' + tableId + ":"
+					+ mementoId];
+			if (memento === undefined) {
+				$this.setLastMementoId(tableId, mementoId - 1);
+				return null;
+			}
+			// console.log(JSON.parse(memento));
+			return JSON.parse(memento);
+		};
+	};
+	var localApi = new LocalAPI();
+
+	this.abort = function() {
+		$this.remoteAPI.abort();
 	};
 
 	this.activateDisk = function(tableId, diskNumber, onSuccess, onError) {
@@ -45,7 +156,7 @@ function API(options) {
 			"id" : tableId,
 			"diskNumber" : diskNumber
 		};
-		$this.sendRequest(data, onSuccess, onError);
+		$this.remoteAPI.sendRequest(data, onSuccess, onError);
 	};
 
 	this.setAttackee = function(tableId, attacker, attackee, onSuccess, onError) {
@@ -55,7 +166,7 @@ function API(options) {
 			"attacker" : attacker,
 			"attackee" : attackee
 		};
-		$this.sendRequest(data, onSuccess, onError);
+		$this.remoteAPI.sendRequest(data, onSuccess, onError);
 	};
 
 	this.buy = function(disks, onSuccess, onError) {
@@ -64,11 +175,11 @@ function API(options) {
 			"action" : "BUY",
 			"disks" : JSON.stringify(disks)
 		};
-		$this.sendRequest(data, onSuccess, onError);
+		$this.remoteAPI.sendRequest(data, onSuccess, onError);
 	};
 
 	this.createTable = function(urlQuery, onSuccess, onError) {
-		$this.sendRequest(urlQuery, onSuccess, onError);
+		$this.remoteAPI.sendRequest(urlQuery, onSuccess, onError);
 	};
 
 	this.setDefendee = function(tableId, defender, defendee, onSuccess, onError) {
@@ -78,7 +189,7 @@ function API(options) {
 			"defender" : defender,
 			"defendee" : defendee
 		};
-		$this.sendRequest(data, onSuccess, onError);
+		$this.remoteAPI.sendRequest(data, onSuccess, onError);
 	};
 
 	this.doOnError = function(result, onError) {
@@ -137,7 +248,7 @@ function API(options) {
 			"action" : "END_ACTIVATIONS",
 			"id" : tableId
 		};
-		$this.sendRequest(data, onSuccess, onError);
+		$this.remoteAPI.sendRequest(data, onSuccess, onError);
 	};
 
 	this.endReinforcements = function(tableId, onSuccess, onError) {
@@ -145,7 +256,7 @@ function API(options) {
 			"action" : "END_REINFORCEMENTS",
 			"id" : tableId
 		};
-		$this.sendRequest(data, onSuccess, onError);
+		$this.remoteAPI.sendRequest(data, onSuccess, onError);
 	};
 
 	this.fireMissiles = function(tableId, diskIndex, missile, tablePoint,
@@ -158,7 +269,7 @@ function API(options) {
 			"point" : JSON.stringify(tablePoint),
 			"missile" : missile
 		};
-		$this.sendRequest(data, onSuccess, onError);
+		$this.remoteAPI.sendRequest(data, onSuccess, onError);
 	};
 
 	this.endMissiles = function(tableId, onSuccess, onError) {
@@ -166,32 +277,18 @@ function API(options) {
 			"action" : "END_MISSILES",
 			"id" : tableId
 		};
-		$this.sendRequest(data, onSuccess, onError);
+		$this.remoteAPI.sendRequest(data, onSuccess, onError);
 	};
 
 	this.getAllDisks = function(onSuccess, onError) {
-		var data = {
-			"action" : "GET_ALL_DISKS"
-		};
-		$this.sendRequest(data, onSuccess, onError);
+		$this.remoteAPI.getAllDisks(onSuccess, onError);
 	};
 
-	this.getDisk = function(diskName, onSuccess, onError, options) {
-		var data = {
-			"action" : "GET_DISK",
-			"diskName" : diskName
-		};
-		$this.sendRequest(data, onSuccess, onError, options);
-	};
-
-	/**
-	 * 
-	 * @param {string}
-	 *            imageName
-	 * @returns {Image}
-	 */
-	this.getImage = function(imageName) {
-		return $this.images[imageName];
+	this.getDisk = function(diskName, onSuccess, onError) {
+		// TODO
+		localApi.getDisk(diskName);
+		// TODO
+		remoteApi.getDisk(onSuccess, onError, options);
 	};
 
 	this.getJWT = function(disks, onSuccess, onError) {
@@ -201,23 +298,18 @@ function API(options) {
 			"action" : "JWT",
 			"disks" : JSON.stringify(disks)
 		};
-		$this.sendRequest(data, onSuccess, onError);
+		$this.remoteAPI.sendRequest(data, onSuccess, onError);
 	};
 
 	this.getLeaderboard = function(onSuccess, onError) {
 		var data = {
 			"action" : "LEADERBOARD"
 		};
-		$this.sendRequest(data, onSuccess, onError);
+		$this.remoteAPI.sendRequest(data, onSuccess, onError);
 	};
 
 	this.getProfile = function(onSuccess, onError) {
-		var data = {
-			"action" : "PROFILE"
-		};
-		// console.log(2.2);
-		$this.sendRequest(data, onSuccess, onError);
-		// console.log(2.9);
+		$this.remoteAPI.getProfile(onSuccess, onError);
 	};
 
 	this.joinTable = function(tableId, army, onSuccess, onError) {
@@ -231,27 +323,25 @@ function API(options) {
 			"army" : army
 		};
 		// console.log(data);
-		$this.sendRequest(data, onSuccess, onError);
+		$this.remoteAPI.sendRequest(data, onSuccess, onError);
 	};
 
 	this.listTables = function(onSuccess, onError) {
 		var data = {
 			"action" : "GET_ALL_TABLES"
 		};
-		$this.sendRequest(data, onSuccess, onError);
+		$this.remoteAPI.sendRequest(data, onSuccess, onError);
 	};
 
 	this.getTable = function(tableId, onSuccess, onError) {
+
+		// TODO try to get it locally
+		// TODO otherwise, get it remotely
+
 		// figure out what the latest version we have locally, and ask
 		// the server for newer data only
 		var mementoId = $this.getLastMementoId(tableId);
 		// console.log('asking for mementos greater then ' + mementoId);
-
-		var data = {
-			"action" : "GET_TABLE",
-			"id" : tableId,
-			"mementoId" : mementoId
-		};
 
 		if ($this.offline(options)) {
 			// TODO get the table info from local storage
@@ -269,7 +359,12 @@ function API(options) {
 
 			$this.doOnSuccess(result, onSuccess);
 		} else {
-			$this.sendRequest(data, onSuccess, onError);
+			var data = {
+				"action" : "GET_TABLE",
+				"id" : tableId,
+				"mementoId" : mementoId
+			};
+			$this.remoteAPI.sendRequest(data, onSuccess, onError);
 		}
 	};
 
@@ -288,7 +383,7 @@ function API(options) {
 				offline = false;
 			}
 		} else {
-			offline = $this.offline;
+			offline = $this.options.offline;
 		}
 		return offline;
 	};
@@ -304,6 +399,10 @@ function API(options) {
 	this.setLastMementoId = function(tableId, mementoId) {
 		localStorage['lastMementoId:' + tableId] = mementoId;
 		return mementoId;
+	};
+
+	this.getBaseUrl = function() {
+		return remoteApi.baseUrl;
 	};
 
 	this.saveMementos = function(tableId, mementos) {
@@ -386,7 +485,7 @@ function API(options) {
 			"point" : JSON.stringify(tableClickPoint)
 		};
 		// console.log(data);
-		$this.sendRequest(data, onSuccess, onError);
+		$this.remoteAPI.sendRequest(data, onSuccess, onError);
 	};
 
 	/**
@@ -400,7 +499,7 @@ function API(options) {
 			"armyName" : armyName,
 			"disks" : JSON.stringify(disks)
 		};
-		$this.sendRequest(data, onSuccess, onError);
+		$this.remoteAPI.sendRequest(data, onSuccess, onError);
 
 	};
 
@@ -409,7 +508,7 @@ function API(options) {
 			"action" : "DELETE_ARMY",
 			"armyName" : armyName
 		};
-		$this.sendRequest(data, onSuccess, onError);
+		$this.remoteAPI.sendRequest(data, onSuccess, onError);
 	};
 
 	this.saveReinforcement = function(tableId, diskNumber, tableClickPoint,
@@ -422,71 +521,7 @@ function API(options) {
 			"point" : JSON.stringify(tableClickPoint),
 			"mementoId" : $this.getLastMementoId(tableId)
 		};
-		$this.sendRequest(data, onSuccess, onError);
+		$this.remoteAPI.sendRequest(data, onSuccess, onError);
 	};
 
-	/**
-	 * 
-	 * @param {Object}
-	 *            data
-	 * @param {Array.
-	 *            <function(Object)>} onSuccess
-	 * @param {Array.
-	 *            <function(Object)>} onError
-	 */
-	this.sendRequest = function(data, onSuccess, onError, options) {
-		// console.log('API.sendRequest');
-
-		// TODO
-
-		var cancelPreviousRequests = false;
-
-		// if the local parameter is defined
-		if (typeof options !== "undefined"
-				&& typeof options.cancelPreviousRequests !== "undefined") {
-			// and true
-			if (options.cancelPreviousRequests === true) {
-				cancelPreviousRequests = true;
-			}
-			// and false
-			else {
-				cancelPreviousRequests = false;
-			}
-		} else {
-			cancelPreviousRequests = $this.cancelPreviousRequests;
-		}
-
-		if (cancelPreviousRequests) {
-			// cancel any request in flight
-			$this.abort();
-		}
-
-		// if not in offline mode
-		if (!$this.offline(options)) {
-
-			// show the loading icon
-			$("#loading").show();
-			// console.log("progress");
-			$("#table").css("cursor", "progress");
-
-			$this.xhr = $.ajax({
-				'url' : url,
-				'data' : data,
-				'dataType' : 'json',
-				success : function(result) {
-					// console.log(result);
-					$this.doOnSuccess(result, onSuccess);
-				},
-				error : function(result) {
-					// console.log(result);
-					$this.doOnError(result, onError);
-				}
-			});
-		}
-		// if in offline mode
-		else {
-			// just be successful
-			$this.doOnSuccess({}, onSuccess);
-		}
-	};
 }

@@ -74,10 +74,11 @@ function TableUI(api, table, container) {
 	this.tooltipsCtx = $(".tooltips", $this.container).get(0).getContext('2d');
 
 	this.activationCounterImage = new Image();
-	this.activationCounterImage.src = $this.api.baseUrl + 'i/Activation.png';
+	this.activationCounterImage.src = $this.api.getBaseUrl()
+			+ 'i/Activation.png';
 
 	this.woundCounterImage = new Image();
-	this.woundCounterImage.src = $this.api.baseUrl + 'i/Wound.png';
+	this.woundCounterImage.src = $this.api.getBaseUrl() + 'i/Wound.png';
 
 	/*
 	 * $(window).mouseout(function() { console.log('window.out'); });
@@ -2005,6 +2006,9 @@ function TableUI(api, table, container) {
 
 	// TODO
 	this.displayNextMemento = function() {
+		if ($this.initialized) {
+			return;
+		}
 		// if we're not already at the last memento
 		if ($this.table.mementoId !== $this.mementoId) {
 			// restore the next memento
@@ -2015,7 +2019,7 @@ function TableUI(api, table, container) {
 			// pause
 			$this.playbackTimeoutID = setTimeout(function() {
 				$this.displayNextMemento();
-			}, 2000);
+			}, $this.REFRESH_DELAY);
 		}
 	};
 

@@ -290,26 +290,27 @@ function ProfileUI(api, player, selectedArmyName) {
 		$.each(armies, function(i, armyName) {
 			// for ( var i = 0; i < armies.length; i++) {
 			// var armyName = armies[i];
-			var li = $("<li>");
-			var a = $("<a>");
-			a.text(armyName);
-			a.attr("href", "#" + armyName);
+			var option = $("<option>");
+			//var a = $("<a>");
+			option.text(armyName);
+			//a.attr("href", "#" + armyName);
 			// a.attr("id", armyName);
-			li.append(a);
-			var d = $("<a>");
-			d.text("[-]");
-			d.attr("href", "");
+			//li.append(a);
+			//var d = $("<a>");
+			//d.text("[-]");
+			//d.attr("href", "");
 
-			d.click(function(e) {
+			
+			//d.click(function(e) {
 
-				e.preventDefault();
+				//e.preventDefault();
 				// console.log("delete army " + armyName);
-				$this.deleteArmy(armyName);
+//				$this.deleteArmy(armyName);
 
-				return false;
-			});
-			li.append(d);
-			$("#armies").append(li);
+	//			return false;
+		//	});
+			//li.append(d);
+			$("#armies").append(option);
 		});
 	};
 

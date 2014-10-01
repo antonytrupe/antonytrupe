@@ -39,6 +39,7 @@ function Main() {
 			// console.log(callback);
 			// get the bot's disk
 			api.getDisk("Grugs", [ function(result) {
+				console.log('Main.setupupBot getDisk Grugs');
 				// console.log(result);
 				// give the ai a disk
 				var diskNumber = bot.addDisk(result.disk);
@@ -112,10 +113,10 @@ function Main() {
 		"use strict";
 
 		var ui = new UI(null);
-
 		window['ui'] = ui;
 
 		var api = new API();
+		window['api'] = api;
 
 		api.getAllDisks(function(result) {
 			$this.updateLinks(result.user);
@@ -737,6 +738,7 @@ function Main() {
 		var ui = new ShopUI(api, table, player);
 		window['ui'] = ui;
 		window['table'] = table;
+		window['api'] = api;
 		ui.init();
 
 		api.getAllDisks(
@@ -746,7 +748,7 @@ function Main() {
 		 */
 		function(result) {
 			// console.log("Main api.getAllDisks");
-			// console.log(result);
+			console.log(result);
 			$this.updateLinks(result.user);
 
 			ui.displayAppInfo(result.appInfo);
@@ -798,10 +800,11 @@ function Main() {
 
 		ui.init();
 
+		console.log('1');
+
 		// ui.listArmies(armies);
 		api.getProfile(function(result) {
-
-			// console.log(result);
+			console.log(result);
 
 			player.update(result.player);
 

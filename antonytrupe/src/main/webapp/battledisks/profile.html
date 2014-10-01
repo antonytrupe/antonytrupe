@@ -8,8 +8,8 @@
 
 <script type="text/javascript">
 	head.load("https://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js",
-			"/ca/jimr/gae/profiler/resources/jquery.tmpl.min.js",
-			"/ca/jimr/gae/profiler/resources/mini_profiler.js",
+			//"/ca/jimr/gae/profiler/resources/jquery.tmpl.min.js",
+			//"/ca/jimr/gae/profiler/resources/mini_profiler.js",
 			//"/battledisks/battledisks.min.js",
 			"/com/antonytrupe/battledisks/Main.js",
 			"/com/antonytrupe/battledisks/Point.js",
@@ -20,12 +20,12 @@
 			//wait for everything to load
 			function() {
 				//wait for the template iframe to load
-				$("mini-profiler-templates").ready(function (){
-					MiniProfiler.init({
-					    requestId: '-1',
-					    baseURL: '/gae_mini_profile/'
-					});
-				});
+				//$("mini-profiler-templates").ready(function (){
+					//MiniProfiler.init({
+					  //  requestId: '-1',
+					   // baseURL: '/gae_mini_profile/'
+					//});
+				//});
 				new Main().profile();
 			});
 </script>
@@ -48,19 +48,19 @@
 </script>
 
 <link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
-<link href="/ca/jimr/gae/profiler/resources/mini_profiler.css" rel="stylesheet" type="text/css"	media="all">
+<!-- <link href="/ca/jimr/gae/profiler/resources/mini_profiler.css" rel="stylesheet" type="text/css"	media="all"> -->
 <link href="style.css" type="text/css" rel="stylesheet" media="all">
 
 </head>
 <body>
-	<iframe id="mini-profiler-templates" src="/ca/jimr/gae/profiler/resources/mini_profiler.html" style="display:none"></iframe>
+	<!-- <iframe id="mini-profiler-templates" src="/ca/jimr/gae/profiler/resources/mini_profiler.html" style="display:none"></iframe>
 	<div id="mp" style="display: none;"></div>
 	<div id="mp-req" style="display: none;"></div>
-	
+	 -->
 	<div class="sidebar" id="navigation">
 		<a href="./">battledisks</a><br />
 		<a id="log_in" href="/login.html?return_to=battledisks%2Fapi%3Faction%3DLOG_IN">log in</a><br />
-		<a id="log_out" href="/antonytrupe/openid?logout=logout&return_to=%2Fbattledisks%2F">log out</a><br />
+		<a id="log_out" href="/openid/?logout=logout&return_to=%2Fbattledisks%2F">log out</a><br />
 		<a id="shop" href="shop.html">shop</a><br />
 		<a class="table_list" href="table_list.html">table list</a><br />
 		<a class="new_table" href="/login.html?return_to=battledisks%2Fnew_table.html">new table</a><br />
@@ -74,14 +74,17 @@
 		<div style="font-size:2em;">Games</div>
 		<ul style="white-space: nowrap;"></ul>
 	</div>
-		
+	
+	<!-- 	
 	<div id="armyControl" class="rightHighlight sidebar">
 		<div style="font-size:1.5em;">Armies</div>
 		<ul id="armies"></ul>
 	</div>
-
+ 	-->
+ 
 	<div id="armyInfo" class="rightHighlight sidebar">
-			<input id="armyName" style="font-size:1.5em;text-align: center;" value="New Army" />
+		<input id="armyName" list="armies" style="font-size:1.5em;text-align: center;" value="New Army" hidden="hidden" />
+		<datalist id="armies"></datalist>
 		<div class="content">
 
 			<table style="border-collapse: collapse;margin:auto;">
