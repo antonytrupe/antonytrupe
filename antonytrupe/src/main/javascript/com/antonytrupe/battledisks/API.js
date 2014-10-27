@@ -90,6 +90,10 @@ function API(options) {
 			});
 		};
 
+		this.getJWT = function(data, onSuccess, onError) {
+			sendRequest(data, onSuccess, onError);
+		};
+
 		this.getProfile = function(onSuccess, onError) {
 			var data = {
 				"action" : "PROFILE"
@@ -109,7 +113,7 @@ function API(options) {
 				"action" : "GET_DISK",
 				"diskName" : diskName
 			};
-
+			// TODO add a callback to save the disk locally
 			sendRequest(data, onSuccess, onError);
 		};
 	};
@@ -147,7 +151,7 @@ function API(options) {
 	var localApi = new LocalAPI();
 
 	this.abort = function() {
-		$this.remoteAPI.abort();
+		remoteApi.abort();
 	};
 
 	this.activateDisk = function(tableId, diskNumber, onSuccess, onError) {
@@ -156,7 +160,7 @@ function API(options) {
 			"id" : tableId,
 			"diskNumber" : diskNumber
 		};
-		$this.remoteAPI.sendRequest(data, onSuccess, onError);
+		remoteApi.sendRequest(data, onSuccess, onError);
 	};
 
 	this.setAttackee = function(tableId, attacker, attackee, onSuccess, onError) {
@@ -166,7 +170,7 @@ function API(options) {
 			"attacker" : attacker,
 			"attackee" : attackee
 		};
-		$this.remoteAPI.sendRequest(data, onSuccess, onError);
+		remoteApi.sendRequest(data, onSuccess, onError);
 	};
 
 	this.buy = function(disks, onSuccess, onError) {
@@ -175,11 +179,11 @@ function API(options) {
 			"action" : "BUY",
 			"disks" : JSON.stringify(disks)
 		};
-		$this.remoteAPI.sendRequest(data, onSuccess, onError);
+		remoteApi.sendRequest(data, onSuccess, onError);
 	};
 
 	this.createTable = function(urlQuery, onSuccess, onError) {
-		$this.remoteAPI.sendRequest(urlQuery, onSuccess, onError);
+		remoteApi.sendRequest(urlQuery, onSuccess, onError);
 	};
 
 	this.setDefendee = function(tableId, defender, defendee, onSuccess, onError) {
@@ -189,7 +193,7 @@ function API(options) {
 			"defender" : defender,
 			"defendee" : defendee
 		};
-		$this.remoteAPI.sendRequest(data, onSuccess, onError);
+		remoteApi.sendRequest(data, onSuccess, onError);
 	};
 
 	this.doOnError = function(result, onError) {
@@ -248,7 +252,7 @@ function API(options) {
 			"action" : "END_ACTIVATIONS",
 			"id" : tableId
 		};
-		$this.remoteAPI.sendRequest(data, onSuccess, onError);
+		remoteApi.sendRequest(data, onSuccess, onError);
 	};
 
 	this.endReinforcements = function(tableId, onSuccess, onError) {
@@ -256,7 +260,7 @@ function API(options) {
 			"action" : "END_REINFORCEMENTS",
 			"id" : tableId
 		};
-		$this.remoteAPI.sendRequest(data, onSuccess, onError);
+		remoteApi.sendRequest(data, onSuccess, onError);
 	};
 
 	this.fireMissiles = function(tableId, diskIndex, missile, tablePoint,
@@ -269,7 +273,7 @@ function API(options) {
 			"point" : JSON.stringify(tablePoint),
 			"missile" : missile
 		};
-		$this.remoteAPI.sendRequest(data, onSuccess, onError);
+		remoteApi.sendRequest(data, onSuccess, onError);
 	};
 
 	this.endMissiles = function(tableId, onSuccess, onError) {
@@ -277,18 +281,26 @@ function API(options) {
 			"action" : "END_MISSILES",
 			"id" : tableId
 		};
-		$this.remoteAPI.sendRequest(data, onSuccess, onError);
+		remoteApi.sendRequest(data, onSuccess, onError);
 	};
 
 	this.getAllDisks = function(onSuccess, onError) {
-		$this.remoteAPI.getAllDisks(onSuccess, onError);
+		remoteApi.getAllDisks(onSuccess, onError);
 	};
 
 	this.getDisk = function(diskName, onSuccess, onError) {
-		// TODO
-		localApi.getDisk(diskName);
-		// TODO
-		remoteApi.getDisk(onSuccess, onError, options);
+		// TODO try to get a local copy
+		var disk = localApi.getDisk(diskName);
+		console.log(disk);
+		if (disk != null) {
+			// 
+			console.log(disk);
+			$this.doOnSuccess({
+				'disk' : disk
+			}, onSuccess);
+		}
+		// TODO if no local copy, go remote
+		remoteApi.getDisk(diskName, onSuccess, onError, options);
 	};
 
 	this.getJWT = function(disks, onSuccess, onError) {
@@ -298,18 +310,18 @@ function API(options) {
 			"action" : "JWT",
 			"disks" : JSON.stringify(disks)
 		};
-		$this.remoteAPI.sendRequest(data, onSuccess, onError);
+		remoteApi.getJWT(data, onSuccess, onError);
 	};
 
 	this.getLeaderboard = function(onSuccess, onError) {
 		var data = {
 			"action" : "LEADERBOARD"
 		};
-		$this.remoteAPI.sendRequest(data, onSuccess, onError);
+		remoteApi.sendRequest(data, onSuccess, onError);
 	};
 
 	this.getProfile = function(onSuccess, onError) {
-		$this.remoteAPI.getProfile(onSuccess, onError);
+		remoteApi.getProfile(onSuccess, onError);
 	};
 
 	this.joinTable = function(tableId, army, onSuccess, onError) {
@@ -323,14 +335,14 @@ function API(options) {
 			"army" : army
 		};
 		// console.log(data);
-		$this.remoteAPI.sendRequest(data, onSuccess, onError);
+		remoteApi.sendRequest(data, onSuccess, onError);
 	};
 
 	this.listTables = function(onSuccess, onError) {
 		var data = {
 			"action" : "GET_ALL_TABLES"
 		};
-		$this.remoteAPI.sendRequest(data, onSuccess, onError);
+		remoteApi.sendRequest(data, onSuccess, onError);
 	};
 
 	this.getTable = function(tableId, onSuccess, onError) {
@@ -364,7 +376,7 @@ function API(options) {
 				"id" : tableId,
 				"mementoId" : mementoId
 			};
-			$this.remoteAPI.sendRequest(data, onSuccess, onError);
+			remoteApi.sendRequest(data, onSuccess, onError);
 		}
 	};
 
@@ -485,7 +497,7 @@ function API(options) {
 			"point" : JSON.stringify(tableClickPoint)
 		};
 		// console.log(data);
-		$this.remoteAPI.sendRequest(data, onSuccess, onError);
+		remoteApi.sendRequest(data, onSuccess, onError);
 	};
 
 	/**
@@ -499,7 +511,7 @@ function API(options) {
 			"armyName" : armyName,
 			"disks" : JSON.stringify(disks)
 		};
-		$this.remoteAPI.sendRequest(data, onSuccess, onError);
+		remoteApi.sendRequest(data, onSuccess, onError);
 
 	};
 
@@ -508,7 +520,7 @@ function API(options) {
 			"action" : "DELETE_ARMY",
 			"armyName" : armyName
 		};
-		$this.remoteAPI.sendRequest(data, onSuccess, onError);
+		remoteApi.sendRequest(data, onSuccess, onError);
 	};
 
 	this.saveReinforcement = function(tableId, diskNumber, tableClickPoint,
@@ -521,7 +533,7 @@ function API(options) {
 			"point" : JSON.stringify(tableClickPoint),
 			"mementoId" : $this.getLastMementoId(tableId)
 		};
-		$this.remoteAPI.sendRequest(data, onSuccess, onError);
+		remoteApi.sendRequest(data, onSuccess, onError);
 	};
 
 }

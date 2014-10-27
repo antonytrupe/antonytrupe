@@ -187,6 +187,10 @@ function Player(name) {
 
 	};
 
+	/**
+	 * 
+	 * @returns array of diskNumbers
+	 */
 	this.getDiskNumbers = function() {
 		return Object.keys($this.diskLocations);
 	};

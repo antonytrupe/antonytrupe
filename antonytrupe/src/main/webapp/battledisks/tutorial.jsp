@@ -24,15 +24,11 @@
 			"/com/antonytrupe/battledisks/TableUI.js", 
 			"/com/antonytrupe/battledisks/UI.js", 
 			"/com/antonytrupe/battledisks/API.js", 
+			"/com/adamhooper/priority-queue.js",
 			"/com/antonytrupe/battledisks/AI.js", 
 			function() {
 				//wait for the template iframe to load
-				$("mini-profiler-templates").ready(function (){
-					MiniProfiler.init({
-					    requestId: '-1',
-					    baseURL: '/gae_mini_profile/'
-					});
-				});
+				
 				new Main().tutorial();
 			});
 </script>

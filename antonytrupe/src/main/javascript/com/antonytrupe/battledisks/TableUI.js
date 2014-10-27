@@ -1950,8 +1950,8 @@ function TableUI(api, table, container) {
 	 * continues remote polling
 	 */
 	this.onSuccess = function(result) {
-		console.log('TableUI.onSuccess');
-		console.log(result);
+		// console.log('TableUI.onSuccess');
+		// console.log(result);
 
 		$this.player.update(result.player);
 

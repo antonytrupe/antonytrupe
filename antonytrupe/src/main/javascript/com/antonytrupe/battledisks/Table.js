@@ -18,11 +18,16 @@
 function Table(maxPlayers, maxPoints, activations, startingDisks,
 		reinforcements, alignmentRestriction, scenario) {
 	"use strict";
+
 	/**
 	 * @type {Table}
+	 * @memberOf Table
 	 */
 	var $this = this;
 
+	/**
+	 * @memberOf Table
+	 */
 	var TO_RADIANS = Math.PI / 180;
 
 	// TODO 1 firstblow
@@ -35,31 +40,29 @@ function Table(maxPlayers, maxPoints, activations, startingDisks,
 
 	/**
 	 * this never changes
+	 * 
+	 * @memberOf Table
 	 */
 	this.id = null;
 
+	/**
+	 * @memberOf Table
+	 */
 	this.ai = new AI($this);
 
 	/**
-	 * each memento has a unique it, but its always the most recent one because we
-	 * need to know the latest version.
+	 * each memento has a unique id, but its always the most recent one because
+	 * we need to know the latest version.
+	 * 
+	 * @memberOf Table
 	 */
 	this.mementoId = null;
-
-	this.memento = {};
-
-	/**
-	 * this changes
-	 */
-	this.memento.round = 0;
-	this.getRound = function() {
-		return $this.memento.round;
-	};
 
 	// JOIN, REINFORCEMENTS, ACTIVATION, MISSILE,COMBAT,REMOVE_COUNTERS,FINISHED
 	/**
 	 * Enum for segments.
 	 * 
+	 * @memberOf Table
 	 * @enum {string}
 	 */
 	this.SEGMENT = {
@@ -72,90 +75,129 @@ function Table(maxPlayers, maxPoints, activations, startingDisks,
 		FINISHED : "FINISHED"
 	};
 
-	this.memento.segment = $this.SEGMENT.JOIN;
-
-	this.maxPlayers = maxPlayers;
-	this.maxPoints = maxPoints;
-	this.activations = activations;
-	this.startingDisks = startingDisks;
-	this.reinforcements = reinforcements;
-	// None, Single, Neutral
-	this.alignmentRestriction = alignmentRestriction;
-	this.scenario = scenario;
-
 	// things that don't change, or only have info added to them, do not need to
 	// be in the mememto
 
 	/**
+	 * @memberOf Table
+	 */
+	this.maxPlayers = maxPlayers;
+	/**
+	 * @memberOf Table
+	 */
+	this.maxPoints = maxPoints;
+	/**
+	 * @memberOf Table
+	 */
+	this.activations = activations;
+	/**
+	 * @memberOf Table
+	 */
+	this.startingDisks = startingDisks;
+	/**
+	 * @memberOf Table
+	 */
+	this.reinforcements = reinforcements;
+	/**
+	 * @memberOf Table
+	 */
+	// None, Single, Neutral
+	this.alignmentRestriction = alignmentRestriction;
+	/**
+	 * @memberOf Table
+	 */
+	this.scenario = scenario;
+
+	/**
 	 * the order doesn't change, but players are added to the end.
 	 */
+	/**
+	 * @memberOf Table
+	 */
 	this.playerOrder = [];
-
+	/**
+	 * @memberOf Table
+	 */
 	this.disks = {};
+	/**
+	 * @memberOf Table
+	 */
 	this.spells = {};
+
+	/**
+	 * this doesn't change
+	 * 
+	 * @memberOf Table
+	 */
+	this.stagingDisks = [];
+
+	/**
+	 * this can stay on the table for now
+	 * 
+	 * @memberOf Table
+	 */
+	this.actions = [];
+
+	/**
+	 * this doesn't get persisted as part of the table
+	 * 
+	 * @memberOf Table
+	 */
+	this.mementos = {};
+
+	/**
+	 * @memberOf Table
+	 */
+	this.memento = {};
+
+	/**
+	 * this changes
+	 * 
+	 * @memberOf Table
+	 */
+	this.memento.round = 0;
+
+	/**
+	 * @memberOf Table.memento
+	 */
+	this.memento.segment = $this.SEGMENT.JOIN;
 
 	/**
 	 * the player that goes/went first this round. this changes each round.
 	 */
 	this.memento.firstPlayer = null;
-	this.getFirstPlayer = function() {
-		return $this.memento.firstPlayer;
-	};
 
 	/**
 	 * the player's name who's turn it is. this changes a lot.
+	 * 
+	 * @memberOf Table.memento
 	 */
 	this.memento.currentPlayer = null;
-	this.getCurrentPlayer = function() {
-		return $this.memento.currentPlayer;
-	};
 
 	// {"playerName":={"reinforcements":[]},...}
-	this.memento.players = {};
-
-	// this can stay on the table for now
-	this.actions = [];
-
 	/**
-	 * this doesn't get persisted as part of the table
+	 * @memberOf Table.memento
 	 */
-	this.mementos = {};
+	this.memento.players = {};
 
 	/**
 	 * {"0":{diskName:"",location:{}},...}
+	 * 
+	 * @memberOf Table.memento
 	 */
 	this.memento.diskInfo = {};
-
-	/**
-	 * this doesn't change
-	 */
-	this.stagingDisks = [];
-
-	// returns an object that has
-	this.getDiskInfo = function(diskNumber) {
-
-		if ($this.memento.diskInfo[diskNumber] == undefined) {
-			console.log(diskNumber);
-			console.log(JSON.parse(JSON.stringify($this.memento.diskInfo)));
-			console.log($this.memento.diskInfo[diskNumber].diskName);
-		}
-		return {
-			'mementoInfo' : $this.memento.diskInfo[diskNumber],
-			'disk' : $this.disks[$this.memento.diskInfo[diskNumber].diskName]
-		};
-	};
-
-	this.getDiskNumbers = function() {
-		// return an object that doesn't have killed disks and
-		return Object.keys($this.memento.diskInfo).filter(function(diskNumber) {
-			return $this.memento.diskInfo[diskNumber] !== null;
-		});
-	};
 
 	/**
 	 * this creates a record of activating the disk. used for explicitly
 	 * activating a disk without taking another action. it also calls
 	 * activateDisk2, which does the grunt work.
+	 * 
+	 * @param {number}
+	 *            diskNumber
+	 * @param {string}
+	 *            playerName
+	 * @returns {Boolean}
+	 * @memberOf Table
 	 */
 	this.activateDisk = function(diskNumber, playerName) {
 		if ($this.canActivate(playerName, diskNumber)) {
@@ -176,6 +218,7 @@ function Table(maxPlayers, maxPoints, activations, startingDisks,
 	 *            diskNumber
 	 * @param {string}
 	 *            playerName
+	 * @memberOf Table
 	 */
 	this.activateDisk2 = function(diskNumber, playerName) {
 		// check to make sure this player can activate this disk
@@ -227,6 +270,13 @@ function Table(maxPlayers, maxPoints, activations, startingDisks,
 
 	};
 
+	/**
+	 * @param {string}
+	 *            playerName
+	 * @param {number}
+	 *            movedDiskNumber
+	 * @memberOf Table
+	 */
 	this.activateMovedDisks = function(playerName, movedDiskNumber) {
 		// find previously moved disk(s) that haven't been activated and
 		// activate them
@@ -247,7 +297,7 @@ function Table(maxPlayers, maxPoints, activations, startingDisks,
 	};
 
 	/**
-	 * 
+	 * @memberOf Table
 	 */
 	this.addMemento = function() {
 		// $this.debug('Table.addMemento');
@@ -260,8 +310,28 @@ function Table(maxPlayers, maxPoints, activations, startingDisks,
 				.stringify($this.memento));
 		$this.mementoId++;
 	};
+	/**
+	 * @memberOf Table
+	 * @param segment
+	 * @returns {Boolean}
+	 */
+	this.anyPlayersIn = function(segment) {
+		var playersInSegment = false;
+		Object.keys($this.memento.players).some(function(pName) {
+			if ($this.getPlayerInfo(pName).segment === segment) {
+				playersInSegment = true;
+				return true;
+			}
+		});
+		return playersInSegment;
+	};
 
-	// returns negative numbers for error codes, and 0 for success
+	/**
+	 * returns negative numbers for error codes, and 0 for success
+	 * 
+	 * @returns {number}
+	 * @memberOf Table
+	 */
 	this.attack = function(attacker) {
 		var attackees = $this.getAttackees(attacker);
 		if (attackees === null) {
@@ -352,6 +422,12 @@ function Table(maxPlayers, maxPoints, activations, startingDisks,
 		return 0;
 	};
 
+	/**
+	 * @memberOf Table
+	 * @param playerName
+	 * @param diskNumber
+	 * @returns {Boolean}
+	 */
 	this.canActivate = function(playerName, diskNumber) {
 		if (diskNumber === null) {
 			return false;
@@ -382,6 +458,12 @@ function Table(maxPlayers, maxPoints, activations, startingDisks,
 		return true;
 	};
 
+	/**
+	 * @memberOf Table
+	 * @param playerName
+	 * @param diskNumber
+	 * @returns {Boolean}
+	 */
 	this.canCastSpell = function(playerName, diskNumber) {
 		if ($this.canActivate(playerName, diskNumber)
 				&& $this.getDiskInfo(diskNumber).disk.spellcaster >= 1) {
@@ -390,20 +472,186 @@ function Table(maxPlayers, maxPoints, activations, startingDisks,
 		return false;
 	};
 
-	this.isPinnedByCreature = function(diskNumber) {
-		if ($this.getDiskInfo(diskNumber).mementoInfo.pinnedBy.length === 0) {
+	/**
+	 * @param {Player}
+	 *            player
+	 * @param {string}
+	 *            armyName
+	 * @return {{success:Boolean,messages:Array}}
+	 * @memberOf Table
+	 */
+	this.canJoin = function(player, armyName) {
+
+		var result = {
+			'success' : true,
+			"messages" : []
+		};
+
+		if ($this.memento.segment !== 'JOIN') {
+			// 0 pass this to the user
+			result.messages
+					.push("This table is no longer in the JOIN segment.");
+			result.success = false;
+		}
+
+		var armyInfo = player.getArmyInfo(armyName);
+
+		// check army size
+		if (armyInfo.points > $this.maxPoints) {
+			// 0 pass this to the user
+			result.messages
+					.push("This table's army point cap is lower then the size of this army.");
+			result.success = false;
+		}
+
+		// check alignment restrictions
+		if ($this.alignmentRestriction === 'Single'
+				&& Object.keys(armyInfo.alignments).length > 2) {
+			// 0 pass this to the user
+			// $this.debug('single faction but more then 2');
+			result.messages
+					.push("This table is restricted to only single faction armies.");
+			result.success = false;
+		}
+
+		if ($this.alignmentRestriction === 'Single'
+				&& Object.keys(armyInfo.alignments).length == 2
+				&& !armyInfo.alignments['Unaligned']) {
+			// 0 pass this to the user
+			// $this.debug('single faction but 2 and one is not unaligned');
+			result.messages
+					.push("This table is restricted to only single faction armies.");
+			result.success = false;
+		}
+
+		if ($this.alignmentRestriction === 'Neutral'
+				&& armyInfo.alignments['Good'] && armyInfo.alignments['Evil']) {
+			// 0 pass this to the user
+			// $this.debug('neutral faction allowed but has good and evil');
+			result.messages
+					.push("This table does not allow armies with both Good and Evil alignments.");
+			result.success = false;
+		}
+
+		// get majority faction
+		var factionPoints = armyInfo.factions[armyInfo.faction];
+
+		// check faction restriction
+		if (factionPoints / armyInfo.points < .5) {
+			// pass this to the user
+			// $this.debug('no majority faction');
+			result.messages
+					.push("All armies must have one faction that is half or more of the army.");
+			result.success = false;
+		}
+		return result;
+	};
+
+	/**
+	 * checks everything including the specific missile
+	 * 
+	 * @param {string}
+	 *            playerName
+	 * @param {number}
+	 *            diskNumber
+	 * @param {string}
+	 *            projectile
+	 * @returns {Boolean}
+	 * @memberOf Table
+	 */
+	this.canMissile = function(playerName, diskNumber, projectile) {
+		$this.debug('Table.canMissile');
+		$this.debug(projectile.toLowerCase());
+		$this.debug(JSON.stringify($this.getDiskInfo(diskNumber).disk));
+		$this.debug($this.getDiskInfo(diskNumber).disk[projectile.toLowerCase()
+				+ 's']);
+
+		// make sure it is this player's turn
+		if ($this.getCurrentPlayer() !== playerName) {
 			return false;
 		}
 
-		return $this.getDiskInfo(diskNumber).mementoInfo.pinnedBy
-				.some(function(pinningDiskNumber) {
-					if ($this.getDiskInfo(pinningDiskNumber).disk.type === 'creature') {
-						return true;
-					}
-				});
+		// make the table is still in the missile segment
+		if ($this.memento.segment !== $this.SEGMENT.MISSILE) {
+			return false;
+		}
+
+		// make sure this player is still in the missile segment
+		if ($this.getPlayerInfo(playerName).segment !== $this.SEGMENT.MISSILE) {
+			return false;
+		}
+
+		// make sure this disk has missiles
+		if ($this.getDiskInfo(diskNumber).disk[projectile.toLowerCase() + 's'] === 0) {
+			return false;
+		}
+
+		return $this.canMissile1(playerName, diskNumber);
 
 	};
 
+	/**
+	 * only checks the disk itself, not anything else about the table(table
+	 * segment, player segment, etc)
+	 * 
+	 * @param {string}
+	 *            playerName
+	 * @param {number}
+	 *            diskNumber
+	 * @returns {Boolean}
+	 * @memberOf Table
+	 */
+	this.canMissile1 = function(playerName, diskNumber) {
+		if (diskNumber === undefined || diskNumber === null) {
+			return false;
+		}
+
+		if (playerName === undefined || playerName === null) {
+			return false;
+		}
+
+		// make sure the moving disk is not pinned, but only count creature
+		// disks, not missiles
+		if ($this.isPinnedByCreature(diskNumber)) {
+			return false;
+		}
+
+		// make sure this disk is not pinning another disk
+		if ($this.getDiskInfo(diskNumber).mementoInfo.pinning.length !== 0) {
+			return false;
+		}
+
+		// make sure this disk is the current players
+		if ($this.getDiskInfo(diskNumber).mementoInfo.player !== playerName) {
+			return false;
+		}
+
+		// make sure this disk has not already been activated
+		if ($this.getDiskInfo(diskNumber).mementoInfo.activated) {
+			return false;
+		}
+
+		// check disk is an archer
+		if (!$this.getDiskInfo(diskNumber).disk.archer) {
+			return false;
+		}
+
+		// check disk is not pinning another disk
+		if ($this.getDiskInfo(diskNumber).mementoInfo.pinning.length !== 0) {
+			return false;
+		}
+
+		return true;
+
+	};
+
+	/**
+	 * 
+	 * @param playerName
+	 * @param diskNumber
+	 * @returns {Boolean}
+	 * @memberOf Table
+	 */
 	this.canMove = function(playerName, diskNumber) {
 		if (diskNumber === undefined || diskNumber === null) {
 			// $this.debug("Table.canMove:" + "diskNumber");
@@ -466,6 +714,13 @@ function Table(maxPlayers, maxPoints, activations, startingDisks,
 		return true;
 	};
 
+	/**
+	 * 
+	 * @param playerName
+	 * @param diskNumber
+	 * @returns {Boolean}
+	 * @memberOf Table
+	 */
 	this.canReinforce = function(playerName, diskNumber) {
 		if (diskNumber === null) {
 			// $this.debug('3');
@@ -494,6 +749,14 @@ function Table(maxPlayers, maxPoints, activations, startingDisks,
 		return $this.getDiskInfo(diskNumber).mementoInfo.reinforcement;
 	};
 
+	/**
+	 * 
+	 * @param playerName
+	 * @param diskNumber
+	 * @param location
+	 * @returns {Boolean}
+	 * @memberOf Table
+	 */
 	this.canReinforceTo = function(playerName, diskNumber, location) {
 		if (!$this.canReinforce(playerName, diskNumber)) {
 			// $this.debug('1');
@@ -526,6 +789,7 @@ function Table(maxPlayers, maxPoints, activations, startingDisks,
 
 	/**
 	 * @private
+	 * @memberOf Table
 	 */
 	this.debug = function(message) {
 		//
@@ -537,6 +801,11 @@ function Table(maxPlayers, maxPoints, activations, startingDisks,
 		}
 	};
 
+	/**
+	 * 
+	 * @param defender
+	 * @memberOf Table
+	 */
 	this.defend = function(defender) {
 		var defendees = $this.getDefendees(defender);
 		if (defendees === null) {
@@ -575,7 +844,9 @@ function Table(maxPlayers, maxPoints, activations, startingDisks,
 	};
 
 	/**
-	 * 
+	 * @param {string}
+	 *            playerName
+	 * @memberOf Table
 	 */
 	this.endActivations = function(playerName) {
 		$this.getPlayerInfo(playerName).segment = $this.SEGMENT.MISSILE;
@@ -606,6 +877,11 @@ function Table(maxPlayers, maxPoints, activations, startingDisks,
 		$this.recordAction("endActivations", [ playerName ]);
 	};
 
+	/**
+	 * @param {string}
+	 *            playerName
+	 * @memberOf Table
+	 */
 	this.endReinforcements = function(playerName) {
 		$this.getPlayerInfo(playerName).segment = $this.SEGMENT.ACTIVATION;
 
@@ -623,6 +899,11 @@ function Table(maxPlayers, maxPoints, activations, startingDisks,
 		$this.recordAction("endReinforcements", [ playerName ]);
 	};
 
+	/**
+	 * @param {string}
+	 *            playerName
+	 * @memberOf Table
+	 */
 	this.endMissiles = function(playerName) {
 		$this.getPlayerInfo(playerName).segment = $this.SEGMENT.COMBAT;
 
@@ -637,10 +918,16 @@ function Table(maxPlayers, maxPoints, activations, startingDisks,
 		$this.recordAction("endMissiles", [ playerName ]);
 	};
 
+	/**
+	 * @memberOf Table
+	 */
 	function getRandomInt(min, max) {
 		return Math.floor(Math.random() * (max - min + 1)) + min;
 	}
 
+	/**
+	 * @memberOf Table
+	 */
 	function getRandomFloat(min, max) {
 		return Math.random() * (max - min + 1) + min;
 	}
@@ -654,6 +941,7 @@ function Table(maxPlayers, maxPoints, activations, startingDisks,
 	 *            tableClickPoint
 	 * @param {Disk}
 	 *            missile
+	 * @memberOf Table
 	 */
 	this.fireMissiles = function(playerName, diskNumber, tableClickPoint,
 			missile) {
@@ -727,17 +1015,19 @@ function Table(maxPlayers, maxPoints, activations, startingDisks,
 	};
 
 	/**
+	 * given a circle defined by a center and radius and a second point, if the
+	 * second point is inside the circle, return it, otherwise return the point
+	 * on the circumference of the circle that intersects with the line defined
+	 * by the second point and center of the circle
+	 * 
 	 * @param {Point}
 	 *            circleCenter
 	 * @param {number}
 	 *            radius
 	 * @param {Point}
 	 *            point
-	 * 
-	 * given a circle defined by a center and radius and a second point, if the
-	 * second point is inside the circle, return it, otherwise return the point
-	 * on the circumference of the circle that intersects with the line defined
-	 * by the second point and center of the circle
+	 * @return {Point}
+	 * @memberOf Table
 	 */
 	this.getPointInsideCircle = function(circleCenter, radius, point) {
 
@@ -749,101 +1039,12 @@ function Table(maxPlayers, maxPoints, activations, startingDisks,
 		return location;
 	};
 
-	this.hasUnactivatedArcherDisks = function(playerName) {
-		$this.debug('Table.hasUnactivatedArcherDisks');
-		$this.debug($this.getArcherDisks(playerName).length);
-		return $this.getArcherDisks(playerName).length > 0;
-	};
-
 	/**
-	 * checks everything including the specific missile
 	 * 
-	 * @param {string}
-	 *            playerName
-	 * @param {number}
-	 *            diskNumber
-	 * @param {string}
-	 *            projectile
+	 * @param playerName
+	 * @returns {Array}
+	 * @memberOf Table
 	 */
-	this.canMissile = function(playerName, diskNumber, projectile) {
-		$this.debug('Table.canMissile');
-		$this.debug(projectile.toLowerCase());
-		$this.debug(JSON.stringify($this.getDiskInfo(diskNumber).disk));
-		$this.debug($this.getDiskInfo(diskNumber).disk[projectile.toLowerCase()
-				+ 's']);
-
-		// make sure it is this player's turn
-		if ($this.getCurrentPlayer() !== playerName) {
-			return false;
-		}
-
-		// make the table is still in the missile segment
-		if ($this.memento.segment !== $this.SEGMENT.MISSILE) {
-			return false;
-		}
-
-		// make sure this player is still in the missile segment
-		if ($this.getPlayerInfo(playerName).segment !== $this.SEGMENT.MISSILE) {
-			return false;
-		}
-
-		// make sure this disk has missiles
-		if ($this.getDiskInfo(diskNumber).disk[projectile.toLowerCase() + 's'] === 0) {
-			return false;
-		}
-
-		return $this.canMissile1(playerName, diskNumber);
-
-	};
-
-	/**
-	 * only checks the disk itself, not anything else about the table(table
-	 * segment, player segment, etc)
-	 */
-	this.canMissile1 = function(playerName, diskNumber) {
-		if (diskNumber === undefined || diskNumber === null) {
-			return false;
-		}
-
-		if (playerName === undefined || playerName === null) {
-			return false;
-		}
-
-		// make sure the moving disk is not pinned, but only count creature
-		// disks, not missiles
-		if ($this.isPinnedByCreature(diskNumber)) {
-			return false;
-		}
-
-		// make sure this disk is not pinning another disk
-		if ($this.getDiskInfo(diskNumber).mementoInfo.pinning.length !== 0) {
-			return false;
-		}
-
-		// make sure this disk is the current players
-		if ($this.getDiskInfo(diskNumber).mementoInfo.player !== playerName) {
-			return false;
-		}
-
-		// make sure this disk has not already been activated
-		if ($this.getDiskInfo(diskNumber).mementoInfo.activated) {
-			return false;
-		}
-
-		// check disk is an archer
-		if (!$this.getDiskInfo(diskNumber).disk.archer) {
-			return false;
-		}
-
-		// check disk is not pinning another disk
-		if ($this.getDiskInfo(diskNumber).mementoInfo.pinning.length !== 0) {
-			return false;
-		}
-
-		return true;
-
-	};
-
 	this.getArcherDisks = function(playerName) {
 		$this.debug('Table.getArcherDisks');
 		var disks = [];
@@ -863,6 +1064,7 @@ function Table(maxPlayers, maxPoints, activations, startingDisks,
 	 *            attacker
 	 * @return {?Array} returns null if the attackee is unknown or there is no
 	 *         attackee, otherwise returns an array of attackees
+	 * @memberOf Table
 	 */
 	this.getAttackees = function(attacker) {
 		if ($this.getDiskInfo(attacker).mementoInfo.attackee !== null) {
@@ -897,9 +1099,18 @@ function Table(maxPlayers, maxPoints, activations, startingDisks,
 	};
 
 	/**
+	 * @returns {string}
+	 * @memberOf Table
+	 */
+	this.getCurrentPlayer = function() {
+		return $this.memento.currentPlayer;
+	};
+
+	/**
 	 * @param {number}
 	 *            defender
-	 * @return {?(Array.<number>|boolean)}
+	 * @return {?(Array.<number>)}
+	 * @memberOf Table
 	 */
 	this.getDefendees = function(defender) {
 		if ($this.getDiskInfo(defender).mementoInfo.defendee !== null) {
@@ -932,6 +1143,51 @@ function Table(maxPlayers, maxPoints, activations, startingDisks,
 
 	};
 
+	/**
+	 * @typedef DiskInfo
+	 * @property mementoInfo
+	 * @property disk
+	 */
+
+	/**
+	 * returns an object that has
+	 * 
+	 * @param {number}
+	 *            diskNumber
+	 * @returns {DiskInfo}
+	 * @memberOf Table
+	 */
+	this.getDiskInfo = function(diskNumber) {
+
+		if ($this.memento.diskInfo[diskNumber] == undefined) {
+			console.log(diskNumber);
+			console.log(JSON.parse(JSON.stringify($this.memento.diskInfo)));
+			console.log($this.memento.diskInfo[diskNumber].diskName);
+		}
+		return {
+			'mementoInfo' : $this.memento.diskInfo[diskNumber],
+			'disk' : $this.disks[$this.memento.diskInfo[diskNumber].diskName]
+		};
+	};
+
+	/**
+	 * 
+	 * @returns {Array}
+	 * @memberOf Table
+	 */
+	this.getDiskNumbers = function() {
+		// return an object that doesn't have killed disks and
+		return Object.keys($this.memento.diskInfo).filter(function(diskNumber) {
+			return $this.memento.diskInfo[diskNumber] !== null;
+		});
+	};
+
+	/**
+	 * 
+	 * @param playerName
+	 * @returns {Array}
+	 * @memberOf Table
+	 */
 	this.getDisksThatNeedAttackee = function(playerName) {
 		// make sure we only count enemy disks when counting the number of disks
 		// a given disk is pinning
@@ -952,6 +1208,12 @@ function Table(maxPlayers, maxPoints, activations, startingDisks,
 		return disks;
 	};
 
+	/**
+	 * 
+	 * @param playerName
+	 * @returns {Array}
+	 * @memberOf Table
+	 */
 	this.getDisksThatNeedDefendee = function(playerName) {
 		// make sure we only count enemy disks
 		var disks = [];
@@ -970,10 +1232,41 @@ function Table(maxPlayers, maxPoints, activations, startingDisks,
 		return disks;
 	};
 
+	/**
+	 * 
+	 * @param playerName
+	 * @returns {Array}
+	 * @memberOf Table
+	 */
+	this.getEnemyDisks = function(playerName) {
+		return $this
+				.getDiskNumbers()
+				.filter(
+						function(diskNumber) {
+							return $this.getDiskInfo(diskNumber).mementoInfo.player != playerName;
+						});
+	};
+
+	/**
+	 * @returns {string}
+	 * @memberOf Table
+	 */
+	this.getFirstPlayer = function() {
+		return $this.memento.firstPlayer;
+	};
+
+	/**
+	 * @returns {number}
+	 * @memberOf Table
+	 */
 	this.getId = function() {
 		return $this.id;
 	};
 
+	/**
+	 * @returns {{tier,attacker}}
+	 * @memberOf Table
+	 */
 	this.getNextAttacker = function() {
 		var stacks = {};
 
@@ -1004,14 +1297,16 @@ function Table(maxPlayers, maxPoints, activations, startingDisks,
 
 		// bug in JSDT
 		return {
-			tier : topTier,
-			attacker : attacker
+			"tier" : topTier,
+			"attacker" : attacker
 		};
 	};
 
 	/**
 	 * @param {string=}
 	 *            playerName
+	 * @returns {string}
+	 * @memberOf Table
 	 */
 	this.getNextPlayer = function(playerName) {
 		// this might break things
@@ -1031,7 +1326,7 @@ function Table(maxPlayers, maxPoints, activations, startingDisks,
 	 * @param {number}
 	 *            diskNumber
 	 * @return {Array}
-	 * 
+	 * @memberOf Table
 	 */
 	this.getOverlappingDisks = function(diskNumber) {
 		var overlappingDisks = [];
@@ -1062,11 +1357,22 @@ function Table(maxPlayers, maxPoints, activations, startingDisks,
 		return overlappingDisks;
 	};
 
+	/**
+	 * @param playerName
+	 * @returns {Player}
+	 * @memberOf Table
+	 */
 	this.getPlayerInfo = function(playerName) {
 		// console.log($this.memento.players);
 		return $this.memento.players[playerName];
 	};
 
+	/**
+	 * @param location
+	 * @param diameter
+	 * @returns {Array}
+	 * @memberOf Table
+	 */
 	this.getOverlappingDisks1 = function(location, diameter) {
 		var overlappingDisks = [];
 		$this
@@ -1096,6 +1402,12 @@ function Table(maxPlayers, maxPoints, activations, startingDisks,
 		return overlappingDisks;
 	};
 
+	/**
+	 * @param {string}
+	 *            playerName
+	 * @return {number}
+	 * @memberOf Table
+	 */
 	this.getRatingAdjustment = function(playerName) {
 		// $this.debug(playerName);
 		var winners = $this.getWinners();
@@ -1145,6 +1457,9 @@ function Table(maxPlayers, maxPoints, activations, startingDisks,
 		return adjustment;
 	};
 
+	/**
+	 * @memberOf Table
+	 */
 	this.getReinforcementCount = function(playerName) {
 		/*
 		 * if (playerName === null || playerName === "" || playerName ===
@@ -1161,6 +1476,30 @@ function Table(maxPlayers, maxPoints, activations, startingDisks,
 				$this.getPlayerInfo(playerName).reinforcements.length);
 	};
 
+	/**
+	 * @memberOf Table
+	 */
+	this.getRound = function() {
+		return $this.memento.round;
+	};
+
+	/**
+	 * @memberOf Table
+	 */
+	this.getSegment = function() {
+		return $this.memento.segment;
+	};
+
+	/**
+	 * @memberOf Table
+	 */
+	this.getStagingDisk = function(playerName) {
+		return $this.stagingDisks[$this.playerOrder.indexOf(playerName)];
+	};
+
+	/**
+	 * @memberOf Table
+	 */
 	this.getTier = function(diskNumber, stacks) {
 		if (diskNumber === undefined
 				|| $this.memento.diskInfo[diskNumber] === null) {
@@ -1202,6 +1541,7 @@ function Table(maxPlayers, maxPoints, activations, startingDisks,
 	 * @param {Array}
 	 *            diskNumbers
 	 * @return {Array}
+	 * @memberOf Table
 	 */
 	this.getTopDisks = function(diskNumbers) {
 		var first, second;
@@ -1227,6 +1567,9 @@ function Table(maxPlayers, maxPoints, activations, startingDisks,
 		return diskNumbers;
 	};
 
+	/**
+	 * @memberOf Table
+	 */
 	this.getUnactivatedDisks = function(playerName) {
 		var disks = [];
 		// loop over all the disks
@@ -1243,6 +1586,9 @@ function Table(maxPlayers, maxPoints, activations, startingDisks,
 		return disks;
 	};
 
+	/**
+	 * @memberOf Table
+	 */
 	this.getWinners = function() {
 		var playersWithDisks = {};
 
@@ -1279,7 +1625,18 @@ function Table(maxPlayers, maxPoints, activations, startingDisks,
 	};
 
 	/**
+	 * @memberOf Table
+	 */
+	this.hasUnactivatedArcherDisks = function(playerName) {
+		$this.debug('Table.hasUnactivatedArcherDisks');
+		$this.debug($this.getArcherDisks(playerName).length);
+		return $this.getArcherDisks(playerName).length > 0;
+	};
+
+	/**
 	 * check activation and pinned
+	 * 
+	 * @memberOf Table
 	 */
 	this.hasUnactivatedDisks = function(playerName) {
 		var foundUADisk = false;
@@ -1296,6 +1653,9 @@ function Table(maxPlayers, maxPoints, activations, startingDisks,
 		return foundUADisk;
 	};
 
+	/**
+	 * @memberOf Table
+	 */
 	this.isAbove = function(one, two) {
 		if (parseInt(one, 10) === parseInt(two, 10)) {
 			return false;
@@ -1318,7 +1678,8 @@ function Table(maxPlayers, maxPoints, activations, startingDisks,
 	 *            one disk number
 	 * @param {number}
 	 *            two disk number
-	 * @return {boolean} true if one is below two
+	 * @return {Boolean} true if one is below two
+	 * @memberOf Table
 	 */
 	this.isBelow = function(one, two) {
 		if (parseInt(one, 10) === parseInt(two, 10)) {
@@ -1342,6 +1703,7 @@ function Table(maxPlayers, maxPoints, activations, startingDisks,
 	 *            one
 	 * @param {{mementoInfo:{location:Point},disk:Disk}}
 	 *            two
+	 * @memberOf Table
 	 */
 	this.isOverLapping = function(one, two) {
 		// TODO 0
@@ -1362,6 +1724,26 @@ function Table(maxPlayers, maxPoints, activations, startingDisks,
 		return false;
 	};
 
+	/**
+	 * @memberOf Table
+	 */
+	this.isPinnedByCreature = function(diskNumber) {
+		if ($this.getDiskInfo(diskNumber).mementoInfo.pinnedBy.length === 0) {
+			return false;
+		}
+
+		return $this.getDiskInfo(diskNumber).mementoInfo.pinnedBy
+				.some(function(pinningDiskNumber) {
+					if ($this.getDiskInfo(pinningDiskNumber).disk.type === 'creature') {
+						return true;
+					}
+				});
+
+	};
+
+	/**
+	 * @memberOf Table
+	 */
 	this.isPinnedByEnemy = function(diskNumber) {
 		if (diskNumber === null) {
 			return false;
@@ -1374,6 +1756,9 @@ function Table(maxPlayers, maxPoints, activations, startingDisks,
 				});
 	};
 
+	/**
+	 * @memberOf Table
+	 */
 	this.isPinningEnemy = function(diskNumber) {
 		if (diskNumber === null) {
 			return false;
@@ -1388,79 +1773,8 @@ function Table(maxPlayers, maxPoints, activations, startingDisks,
 	};
 
 	/**
-	 * @param {Player}
-	 *            player
-	 * @param {string}
-	 *            armyName
-	 * @return {{success:boolean,messages:Array}}
+	 * @memberOf Table
 	 */
-	this.canJoin = function(player, armyName) {
-
-		var result = {
-			'success' : true,
-			"messages" : []
-		};
-
-		if ($this.memento.segment !== 'JOIN') {
-			// 0 pass this to the user
-			result.messages
-					.push("This table is no longer in the JOIN segment.");
-			result.success = false;
-		}
-
-		var armyInfo = player.getArmyInfo(armyName);
-
-		// check army size
-		if (armyInfo.points > $this.maxPoints) {
-			// 0 pass this to the user
-			result.messages
-					.push("This table's army point cap is lower then the size of this army.");
-			result.success = false;
-		}
-
-		// check alignment restrictions
-		if ($this.alignmentRestriction === 'Single'
-				&& Object.keys(armyInfo.alignments).length > 2) {
-			// 0 pass this to the user
-			// $this.debug('single faction but more then 2');
-			result.messages
-					.push("This table is restricted to only single faction armies.");
-			result.success = false;
-		}
-
-		if ($this.alignmentRestriction === 'Single'
-				&& Object.keys(armyInfo.alignments).length == 2
-				&& !armyInfo.alignments['Unaligned']) {
-			// 0 pass this to the user
-			// $this.debug('single faction but 2 and one is not unaligned');
-			result.messages
-					.push("This table is restricted to only single faction armies.");
-			result.success = false;
-		}
-
-		if ($this.alignmentRestriction === 'Neutral'
-				&& armyInfo.alignments['Good'] && armyInfo.alignments['Evil']) {
-			// 0 pass this to the user
-			// $this.debug('neutral faction allowed but has good and evil');
-			result.messages
-					.push("This table does not allow armies with both Good and Evil alignments.");
-			result.success = false;
-		}
-
-		// get majority faction
-		var factionPoints = armyInfo.factions[armyInfo.faction];
-
-		// check faction restriction
-		if (factionPoints / armyInfo.points < .5) {
-			// pass this to the user
-			// $this.debug('no majority faction');
-			result.messages
-					.push("All armies must have one faction that is half or more of the army.");
-			result.success = false;
-		}
-		return result;
-	};
-
 	this.join = function(player, armyName) {
 
 		var result = $this.canJoin(player, armyName);
@@ -1518,10 +1832,13 @@ function Table(maxPlayers, maxPoints, activations, startingDisks,
 	};
 
 	/**
+	 * @param {string}
+	 *            playerName
 	 * @param {number}
 	 *            movedDiskNumber
 	 * @param {Point}
 	 *            tableClickPoint
+	 * @memberOf Table
 	 */
 	this.move = function(playerName, movedDiskNumber, tableClickPoint) {
 		// $this.debug("Table.move");
@@ -1625,7 +1942,11 @@ function Table(maxPlayers, maxPoints, activations, startingDisks,
 		return true;
 	};
 
-	// returns the tier we just resolved
+	/**
+	 * returns the tier we just resolved
+	 * 
+	 * @memberOf Table
+	 */
 	this.nextFight = function() {
 		var nextAttacker = $this.getNextAttacker();
 
@@ -1656,6 +1977,7 @@ function Table(maxPlayers, maxPoints, activations, startingDisks,
 	 *            tableLocation
 	 * @param {String}
 	 *            playerName
+	 * @memberOf Table
 	 */
 	this.place = function(disk, tableLocation, playerName) {
 		// $this.debug('Table.place');
@@ -1689,6 +2011,8 @@ function Table(maxPlayers, maxPoints, activations, startingDisks,
 	/**
 	 * place the player's reinforcements on the table and remove those disks
 	 * from their reinforcement stack
+	 * 
+	 * @memberOf Table
 	 */
 	this.placeReinforcements = function(playerName) {
 		// $this.debug('Table.placeReinforcements');
@@ -1757,10 +2081,9 @@ function Table(maxPlayers, maxPoints, activations, startingDisks,
 
 	};
 
-	this.getStagingDisk = function(playerName) {
-		return $this.stagingDisks[$this.playerOrder.indexOf(playerName)];
-	};
-
+	/**
+	 * @memberOf Table
+	 */
 	this.placeStagingDisks = function() {
 		var i, name = "Staging", //
 		type = "land", //
@@ -1806,17 +2129,6 @@ function Table(maxPlayers, maxPoints, activations, startingDisks,
 		}
 	};
 
-	this.anyPlayersIn = function(segment) {
-		var playersInSegment = false;
-		Object.keys($this.memento.players).some(function(pName) {
-			if ($this.getPlayerInfo(pName).segment === segment) {
-				playersInSegment = true;
-				return true;
-			}
-		});
-		return playersInSegment;
-	};
-
 	/**
 	 * used by API.createUnitTest and the replay functionality. Only call this
 	 * after something has changed, ie, do not call this to record attempted and
@@ -1825,6 +2137,7 @@ function Table(maxPlayers, maxPoints, activations, startingDisks,
 	 * 
 	 * @param methodName
 	 * @param args
+	 * @memberOf Table
 	 */
 	this.recordAction = function(methodName, args) {
 		$this.actions.push({
@@ -1835,15 +2148,18 @@ function Table(maxPlayers, maxPoints, activations, startingDisks,
 		if (methodName !== "createTable") {
 			$this.addMemento();
 		}
-		$this.ai.go();
+		// TODO holy cow, this is not the right place for this at all
+		var solution = $this.ai.search();
+		$this.ai.execute(solution);
 	};
 
 	/**
 	 * @param {number}
 	 *            diskNumber
-	 * @param {boolean=}
+	 * @param {Boolean=}
 	 *            disregardMemento if true, then does not create a memento. if
 	 *            false, creates memento
+	 * @memberOf Table
 	 */
 	this.remove = function(diskNumber, disregardMemento) {
 		if (!disregardMemento) {
@@ -1935,13 +2251,52 @@ function Table(maxPlayers, maxPoints, activations, startingDisks,
 		}
 	};
 
+	/**
+	 * @memberOf Table
+	 */
 	this.removeActions = function() {
 		// clear actions
 		$this.actions.length = 0;
 	};
 
 	/**
+	 * @memberOf Table
+	 */
+	this.restoreMemento = function(memento) {
+		$this.memento = memento;
+	};
+
+	/**
+	 * @param {Object}
+	 *            table
+	 * @return {number} flag indicating success or error code
+	 * @memberOf Table
+	 */
+	this.restore = function(table) {
+		// $this.debug('Table.update');
+		// $this.debug(JSON.stringify(table));
+
+		if (table === undefined) {
+			return -1;
+		}
+		if (table === null) {
+			return -2;
+		}
+
+		// future proof
+		Object.keys(table).forEach(function(key) {
+			$this[key] = table[key];
+		});
+
+		// $this.restoreMemento(table.memento);
+
+		return 0;
+	};
+
+	/**
 	 * move disks, but keep them in the reinforcement stack
+	 * 
+	 * @memberOf Table
 	 */
 	this.saveReinforcement = function(playerName, diskNumber, location) {
 		// validation
@@ -1957,6 +2312,13 @@ function Table(maxPlayers, maxPoints, activations, startingDisks,
 
 	};
 
+	/**
+	 * 
+	 * @param playerName
+	 * @param attacker
+	 * @param attackee
+	 * @memberOf Table
+	 */
 	this.setAttackee = function(playerName, attacker, attackee) {
 		$this.getDiskInfo(attacker).mementoInfo.attackee = attackee;
 		if ($this.nextFight() <= 1) {
@@ -1966,6 +2328,13 @@ function Table(maxPlayers, maxPoints, activations, startingDisks,
 		$this.recordAction("setAttackee", [ playerName, attacker, attackee ]);
 	};
 
+	/**
+	 * 
+	 * @param playerName
+	 * @param defender
+	 * @param defendee
+	 * @memberOf Table
+	 */
 	this.setDefendee = function(playerName, defender, defendee) {
 		$this.getDiskInfo(defender).mementoInfo.defendee = defendee;
 		if ($this.nextFight() <= 1) {
@@ -1975,6 +2344,11 @@ function Table(maxPlayers, maxPoints, activations, startingDisks,
 		$this.recordAction("setDefendee", [ playerName, defender, defendee ]);
 	};
 
+	/**
+	 * 
+	 * @param id
+	 * @memberOf Table
+	 */
 	this.setId = function(id) {
 		this.id = id;
 	};
@@ -1988,6 +2362,7 @@ function Table(maxPlayers, maxPoints, activations, startingDisks,
 	 *            location
 	 * @param {number}
 	 *            diskNumber
+	 * @memberOf Table
 	 */
 	this.slide = function(location, diskNumber) {
 		// deep copy of the current diskInfo
@@ -2008,6 +2383,7 @@ function Table(maxPlayers, maxPoints, activations, startingDisks,
 	 * @param {number}
 	 *            movedDiskNumber the disk to "drop" on top of the rest of the
 	 *            disks on the board.
+	 * @memberOf Table
 	 */
 	this.stack = function(movedDiskNumber) {
 		// unpin previously pinned disks
@@ -2043,10 +2419,9 @@ function Table(maxPlayers, maxPoints, activations, startingDisks,
 		});
 	};
 
-	this.getSegment = function() {
-		return $this.memento.segment;
-	};
-
+	/**
+	 * @memberOf Table
+	 */
 	this.startActivationSegment = function() {
 		$this.debug("startActivationSegment");
 
@@ -2059,7 +2434,9 @@ function Table(maxPlayers, maxPoints, activations, startingDisks,
 		this.memento.currentPlayer = $this.memento.firstPlayer;
 
 		Object.keys($this.memento.players).forEach(function(player) {
-			player.segment = $this.SEGMENT.ACTIVATION;
+			console.log($this.getPlayerInfo(player));
+			console.log($this.getPlayerInfo(player).segment);
+			$this.getPlayerInfo(player).segment = $this.SEGMENT.ACTIVATION;
 		});
 
 		// skip players that have no disks available to activate
@@ -2071,6 +2448,9 @@ function Table(maxPlayers, maxPoints, activations, startingDisks,
 		}
 	};
 
+	/**
+	 * @memberOf Table
+	 */
 	this.startCombatSegment = function() {
 		$this.debug("startCombatSegment");
 		this.memento.segment = $this.SEGMENT.COMBAT;
@@ -2086,6 +2466,9 @@ function Table(maxPlayers, maxPoints, activations, startingDisks,
 		}
 	};
 
+	/**
+	 * @memberOf Table
+	 */
 	this.startMissileSegment = function() {
 		$this.debug("startMissileSegment");
 
@@ -2119,6 +2502,9 @@ function Table(maxPlayers, maxPoints, activations, startingDisks,
 		}
 	};
 
+	/**
+	 * @memberOf Table
+	 */
 	this.startReinforcementSegment = function() {
 		$this.debug("startReinforcementSegment");
 		this.memento.segment = $this.SEGMENT.REINFORCEMENTS;
@@ -2150,6 +2536,9 @@ function Table(maxPlayers, maxPoints, activations, startingDisks,
 		}
 	};
 
+	/**
+	 * @memberOf Table
+	 */
 	this.startRemoveCountersSegment = function() {
 		$this.debug("startRemoveCountersSegment");
 		this.memento.segment = $this.SEGMENT.REMOVE_COUNTERS;
@@ -2195,7 +2584,7 @@ function Table(maxPlayers, maxPoints, activations, startingDisks,
 	};
 
 	/**
-	 * 
+	 * @memberOf Table
 	 */
 	this.stringify = function(excludedKeys) {
 		return JSON.stringify($this, function(key, value) {
@@ -2212,36 +2601,6 @@ function Table(maxPlayers, maxPoints, activations, startingDisks,
 			return value;
 
 		});
-	};
-
-	this.restoreMemento = function(memento) {
-		$this.memento = memento;
-	};
-
-	/**
-	 * @param {Object}
-	 *            table
-	 * @return {number} flag indicating success or error code
-	 */
-	this.restore = function(table) {
-		// $this.debug('Table.update');
-		// $this.debug(JSON.stringify(table));
-
-		if (table === undefined) {
-			return -1;
-		}
-		if (table === null) {
-			return -2;
-		}
-
-		// future proof
-		Object.keys(table).forEach(function(key) {
-			$this[key] = table[key];
-		});
-
-		// $this.restoreMemento(table.memento);
-
-		return 0;
 	};
 
 	// record table creation command

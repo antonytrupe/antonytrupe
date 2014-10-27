@@ -11,7 +11,7 @@ function Main() {
 		var table = new Table(2, 10, 1, 1, 1, "", "");
 		window['table'] = table;
 		table.placeStagingDisks();
-		table.id = 1;
+		table.id = "tutorialOne";
 
 		var api = new API({
 			'offline' : true
@@ -40,7 +40,7 @@ function Main() {
 			// get the bot's disk
 			api.getDisk("Grugs", [ function(result) {
 				console.log('Main.setupupBot getDisk Grugs');
-				// console.log(result);
+				console.log(result);
 				// give the ai a disk
 				var diskNumber = bot.addDisk(result.disk);
 
