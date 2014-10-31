@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src/main/webapp"/>
-	<classpathentry kind="src" path="src/main/javascript"/>
+	<classpathentry excluding="com/antonytrupe/tend/*" kind="src" path="src/main/javascript"/>
 	<classpathentry kind="con" path="org.eclipse.wst.jsdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="con" path="org.eclipse.wst.jsdt.launching.WebProject">
 		<attributes>

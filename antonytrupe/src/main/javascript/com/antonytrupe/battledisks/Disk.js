@@ -1,8 +1,35 @@
 /**
+ * @param name
+ * @param type
+ * @param attack
+ * @param defense
+ * @param toughness
+ * @param movement
+ * @param wounds
+ * @param flying
+ * @param swashbuckler
+ * @param archer
+ * @param arrows
+ * @param bolts
+ * @param fireballs
+ * @param boulders
+ * @param missileImmunity
+ * @param firstblow
+ * @param spellcaster
+ * @param limit
+ * @param cost
+ * @param faction
+ * @param alignment
+ * @param diameter
+ * @param description
+ * @param price
  * @constructor
+ * @class
  */
-function Disk(name, type, attack, defense, toughness, movement, wounds, flying, swashbuckler, archer, arrows, bolts, fireballs, boulders, missileImmunity,
-		firstblow, spellcaster, limit, cost, faction, alignment, diameter, description, price) {
+function Disk(name, type, attack, defense, toughness, movement, wounds, flying,
+		swashbuckler, archer, arrows, bolts, fireballs, boulders,
+		missileImmunity, firstblow, spellcaster, limit, cost, faction,
+		alignment, diameter, description, price) {
 	"use strict";
 	var $this = this;
 	$this.name = name;

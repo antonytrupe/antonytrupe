@@ -1,6 +1,6 @@
 /**
  * @constructor
- * @param {?string=}
+ * @param {string}
  *            name
  */
 function Player(name) {
@@ -31,13 +31,12 @@ function Player(name) {
 	this.armies = {};
 	this.cart = {};
 
-	// this.activeTables = {};
-
 	/**
 	 * @param {Disk}
 	 *            disk
-	 * @param {Point=}
+	 * @param {Point}
 	 *            location
+	 * @return
 	 */
 	this.addDisk = function(disk, location) {
 
@@ -60,7 +59,7 @@ function Player(name) {
 	 *            armyName
 	 * @param {number}
 	 *            diskNumber
-	 * @param {Point=}
+	 * @param {Point}
 	 *            location
 	 */
 	this.addDiskToArmy = function(armyName, diskNumber, location) {
@@ -209,8 +208,9 @@ function Player(name) {
 	/**
 	 * @param {number}
 	 *            diskNumber
-	 * @param {string=}
+	 * @param {string}
 	 *            armyName
+	 * @return
 	 */
 	this.getDiskInfo = function(diskNumber, armyName) {
 		// console.log('Player.getDiskInfo');
@@ -269,6 +269,7 @@ function Player(name) {
 	};
 
 	/**
+	 * @param message
 	 * @private
 	 */
 	this.debug = function(message) {

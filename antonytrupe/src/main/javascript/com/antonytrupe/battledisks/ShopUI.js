@@ -1,5 +1,6 @@
 /**
  * @constructor
+ * @class
  * @extends UI
  * @param {Table}
  *            table
@@ -48,13 +49,17 @@ function ShopUI(api, table, player) {
 		return false;
 	};
 
-	$(this.container).mousedown(function(event) {
-		$this.mouseDownHandler($this.getTableLocation(event.pageX, event.pageY), event.which, event);
-	});
+	$(this.container).mousedown(
+			function(event) {
+				$this.mouseDownHandler($this.getTableLocation(event.pageX,
+						event.pageY), event.which, event);
+			});
 
-	$(this.container).mouseup(function(v) {
-		$this.mouseUpHandler($this.getTableLocation(v.pageX, v.pageY), v.which);
-	});
+	$(this.container).mouseup(
+			function(v) {
+				$this.mouseUpHandler($this.getTableLocation(v.pageX, v.pageY),
+						v.which);
+			});
 
 	$(this.container).bind("contextmenu", function(v) {
 		return false;
@@ -112,7 +117,9 @@ function ShopUI(api, table, player) {
 		$("#applicationVersion").text(info.applicationVersion);
 		var u = new Date(info.uploadDate);
 		$("#uploadDate").text(
-				u.getFullYear() + "." + (u.getMonth() + 1) + "." + u.getDate() + " " + u.getHours() + ":" + u.getMinutes() + ":" + u.getSeconds() + "GMT");
+				u.getFullYear() + "." + (u.getMonth() + 1) + "." + u.getDate()
+						+ " " + u.getHours() + ":" + u.getMinutes() + ":"
+						+ u.getSeconds() + "GMT");
 	};
 
 	this.init = function() {
@@ -264,7 +271,8 @@ function ShopUI(api, table, player) {
 		// if a disk is selected
 		if ($this.selectedDisk !== null) {
 
-			if (Object.keys($this.selectedDisks).indexOf($this.table.getDiskInfo($this.selectedDisk).disk.name) === -1) {
+			if (Object.keys($this.selectedDisks).indexOf(
+					$this.table.getDiskInfo($this.selectedDisk).disk.name) === -1) {
 				$this.selectedDisks[this.table.getDiskInfo($this.selectedDisk).disk.name] = {
 					"count" : 0,
 					"disk" : $this.table.getDiskInfo($this.selectedDisk).disk
@@ -281,8 +289,10 @@ function ShopUI(api, table, player) {
 				// subtract one of this disk
 				$this.selectedDisks[$this.table.getDiskInfo($this.selectedDisk).disk.name].count--;
 
-				if ($this.selectedDisks[$this.table.getDiskInfo($this.selectedDisk).disk.name].count <= 0) {
-					delete $this.selectedDisks[$this.table.getDiskInfo($this.selectedDisk).disk.name];
+				if ($this.selectedDisks[$this.table
+						.getDiskInfo($this.selectedDisk).disk.name].count <= 0) {
+					delete $this.selectedDisks[$this.table
+							.getDiskInfo($this.selectedDisk).disk.name];
 					$this.draw();
 				}
 			}
@@ -304,7 +314,8 @@ function ShopUI(api, table, player) {
 
 		if ($this.selectedDisk != null) {
 			// console.log('selectedDisk != null');
-			$this.table.getDiskInfo($this.selectedDisk).mementoInfo.location = $this.getTableLocation(screenLocation.x, screenLocation.y);
+			$this.table.getDiskInfo($this.selectedDisk).mementoInfo.location = $this
+					.getTableLocation(screenLocation.x, screenLocation.y);
 			$this.draw();
 		}
 
@@ -380,21 +391,22 @@ function ShopUI(api, table, player) {
 		// console.log('ShopUI.selectDisk');
 		var clickedDisk = null;
 
-		$.each($this.table.getDiskNumbers(),
-				function(diskNumber) {
-					var diskInfo = $this.table.getDiskInfo(diskNumber);
-					// check to see if the clicked point is inside the disk
-					// console.log(i);
-					// console.log(dp);
-					var distance = Math.sqrt(Math.pow(diskInfo.mementoInfo.location.x - tablePoint.x, 2)
-							+ Math.pow(diskInfo.mementoInfo.location.y - tablePoint.y, 2));
-					// console.log(distance);
-					if (distance <= diskInfo.disk.diameter / 2) {
-						// add the disk to the clickedDisks object
-						clickedDisk = diskNumber;
-						return false;
-					}
-				});
+		$.each($this.table.getDiskNumbers(), function(diskNumber) {
+			var diskInfo = $this.table.getDiskInfo(diskNumber);
+			// check to see if the clicked point is inside the disk
+			// console.log(i);
+			// console.log(dp);
+			var distance = Math.sqrt(Math.pow(diskInfo.mementoInfo.location.x
+					- tablePoint.x, 2)
+					+ Math.pow(diskInfo.mementoInfo.location.y - tablePoint.y,
+							2));
+			// console.log(distance);
+			if (distance <= diskInfo.disk.diameter / 2) {
+				// add the disk to the clickedDisks object
+				clickedDisk = diskNumber;
+				return false;
+			}
+		});
 
 		// console.log(clickedDisk);
 
@@ -411,11 +423,13 @@ function ShopUI(api, table, player) {
 
 			// profile
 			if ($("#profile").length) {
-				$("#profile").attr("href", $("#profile").attr("href").replace(toRemove, ""));
+				$("#profile").attr("href",
+						$("#profile").attr("href").replace(toRemove, ""));
 			}
 
 			// new_table
-			$(".new_table").attr("href", $(".new_table").attr("href").replace(toRemove, ""));
+			$(".new_table").attr("href",
+					$(".new_table").attr("href").replace(toRemove, ""));
 		}
 	};
 }

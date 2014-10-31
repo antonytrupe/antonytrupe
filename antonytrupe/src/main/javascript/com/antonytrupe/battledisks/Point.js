@@ -1,5 +1,7 @@
 /**
- * @constructor
+ * @param x
+ * @param y
+ * @class
  */
 function Point(x, y) {
 	// "use strict";

@@ -1,19 +1,20 @@
 /**
- * @param {number=}
+ * @param {number}
  *            maxPlayers
- * @param {number=}
+ * @param {number}
  *            maxPoints
- * @param {number=}
+ * @param {number}
  *            activations
- * @param {number=}
+ * @param {number}
  *            startingDisks
- * @param {number=}
+ * @param {number}
  *            reinforcements
- * @param {string=}
+ * @param {string}
  *            alignmentRestriction
- * @param {string=}
+ * @param {string}
  *            scenario
  * @constructor holds states
+ * @class
  */
 function Table(maxPlayers, maxPoints, activations, startingDisks,
 		reinforcements, alignmentRestriction, scenario) {
@@ -127,6 +128,7 @@ function Table(maxPlayers, maxPoints, activations, startingDisks,
 	/**
 	 * this doesn't change
 	 * 
+	 * @type {Array.<{disk,location}>}
 	 * @memberOf Table
 	 */
 	this.stagingDisks = [];
@@ -328,6 +330,8 @@ function Table(maxPlayers, maxPoints, activations, startingDisks,
 
 	/**
 	 * returns negative numbers for error codes, and 0 for success
+	 * 
+	 * @param attacker
 	 * 
 	 * @returns {number}
 	 * @memberOf Table
@@ -788,6 +792,7 @@ function Table(maxPlayers, maxPoints, activations, startingDisks,
 	};
 
 	/**
+	 * @param message
 	 * @private
 	 * @memberOf Table
 	 */
@@ -919,6 +924,9 @@ function Table(maxPlayers, maxPoints, activations, startingDisks,
 	};
 
 	/**
+	 * @param min
+	 * @param max
+	 * @returns {number}
 	 * @memberOf Table
 	 */
 	function getRandomInt(min, max) {
@@ -926,6 +934,9 @@ function Table(maxPlayers, maxPoints, activations, startingDisks,
 	}
 
 	/**
+	 * @param min
+	 * @param max
+	 * @returns {number}
 	 * @memberOf Table
 	 */
 	function getRandomFloat(min, max) {
@@ -954,7 +965,7 @@ function Table(maxPlayers, maxPoints, activations, startingDisks,
 
 		if (!$this.canMissile(playerName, diskNumber, missile.name)) {
 			$this.debug('cannot fireMissiles');
-			return false;
+			return;
 		}
 
 		var diskInfo = $this.getDiskInfo(diskNumber);
@@ -1303,7 +1314,7 @@ function Table(maxPlayers, maxPoints, activations, startingDisks,
 	};
 
 	/**
-	 * @param {string=}
+	 * @param {string}
 	 *            playerName
 	 * @returns {string}
 	 * @memberOf Table
@@ -1458,6 +1469,8 @@ function Table(maxPlayers, maxPoints, activations, startingDisks,
 	};
 
 	/**
+	 * @param playerName
+	 * @returns {number}
 	 * @memberOf Table
 	 */
 	this.getReinforcementCount = function(playerName) {
@@ -1477,6 +1490,7 @@ function Table(maxPlayers, maxPoints, activations, startingDisks,
 	};
 
 	/**
+	 * @returns {number}
 	 * @memberOf Table
 	 */
 	this.getRound = function() {
@@ -1484,6 +1498,7 @@ function Table(maxPlayers, maxPoints, activations, startingDisks,
 	};
 
 	/**
+	 * @returns {number}
 	 * @memberOf Table
 	 */
 	this.getSegment = function() {
@@ -1491,6 +1506,8 @@ function Table(maxPlayers, maxPoints, activations, startingDisks,
 	};
 
 	/**
+	 * @param playerName
+	 * @returns {{disk,location}}
 	 * @memberOf Table
 	 */
 	this.getStagingDisk = function(playerName) {
@@ -1498,6 +1515,9 @@ function Table(maxPlayers, maxPoints, activations, startingDisks,
 	};
 
 	/**
+	 * @param diskNumber
+	 * @param stacks
+	 * @returns {number}
 	 * @memberOf Table
 	 */
 	this.getTier = function(diskNumber, stacks) {
@@ -1568,6 +1588,8 @@ function Table(maxPlayers, maxPoints, activations, startingDisks,
 	};
 
 	/**
+	 * @param playerName
+	 * @returns {Array}
 	 * @memberOf Table
 	 */
 	this.getUnactivatedDisks = function(playerName) {
@@ -1587,6 +1609,7 @@ function Table(maxPlayers, maxPoints, activations, startingDisks,
 	};
 
 	/**
+	 * @returns {Array}
 	 * @memberOf Table
 	 */
 	this.getWinners = function() {
@@ -1625,6 +1648,8 @@ function Table(maxPlayers, maxPoints, activations, startingDisks,
 	};
 
 	/**
+	 * @param playerName
+	 * @returns {boolean}
 	 * @memberOf Table
 	 */
 	this.hasUnactivatedArcherDisks = function(playerName) {
@@ -1635,6 +1660,9 @@ function Table(maxPlayers, maxPoints, activations, startingDisks,
 
 	/**
 	 * check activation and pinned
+	 * 
+	 * @param playerName
+	 * @returns {boolean}
 	 * 
 	 * @memberOf Table
 	 */
@@ -1654,6 +1682,9 @@ function Table(maxPlayers, maxPoints, activations, startingDisks,
 	};
 
 	/**
+	 * @param one
+	 * @param two
+	 * @returns {boolean}
 	 * @memberOf Table
 	 */
 	this.isAbove = function(one, two) {
@@ -1699,10 +1730,23 @@ function Table(maxPlayers, maxPoints, activations, startingDisks,
 	};
 
 	/**
-	 * @param {{mementoInfo:{location:Point},disk:Disk}}
+	 * @param {object}
 	 *            one
-	 * @param {{mementoInfo:{location:Point},disk:Disk}}
+	 * @param {object}
+	 *            one.mementoInfo
+	 * @param {Point}
+	 *            one.mementoInfo.location
+	 * @param {Disk}
+	 *            one.disk
+	 * @param {object}
 	 *            two
+	 * @param {object}
+	 *            two.mementoInfo
+	 * @param {Point}
+	 *            two.mementoInfo.location
+	 * @param {Disk}
+	 *            two.disk
+	 * @returns {boolean}
 	 * @memberOf Table
 	 */
 	this.isOverLapping = function(one, two) {
@@ -1725,6 +1769,8 @@ function Table(maxPlayers, maxPoints, activations, startingDisks,
 	};
 
 	/**
+	 * @param diskNumber
+	 * @returns {boolean}
 	 * @memberOf Table
 	 */
 	this.isPinnedByCreature = function(diskNumber) {
@@ -1742,6 +1788,8 @@ function Table(maxPlayers, maxPoints, activations, startingDisks,
 	};
 
 	/**
+	 * @param diskNumber
+	 * @returns {boolean}
 	 * @memberOf Table
 	 */
 	this.isPinnedByEnemy = function(diskNumber) {
@@ -1757,6 +1805,8 @@ function Table(maxPlayers, maxPoints, activations, startingDisks,
 	};
 
 	/**
+	 * @param diskNumber
+	 * @returns {boolean}
 	 * @memberOf Table
 	 */
 	this.isPinningEnemy = function(diskNumber) {
@@ -1773,6 +1823,9 @@ function Table(maxPlayers, maxPoints, activations, startingDisks,
 	};
 
 	/**
+	 * @param player
+	 * @param armyName
+	 * @returns {{success:Boolean,messages:Array}}
 	 * @memberOf Table
 	 */
 	this.join = function(player, armyName) {
@@ -1838,6 +1891,7 @@ function Table(maxPlayers, maxPoints, activations, startingDisks,
 	 *            movedDiskNumber
 	 * @param {Point}
 	 *            tableClickPoint
+	 * @returns
 	 * @memberOf Table
 	 */
 	this.move = function(playerName, movedDiskNumber, tableClickPoint) {
@@ -1945,6 +1999,7 @@ function Table(maxPlayers, maxPoints, activations, startingDisks,
 	/**
 	 * returns the tier we just resolved
 	 * 
+	 * @returns {number}
 	 * @memberOf Table
 	 */
 	this.nextFight = function() {
@@ -2011,6 +2066,8 @@ function Table(maxPlayers, maxPoints, activations, startingDisks,
 	/**
 	 * place the player's reinforcements on the table and remove those disks
 	 * from their reinforcement stack
+	 * 
+	 * @param playerName
 	 * 
 	 * @memberOf Table
 	 */
@@ -2119,12 +2176,12 @@ function Table(maxPlayers, maxPoints, activations, startingDisks,
 			y = Math.sin(Math.PI * 2 / $this.maxPlayers * i) * stagingDiameter;
 
 			$this.stagingDisks.push({
-				disk : new Disk(name, type, attack, defense, toughness,
+				"disk" : new Disk(name, type, attack, defense, toughness,
 						movement, wounds, flying, swashbuckler, archer, arrows,
 						bolts, fireballs, boulders, missileImmunity, firstblow,
 						spellcaster, limit, cost, faction, alignment, diameter,
 						description, price),
-				location : new Point(x, y)
+				"location" : new Point(x, y)
 			});
 		}
 	};
@@ -2156,7 +2213,7 @@ function Table(maxPlayers, maxPoints, activations, startingDisks,
 	/**
 	 * @param {number}
 	 *            diskNumber
-	 * @param {Boolean=}
+	 * @param {boolean}
 	 *            disregardMemento if true, then does not create a memento. if
 	 *            false, creates memento
 	 * @memberOf Table
@@ -2260,6 +2317,7 @@ function Table(maxPlayers, maxPoints, activations, startingDisks,
 	};
 
 	/**
+	 * @param memento
 	 * @memberOf Table
 	 */
 	this.restoreMemento = function(memento) {
@@ -2296,12 +2354,16 @@ function Table(maxPlayers, maxPoints, activations, startingDisks,
 	/**
 	 * move disks, but keep them in the reinforcement stack
 	 * 
+	 * @param playerName
+	 * @param diskNumber
+	 * @param location
+	 * 
 	 * @memberOf Table
 	 */
 	this.saveReinforcement = function(playerName, diskNumber, location) {
 		// validation
 		if (!this.canReinforceTo(playerName, diskNumber, location)) {
-			return false;
+			return;
 		}
 
 		$this.slide(location, diskNumber);
@@ -2584,6 +2646,8 @@ function Table(maxPlayers, maxPoints, activations, startingDisks,
 	};
 
 	/**
+	 * @param excludedKeys
+	 * @returns {string}
 	 * @memberOf Table
 	 */
 	this.stringify = function(excludedKeys) {

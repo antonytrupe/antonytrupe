@@ -9,10 +9,10 @@ function AI(table, player) {
 	"use strict";
 
 	/**
-	 * @typedef {Object} Node
-	 * @property parent
+	 * @typedef {object} Node
+	 * @property {Node} parent
 	 * @property value
-	 * @property children
+	 * @property {Array.<Node>} children
 	 * @property type
 	 * @property diskNumber
 	 * @property diskCount
@@ -41,6 +41,7 @@ function AI(table, player) {
 	var MOVEMENT_BONUS = 0;
 
 	/**
+	 * @private
 	 * @memberOf AI
 	 */
 	var DEFENDER_DIED_BONUS = 0;
@@ -63,6 +64,7 @@ function AI(table, player) {
 	});
 
 	/**
+	 * @type {Node}
 	 * @memberOf AI
 	 */
 	var tree = {
@@ -72,6 +74,7 @@ function AI(table, player) {
 	/**
 	 * past path cost
 	 * 
+	 * @return {number}
 	 * @memberOf AI
 	 */
 	function g() {
@@ -81,6 +84,9 @@ function AI(table, player) {
 	/**
 	 * heuristic, future path cost, --> future value, estimate, best case
 	 * 
+	 * @param attackerInfo
+	 * @param defenderInfo
+	 * @return
 	 * @memberOf AI
 	 */
 	function h(attackerInfo, defenderInfo) {
@@ -91,6 +97,9 @@ function AI(table, player) {
 	}
 
 	/**
+	 * @param attackerInfo
+	 * @param defenderInfo
+	 * @return
 	 * @memberOf AI
 	 */
 	function getDefenderDamageBonus(attackerInfo, defenderInfo) {
@@ -108,6 +117,9 @@ function AI(table, player) {
 	}
 
 	/**
+	 * @param attackerInfo
+	 * @param defenderInfo
+	 * @return
 	 * @memberOf AI
 	 */
 	function getAttackerDamagePenalty(attackerInfo, defenderInfo) {
@@ -126,6 +138,7 @@ function AI(table, player) {
 	/**
 	 * @param attackerInfo
 	 * @param defenderInfo
+	 * @return
 	 * @memberOf AI
 	 */
 	function getMovementPoints(attackerInfo, defenderInfo) {
@@ -143,7 +156,6 @@ function AI(table, player) {
 	/**
 	 * @param {Node}
 	 *            node
-	 * @param value
 	 * @memberOf AI
 	 */
 	function addToFringe(node) {
@@ -157,7 +169,7 @@ function AI(table, player) {
 	}
 
 	/**
-	 * @param {?Object}
+	 * @param {Object}
 	 *            parent - null if creating the root node
 	 * @param {string}
 	 *            type - root, min, max, expectimax
@@ -229,31 +241,36 @@ function AI(table, player) {
 		}
 		console.log(tree);
 
-		var solution = getSolution();
-		return solution;
+		// var solution = getSolution();
+		// return solution;
 	};
 
 	/**
 	 * return them in lowest value first
 	 * 
+	 * @return
 	 * @memberOf AI
 	 */
 	function getFriendlyDisks() {
 
-		return $this.table.getPlayerInfo($this.table.getCurrentPlayer())
-				.getDiskNumbers().filter(
+		return $this.table
+				.getPlayerInfo($this.table.getCurrentPlayer())
+				.getDiskNumbers()
+				.filter(
 						function(diskNumber) {
 							return $this.table.canActivate($this.table
 									.getCurrentPlayer(), diskNumber);
-						}).sort(
+						})
+				.sort(
 						function(a, b) {
 
-							$this.table.getDiskInfo(a).disk.cost < $this.table
+							return $this.table.getDiskInfo(a).disk.cost < $this.table
 									.getDiskInfo(b).disk.cost;
 						});
 	}
 
 	/**
+	 * @param friendlyPlayer
 	 * @memberOf AI
 	 */
 	function getEnemyDisks(friendlyPlayer) {
@@ -271,25 +288,28 @@ function AI(table, player) {
 	 * @memberOf AI
 	 */
 	this.execute = function() {
+		// TODO execute
 	};
 
 	/**
 	 * @memberOf AI
 	 */
 	function loopOverFriendlyDefenders() {
+		// TODO loopOverFriendlyDefenders
 	}
 
 	/**
 	 * @memberOf AI
 	 */
 	function loopOverEnemyAttackers() {
+		// TODO loopOverEnemyAttackers
 	}
 
 	/**
-	 * @param {number[]}
-	 *            diskNumbers - array of friendly disk numbers
+	 * @param {Array}
+	 *            friendlyDiskNumbers - array of friendly disk numbers
 	 * @param {number}
-	 *            diskCounter
+	 *            diskCount
 	 * @param {Node}
 	 *            parent
 	 * @memberOf AI
@@ -361,14 +381,11 @@ function AI(table, player) {
 									$this.table.getDiskInfo(enemyDiskNumber).mementoInfo.location);
 
 					// these are our nodes
-					// parent, attackerDiskNumber, defenderDiskNumber, memento,
-					// value
+					// parent, type, value, diskNumber, diskCount, memento
 					var node = addToTree(attackerParentNode, "enemy:defender",
-							value, {
-								"diskNumber" : enemyDiskNumber
-							});
+							value, enemyDiskNumber, null, $this.table.memento);
 
-					addToFringe(node, value);
+					addToFringe(node);
 
 				});
 

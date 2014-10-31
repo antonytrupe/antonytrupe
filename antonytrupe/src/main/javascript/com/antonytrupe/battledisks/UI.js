@@ -1,5 +1,7 @@
 /**
  * @constructor
+ * @param {string}
+ *            container
  */
 function UI(container) {
 	"use strict";
@@ -8,7 +10,7 @@ function UI(container) {
 	this.container = container;
 
 	// string
-	$this.currentPlayer = null;
+	this.currentPlayer = null;
 
 	// 0 to disable
 	this.edgeScrollWidth = 0;
@@ -329,7 +331,9 @@ function UI(container) {
 	 *            x
 	 * @param {number}
 	 *            y
-	 * @param {Object=}
+	 * @param {number}
+	 *            angle
+	 * @param {object}
 	 *            options
 	 */
 	this.print = function(ctx, t, x, y, angle, options) {

@@ -1,5 +1,5 @@
 /**
- * @constructor
+ * @class
  * @extends UI
  * @param {API}
  *            api
@@ -55,13 +55,17 @@ function ProfileUI(api, player, selectedArmyName) {
 	});
 
 	// attach the mousedown handler
-	$($this.container).mousedown(function(v) {
-		$this.mouseDownHandler($this.getTableLocation(v.pageX, v.pageY), v.which, v);
-	});
+	$($this.container).mousedown(
+			function(v) {
+				$this.mouseDownHandler(
+						$this.getTableLocation(v.pageX, v.pageY), v.which, v);
+			});
 
-	$($this.container).mouseup(function(v) {
-		$this.mouseUpHandler($this.getTableLocation(v.pageX, v.pageY), v.which);
-	});
+	$($this.container).mouseup(
+			function(v) {
+				$this.mouseUpHandler($this.getTableLocation(v.pageX, v.pageY),
+						v.which);
+			});
 
 	$($this.container).mousemove(function(v) {
 		$this._mouseMoveHandler(v);
@@ -88,24 +92,34 @@ function ProfileUI(api, player, selectedArmyName) {
 
 		// console.log($this.player.name);
 
-		if (typeof $this.player.name === "undefined" || $this.player.name === "") {
+		if (typeof $this.player.name === "undefined"
+				|| $this.player.name === "") {
 			var list = $("#log_in").clone();
 			list.text("Log in");
 			$("#directions").append(list);
 		} else {
-			$("#directions").append($("<div>").append("Click and drag to move your disks around. "));
+			$("#directions").append(
+					$("<div>").append(
+							"Click and drag to move your disks around. "));
 
-			$("#directions").append($("<div>").append("Left click adds the disk to the current army. "));
+			$("#directions").append(
+					$("<div>").append(
+							"Left click adds the disk to the current army. "));
 
-			$("#directions").append($("<div>").append("Right click removes the disk from the current army. "));
+			$("#directions")
+					.append(
+							$("<div>")
+									.append(
+											"Right click removes the disk from the current army. "));
 
-			$("#directions").append($("<div>").append("Once you have saved an army, ")
-			//
-			.append($(".table_list").clone().text("join a game"))
-			//
-			.append(" or ")
-			//
-			.append($(".new_table").clone().text("create a new game.")));
+			$("#directions")
+					.append($("<div>").append("Once you have saved an army, ")
+					//
+					.append($(".table_list").clone().text("join a game"))
+					//
+					.append(" or ")
+					//
+					.append($(".new_table").clone().text("create a new game.")));
 		}
 	};
 
@@ -191,8 +205,10 @@ function ProfileUI(api, player, selectedArmyName) {
 
 		var tableHeight = bottom - top;
 
-		var xRatio = (tableWidth * PIXELS_PER_INCH) / $($this.container).width();
-		var yRatio = (tableHeight * PIXELS_PER_INCH) / $($this.container).height();
+		var xRatio = (tableWidth * PIXELS_PER_INCH)
+				/ $($this.container).width();
+		var yRatio = (tableHeight * PIXELS_PER_INCH)
+				/ $($this.container).height();
 
 		return Math.max(xRatio, yRatio);
 
@@ -212,14 +228,17 @@ function ProfileUI(api, player, selectedArmyName) {
 
 		$this.listTables($this.player.activeTables);
 
-		$this.player.getDiskNumbers().reverse().forEach(function(diskNumber) {
-			// console.log(diskNumber);
+		$this.player.getDiskNumbers().reverse().forEach(
+				function(diskNumber) {
+					// console.log(diskNumber);
 
-			var info = $this.player.getDiskInfo(diskNumber, $this.selectedArmyName);
-			// console.log(info);
+					var info = $this.player.getDiskInfo(diskNumber,
+							$this.selectedArmyName);
+					// console.log(info);
 
-			$this._drawDisk(info.disk, info.location, 'rgba(32,32,32,.8)');
-		});
+					$this._drawDisk(info.disk, info.location,
+							'rgba(32,32,32,.8)');
+				});
 
 		// place the disks that are in the selected army
 
@@ -232,7 +251,9 @@ function ProfileUI(api, player, selectedArmyName) {
 			var title = "";
 
 			var a = $("<a>").append(
-					table.id + ": " + Object.keys(table.memento.players).length + "/" + table.maxPlayers + " players, " + table.maxPoints + " point armies");
+					table.id + ": " + Object.keys(table.memento.players).length
+							+ "/" + table.maxPlayers + " players, "
+							+ table.maxPoints + " point armies");
 			a.append(", " + table.alignmentRestriction);
 			// a.append(JSON.stringify(v.players));
 			a.attr('href', './table.html#!' + table.id);
@@ -257,11 +278,15 @@ function ProfileUI(api, player, selectedArmyName) {
 
 		});
 
-		$("#myActiveTables ul").append($("<li>").append($(".table_list").first().clone().text("Join a game")));
+		$("#myActiveTables ul").append(
+				$("<li>").append(
+						$(".table_list").first().clone().text("Join a game")));
 		//
 
 		//
-		$("#myActiveTables ul").append($("<li>").append($(".new_table").first().clone().text("Create a game")));
+		$("#myActiveTables ul").append(
+				$("<li>").append(
+						$(".new_table").first().clone().text("Create a game")));
 
 	};
 
@@ -291,25 +316,24 @@ function ProfileUI(api, player, selectedArmyName) {
 			// for ( var i = 0; i < armies.length; i++) {
 			// var armyName = armies[i];
 			var option = $("<option>");
-			//var a = $("<a>");
+			// var a = $("<a>");
 			option.text(armyName);
-			//a.attr("href", "#" + armyName);
+			// a.attr("href", "#" + armyName);
 			// a.attr("id", armyName);
-			//li.append(a);
-			//var d = $("<a>");
-			//d.text("[-]");
-			//d.attr("href", "");
+			// li.append(a);
+			// var d = $("<a>");
+			// d.text("[-]");
+			// d.attr("href", "");
 
-			
-			//d.click(function(e) {
+			// d.click(function(e) {
 
-				//e.preventDefault();
-				// console.log("delete army " + armyName);
-//				$this.deleteArmy(armyName);
+			// e.preventDefault();
+			// console.log("delete army " + armyName);
+			// $this.deleteArmy(armyName);
 
-	//			return false;
-		//	});
-			//li.append(d);
+			// return false;
+			// });
+			// li.append(d);
 			$("#armies").append(option);
 		});
 	};
@@ -326,104 +350,119 @@ function ProfileUI(api, player, selectedArmyName) {
 		// console.log($this.player.armies);
 		// console.log($this.player.armies[$this.selectedArmyName]);
 
-		if ($this.selectedArmyName === null || $this.selectedArmyName === "" || $this.player.armies[$this.selectedArmyName] === undefined
+		if ($this.selectedArmyName === null || $this.selectedArmyName === ""
+				|| $this.player.armies[$this.selectedArmyName] === undefined
 				|| $this.player.armies[$this.selectedArmyName] === null) {
 			return;
 		}
 
 		$("#armyName").val($this.selectedArmyName);
 
-		$.each($this.player.armies[$this.selectedArmyName], function(i) {
-			// armyDisks
-			// console.log(i);
-			var armyDiskInfo = $this.player.armies[$this.selectedArmyName][i];
-			// console.log(armyDiskInfo);
+		$
+				.each(
+						$this.player.armies[$this.selectedArmyName],
+						function(i) {
+							// armyDisks
+							// console.log(i);
+							var armyDiskInfo = $this.player.armies[$this.selectedArmyName][i];
+							// console.log(armyDiskInfo);
 
-			var diskInfo = $this.player.getDiskInfo(armyDiskInfo.diskNumber);
+							var diskInfo = $this.player
+									.getDiskInfo(armyDiskInfo.diskNumber);
 
-			var li = $("<li>");
-			var name = $("<span>").text(diskInfo.disk.name);
+							var li = $("<li>");
+							var name = $("<span>").text(diskInfo.disk.name);
 
-			name.hover(function() {
-			});
+							name.hover(function() {
+								// TODO
+							});
 
-			li.append(name);
+							li.append(name);
 
-			// move up
-			var up = $("<a>");
-			up.html("[&uarr;]");
-			if (i !== 0) {
-				up.attr('title', 'move up');
-				up.attr("href", "");
-				up.click(function(e) {
-					e.preventDefault();
-					var temp = $this.player.armies[$this.selectedArmyName][i];
-					$this.player.armies[$this.selectedArmyName][i] = $this.player.armies[$this.selectedArmyName][i - 1];
-					$this.player.armies[$this.selectedArmyName][i - 1] = temp;
+							// move up
+							var up = $("<a>");
+							up.html("[&uarr;]");
+							if (i !== 0) {
+								up.attr('title', 'move up');
+								up.attr("href", "");
+								up
+										.click(function(e) {
+											e.preventDefault();
+											var temp = $this.player.armies[$this.selectedArmyName][i];
+											$this.player.armies[$this.selectedArmyName][i] = $this.player.armies[$this.selectedArmyName][i - 1];
+											$this.player.armies[$this.selectedArmyName][i - 1] = temp;
 
-					$this.showArmyInfo();
-					$this.draw();
-					return false;
-				});
-			}
-			li.prepend(up);
+											$this.showArmyInfo();
+											$this.draw();
+											return false;
+										});
+							}
+							li.prepend(up);
 
-			// move down
-			var down = $("<a>");
-			down.html("[&darr;]");
-			if (i !== Object.keys($this.player.armies[$this.selectedArmyName]).length - 1) {
-				down.attr('title', 'move down');
-				down.attr("href", "");
-				down.click(function(e) {
-					e.preventDefault();
-					var temp = $this.player.armies[$this.selectedArmyName][i];
-					$this.player.armies[$this.selectedArmyName][i] = $this.player.armies[$this.selectedArmyName][i + 1];
-					$this.player.armies[$this.selectedArmyName][i + 1] = temp;
+							// move down
+							var down = $("<a>");
+							down.html("[&darr;]");
+							if (i !== Object
+									.keys($this.player.armies[$this.selectedArmyName]).length - 1) {
+								down.attr('title', 'move down');
+								down.attr("href", "");
+								down
+										.click(function(e) {
+											e.preventDefault();
+											var temp = $this.player.armies[$this.selectedArmyName][i];
+											$this.player.armies[$this.selectedArmyName][i] = $this.player.armies[$this.selectedArmyName][i + 1];
+											$this.player.armies[$this.selectedArmyName][i + 1] = temp;
 
-					$this.showArmyInfo();
-					$this.draw();
-					return false;
-				});
-			}
-			li.prepend(down);
+											$this.showArmyInfo();
+											$this.draw();
+											return false;
+										});
+							}
+							li.prepend(down);
 
-			//
-			var remove = $("<a>");
-			remove.html("[-]");
-			remove.attr('title', 'remove');
-			remove.attr("href", "");
-			remove.click(function(e) {
-				e.preventDefault();
-				$this.player.removeDiskFromArmy($this.selectedArmyName, armyDiskInfo.diskNumber);
-				$this.showArmyInfo();
-				return false;
-			});
-			li.prepend(remove);
+							//
+							var remove = $("<a>");
+							remove.html("[-]");
+							remove.attr('title', 'remove');
+							remove.attr("href", "");
+							remove.click(function(e) {
+								e.preventDefault();
+								$this.player.removeDiskFromArmy(
+										$this.selectedArmyName,
+										armyDiskInfo.diskNumber);
+								$this.showArmyInfo();
+								return false;
+							});
+							li.prepend(remove);
 
-			$("#armyDisks").append(li);
-		});
+							$("#armyDisks").append(li);
+						});
 
 		var info = $this.player.getArmyInfo($this.selectedArmyName);
 
 		// update points
 		$(".points").text(String(info.points));
 
-		Object.keys(info.factions).forEach(function(faction) {
-			var p = info.factions[faction];
-			var tr = $("<tr>");
-			tr.append($("<td>").text(faction));
-			tr.append($("<td>").text(p));
-			tr.append($("<td>").text((p / info.points * 100).toFixed(0) + "%"));
-			// + " %" + (p / info.points * 100).toFixed(0));
-			$("#factions").append(tr);
-		});
+		Object.keys(info.factions).forEach(
+				function(faction) {
+					var p = info.factions[faction];
+					var tr = $("<tr>");
+					tr.append($("<td>").text(faction));
+					tr.append($("<td>").text(p));
+					tr.append($("<td>").text(
+							(p / info.points * 100).toFixed(0) + "%"));
+					// + " %" + (p / info.points * 100).toFixed(0));
+					$("#factions").append(tr);
+				});
 
-		Object.keys(info.alignments).forEach(function(alignment) {
-			var points = info.alignments[alignment];
-			var tr = $("<tr>");
-			tr.append($("<td>").text(alignment)).append($("<td>").text(points));
-			$("#alignments").append(tr);
-		});
+		Object.keys(info.alignments).forEach(
+				function(alignment) {
+					var points = info.alignments[alignment];
+					var tr = $("<tr>");
+					tr.append($("<td>").text(alignment)).append(
+							$("<td>").text(points));
+					$("#alignments").append(tr);
+				});
 	};
 
 	this.mouseDownHandler = function(tablePoint, which, event) {
@@ -435,16 +474,19 @@ function ProfileUI(api, player, selectedArmyName) {
 		$this.selectedDisk = $this.selectDisk(tablePoint);
 		// if this is a left mouse click and a disk is selected and the selected
 		// disk is not in the army
-		if ($this.selectedDisk !== null && which === 1 && $this.selectedArmyName !== null) {
+		if ($this.selectedDisk !== null && which === 1
+				&& $this.selectedArmyName !== null) {
 			// console.log(JSON.stringify($this.selectedDisk));
-			$this.player.addDiskToArmy($this.selectedArmyName, $this.selectedDisk);
+			$this.player.addDiskToArmy($this.selectedArmyName,
+					$this.selectedDisk);
 			// console.log(JSON.stringify($this.selectedDisk));
 		}
 		// if this is a right mouse click and a disk is selected and the
 		// selected disk is in the army
 		if ($this.selectedDisk !== null && which === 3) {
 			// console.log(JSON.stringify($this.selectedDisk));
-			$this.player.removeDiskFromArmy($this.selectedArmyName, $this.selectedDisk);
+			$this.player.removeDiskFromArmy($this.selectedArmyName,
+					$this.selectedDisk);
 			// console.log(JSON.stringify($this.selectedDisk));
 		}
 		// update the list of disks correctly
@@ -463,7 +505,8 @@ function ProfileUI(api, player, selectedArmyName) {
 
 		if ($this.mousedown && $this.selectedDisk !== null) {
 
-			$this.player.move($this.selectedDisk, $this.getTableLocation(event.pageX, event.pageY), $this.selectedArmyName);
+			$this.player.move($this.selectedDisk, $this.getTableLocation(
+					event.pageX, event.pageY), $this.selectedArmyName);
 
 			// $this.army[$this.selectedDisk.list][$this.selectedDisk.index].location
 			// = $this.getTableLocation(event.pageX, event.pageY);
@@ -492,11 +535,12 @@ function ProfileUI(api, player, selectedArmyName) {
 		var armyName = String($("#armyName").val());
 
 		// console.log(JSON.stringify($this.army));
-		$this.api.saveArmy(armyName, $this.player.armies[$this.selectedArmyName], function(result) {
-			$this.player.update(result.player);
-			$this.listArmies($this.player.getArmies());
-			window.location.hash = "#!" + armyName;
-		}, null);
+		$this.api.saveArmy(armyName,
+				$this.player.armies[$this.selectedArmyName], function(result) {
+					$this.player.update(result.player);
+					$this.listArmies($this.player.getArmies());
+					window.location.hash = "#!" + armyName;
+				}, null);
 	};
 
 	/**
@@ -531,11 +575,13 @@ function ProfileUI(api, player, selectedArmyName) {
 		 *            diskNumber
 		 */
 		function(diskNumber) {
-			var dp = $this.player.getDiskInfo(diskNumber, $this.selectedArmyName);
+			var dp = $this.player.getDiskInfo(diskNumber,
+					$this.selectedArmyName);
 			// check to see if the clicked point is inside the disk
 			// console.log(JSON.stringify(dp.location));
 			// console.log(JSON.stringify(mp));
-			var distance = Math.sqrt(Math.pow(dp.location.x - tablePoint.x, 2) + Math.pow(dp.location.y - tablePoint.y, 2));
+			var distance = Math.sqrt(Math.pow(dp.location.x - tablePoint.x, 2)
+					+ Math.pow(dp.location.y - tablePoint.y, 2));
 			// console.log(distance);
 			if (distance <= dp.disk.diameter / 2) {
 				// add the disk to the clickedDisks object
@@ -556,10 +602,12 @@ function ProfileUI(api, player, selectedArmyName) {
 			$("#log_in").text($this.player.name);
 
 			// new_table
-			$(".new_table").attr("href", $(".new_table").attr("href").replace(toRemove, ""));
+			$(".new_table").attr("href",
+					$(".new_table").attr("href").replace(toRemove, ""));
 
 			// shop
-			$("#shop").attr("href", $("#shop").attr("href").replace(toRemove, ""));
+			$("#shop").attr("href",
+					$("#shop").attr("href").replace(toRemove, ""));
 		}
 	};
 }

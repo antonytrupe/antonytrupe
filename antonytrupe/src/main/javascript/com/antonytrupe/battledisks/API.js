@@ -1,5 +1,7 @@
 /**
+ * @param options
  * @constructor
+ * @class
  */
 function API(options) {
 	"use strict";
@@ -21,6 +23,9 @@ function API(options) {
 
 	// console.log($this.offline);
 
+	/**
+	 * @constructor
+	 */
 	var RemoteAPI = function() {
 		"use strict";
 		// var $thisRemote = this;
@@ -30,7 +35,10 @@ function API(options) {
 		this.baseUrl = "/battledisks/";
 		this.apiUrl = this.baseUrl + "api";
 
-		var cancelPreviousRequests = function() {
+		/**
+		 * @memberOf RemoteAPI
+		 */
+		function cancelPreviousRequests  () {
 			return true;
 		};
 
@@ -55,12 +63,13 @@ function API(options) {
 		 * 
 		 * @param {Object}
 		 *            data
-		 * @param {Array.
-		 *            <function(Object)>} onSuccess
-		 * @param {Array.
-		 *            <function(Object)>} onError
+		 * @param {Array.<Function>}
+		 * onSuccess
+		 * @param {Array.<Function>} 
+		 * onError
+		 * @memberOf RemoteAPI
 		 */
-		var sendRequest = function(data, onSuccess, onError, options) {
+		function sendRequest (data, onSuccess, onError, options) {
 			"use strict";
 			// console.log('API.sendRequest');
 
@@ -88,7 +97,7 @@ function API(options) {
 					this.doOnError(result, onError);
 				}
 			});
-		};
+		}
 
 		this.getJWT = function(data, onSuccess, onError) {
 			sendRequest(data, onSuccess, onError);
@@ -108,7 +117,7 @@ function API(options) {
 			sendRequest(data, onSuccess, onError);
 		};
 
-		this.getDisk = function(diskName, onSuccess, onError) {
+		this.getDisk = function(diskName, onSuccess, onError ) {
 			var data = {
 				"action" : "GET_DISK",
 				"diskName" : diskName
@@ -119,8 +128,12 @@ function API(options) {
 	};
 	var remoteApi = new RemoteAPI();
 
+	/**
+	 * @constructor
+	 */
 	var LocalAPI = function() {
 		this.getTable = function() {
+			// TODO
 		};
 
 		this.getDisk = function(diskName) {
@@ -300,7 +313,7 @@ function API(options) {
 			}, onSuccess);
 		}
 		// TODO if no local copy, go remote
-		remoteApi.getDisk(diskName, onSuccess, onError, options);
+		remoteApi.getDisk(diskName, onSuccess, onError);
 	};
 
 	this.getJWT = function(disks, onSuccess, onError) {
@@ -483,10 +496,8 @@ function API(options) {
 	 *            diskNumber
 	 * @param {Point}
 	 *            tableClickPoint
-	 * @param {Array.
-	 *            <function()>} onSuccess
-	 * @param {Array.
-	 *            <function()>} onError
+	 * @param {Array.<function()>} onSuccess
+	 * @param {Array.<function()>} onError
 	 */
 	this.move = function(tableId, diskNumber, tableClickPoint, onSuccess,
 			onError) {
@@ -503,6 +514,9 @@ function API(options) {
 	/**
 	 * @param {string}
 	 *            armyName
+	 * @param disks
+	 * @param onSuccess
+	 * @param onError
 	 */
 	this.saveArmy = function(armyName, disks, onSuccess, onError) {
 		// console.log('API.saveArmy');

@@ -1,17 +1,12 @@
 /**
- * @constructor
- * @extends UI
- * @param {Table}
- *            table
- * @param {API}
- *            api
- * @param {string}
- *            container
- * @returns
+ * @class
+ * @param api
+ * @param table
+ * @param container
  */
 function TableUI(api, table, container) {
 	"use strict";
-
+	// * @extends UI
 	$.extend(this, new UI(container));
 	var $this = this;
 
@@ -2047,6 +2042,8 @@ function TableUI(api, table, container) {
 
 	/**
 	 * persists the placement of reinforcements
+	 * 
+	 * @param diskNumber
 	 */
 	this.saveReinforcement = function(diskNumber) {
 		// console.log("TableUI.saveReinforcment");
