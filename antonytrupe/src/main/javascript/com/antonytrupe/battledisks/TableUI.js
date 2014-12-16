@@ -954,8 +954,8 @@ function TableUI(api, table, container) {
 	};
 
 	this.draw = function() {
-		console.log("TableUI.draw");
-		console.log($this.mementoId);
+		//console.log("TableUI.draw");
+		//console.log($this.mementoId);
 
 		$this.disksCtx.canvas.height = $($this.container).height();
 		$this.disksCtx.canvas.width = $($this.container).width();

@@ -27,8 +27,6 @@
 			"/com/adamhooper/priority-queue.js",
 			"/com/antonytrupe/battledisks/AI.js", 
 			function() {
-				//wait for the template iframe to load
-				
 				new Main().tutorial();
 			});
 </script>

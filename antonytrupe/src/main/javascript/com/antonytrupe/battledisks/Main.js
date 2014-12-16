@@ -8,7 +8,7 @@ function Main() {
 	$this.tutorial = function() {
 		console.log('Main.tutorial');
 
-		var table = new Table(2, 10, 1, 1, 1, "", "");
+		var table = new Table(2, 10, 3, 3, 1, "", "");
 		window['table'] = table;
 		table.placeStagingDisks();
 		table.id = "tutorialOne";
@@ -18,6 +18,9 @@ function Main() {
 		});
 		window['api'] = api;
 
+		/**
+		 * @type {Player}
+		 */
 		var bot = new Player("bot");
 		bot.type = 'ai';
 		window['bot'] = bot;
@@ -33,7 +36,7 @@ function Main() {
 
 		setupBot(null, setupPlayer);
 
-		function setupBot(result, callback) {
+		function setupBot(botResult, callback) {
 			console.log('Main.setupBot');
 
 			// console.log(callback);
@@ -42,10 +45,16 @@ function Main() {
 				console.log('Main.setupupBot getDisk Grugs');
 				console.log(result);
 				// give the ai a disk
-				var diskNumber = bot.addDisk(result.disk);
+				var diskOne = bot.addDisk(result.disk);
+				var diskTwo = bot.addDisk(result.disk);
+				var diskThree = bot.addDisk(result.disk);
 
 				// give the ai an army
-				bot.addDiskToArmy("1", diskNumber);
+				bot.addDiskToArmy("1", diskOne);
+				bot.addDiskToArmy("1", diskTwo);
+				bot.addDiskToArmy("1", diskThree);
+				console.log("3 grugs");
+				console.log();
 
 				// have the ai join the table
 				table.join(bot, "1");
@@ -64,7 +73,7 @@ function Main() {
 			});
 		}
 
-		function setupPlayer(result, callback) {
+		function setupPlayer(playerResult, callback) {
 			console.log('Main.setupPlayer');
 
 			// console.log(callback);
@@ -160,10 +169,10 @@ function Main() {
 			console.log(result.players);
 			$this.updateLinks(result.user);
 
-			result.players.forEach(/**
-									 * @param {{playerName,rating}}
-									 *            player
-									 */
+			result.players.forEach(
+			/**
+			 * @param player
+			 */
 			function(player) {
 				var li = $("<li>");
 				li.text(Math.round(player.rating) + " : " + player.playerName);
@@ -351,8 +360,7 @@ function Main() {
 		api
 				.listTables(
 						/**
-						 * @param {{openTables,activeTables,user,player}}
-						 *            result
+						 * @param result
 						 */
 						function(result) {
 							// console.log(result);
@@ -470,6 +478,12 @@ function Main() {
 													li.append(label);
 												}
 
+												function listPlayer(i,
+														playerName) {
+													//
+
+												}
+
 												// player list
 												var players = $("<ol>");
 												$
@@ -488,9 +502,9 @@ function Main() {
 																					table.memento.players[playerName].reinforcements)
 																			.forEach(
 																					function(
-																							i) {
+																							ii) {
 																						// console.log(reinforcementNumber);
-																						var diskName = table.memento.players[playerName].reinforcements[i];
+																						var diskName = table.memento.players[playerName].reinforcements[ii];
 																						// console.log(diskName);
 																						// console.log(i);
 																						var diskNumber = player
@@ -743,8 +757,7 @@ function Main() {
 
 		api.getAllDisks(
 		/**
-		 * @param {{disks,user,appInfo,player}}
-		 *            result
+		 * @param result
 		 */
 		function(result) {
 			// console.log("Main api.getAllDisks");
@@ -825,8 +838,7 @@ function Main() {
 }
 
 /**
- * @param {...*}
- *            args
+ * @param args
  * @return {Array}
  * @this {Array}
  */

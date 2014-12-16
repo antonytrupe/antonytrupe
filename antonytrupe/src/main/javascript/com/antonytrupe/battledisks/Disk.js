@@ -1,6 +1,10 @@
 /**
- * @param name
- * @param type
+ * @constructor
+ * @class
+ * @param {string}
+ *            name
+ * @param {string}
+ *            type
  * @param attack
  * @param defense
  * @param toughness
@@ -23,8 +27,6 @@
  * @param diameter
  * @param description
  * @param price
- * @constructor
- * @class
  */
 function Disk(name, type, attack, defense, toughness, movement, wounds, flying,
 		swashbuckler, archer, arrows, bolts, fireballs, boulders,
@@ -72,7 +74,7 @@ function Disk(name, type, attack, defense, toughness, movement, wounds, flying,
 	/**
 	 * @param {Object}
 	 *            result
-	 * @returns
+	 * @returns {Disk|number}
 	 */
 	$this.update = function(result) {
 		if (result === undefined) {

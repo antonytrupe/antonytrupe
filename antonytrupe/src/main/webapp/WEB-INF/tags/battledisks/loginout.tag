@@ -1,7 +1,7 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
-<%@tag description="Overall Page template" pageEncoding="UTF-8"%>
-<%@attribute name="user"%>
-<%@attribute name="return_to"%>
+<%@ tag description="Overall Page template" pageEncoding="UTF-8"%>
+<%@ attribute name="user"%>
+<%@ attribute name="return_to"%>
 
 <c:choose>
 	<c:when test="${user!=null}">

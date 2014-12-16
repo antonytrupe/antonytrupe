@@ -36,11 +36,12 @@ function API(options) {
 		this.apiUrl = this.baseUrl + "api";
 
 		/**
+		 * @return {boolean}
 		 * @memberOf RemoteAPI
 		 */
-		function cancelPreviousRequests  () {
+		function cancelPreviousRequests() {
 			return true;
-		};
+		}
 
 		// private method
 		var abort = function() {
@@ -63,13 +64,14 @@ function API(options) {
 		 * 
 		 * @param {Object}
 		 *            data
-		 * @param {Array.<Function>}
-		 * onSuccess
-		 * @param {Array.<Function>} 
-		 * onError
+		 * @param {Array}
+		 *            onSuccess
+		 * @param {Array}
+		 *            onError
+		 * @param options
 		 * @memberOf RemoteAPI
 		 */
-		function sendRequest (data, onSuccess, onError, options) {
+		function sendRequest(data, onSuccess, onError, options) {
 			"use strict";
 			// console.log('API.sendRequest');
 
@@ -117,7 +119,7 @@ function API(options) {
 			sendRequest(data, onSuccess, onError);
 		};
 
-		this.getDisk = function(diskName, onSuccess, onError ) {
+		this.getDisk = function(diskName, onSuccess, onError) {
 			var data = {
 				"action" : "GET_DISK",
 				"diskName" : diskName
@@ -496,8 +498,10 @@ function API(options) {
 	 *            diskNumber
 	 * @param {Point}
 	 *            tableClickPoint
-	 * @param {Array.<function()>} onSuccess
-	 * @param {Array.<function()>} onError
+	 * @param {Array.
+	 *            <function()>} onSuccess
+	 * @param {Array.
+	 *            <function()>} onError
 	 */
 	this.move = function(tableId, diskNumber, tableClickPoint, onSuccess,
 			onError) {

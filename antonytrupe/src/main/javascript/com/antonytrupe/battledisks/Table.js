@@ -13,7 +13,7 @@
  *            alignmentRestriction
  * @param {string}
  *            scenario
- * @constructor holds states
+ * @constructor
  * @class
  */
 function Table(maxPlayers, maxPoints, activations, startingDisks,

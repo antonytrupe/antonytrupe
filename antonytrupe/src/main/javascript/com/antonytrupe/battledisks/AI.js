@@ -9,10 +9,11 @@ function AI(table, player) {
 	"use strict";
 
 	/**
-	 * @typedef {object} Node
-	 * @property {Node} parent
-	 * @property value
-	 * @property {Array.<Node>} children
+	 * @typedef {object} AiNode
+	 * @property {AiNode} parent
+	 * @property f_score Estimated total cost from start to goal
+	 * @property g_score Cost from start along best known path
+	 * @property {Array.<AiNode>} children
 	 * @property type
 	 * @property diskNumber
 	 * @property diskCount
@@ -35,6 +36,8 @@ function AI(table, player) {
 	 */
 	this.player = player;
 
+	this.depth = 3;
+
 	/**
 	 * @memberOf AI
 	 */
@@ -52,6 +55,15 @@ function AI(table, player) {
 	var ATTACKER_DIED_PENALTY = 0;
 
 	/**
+	 * @type {AiNode}
+	 * @memberOf AI
+	 */
+	var tree = {
+		"children" : [],
+		"value" : Number.NEGATIVE_INFINITY
+	};
+
+	/**
 	 * priority queue of nodes to be traversed - queue(), dequeue(), peek(),
 	 * length
 	 * 
@@ -59,17 +71,11 @@ function AI(table, player) {
 	 */
 	var fringe = new PriorityQueue({
 		comparator : function(a, b) {
-			return b.value > a.value;
+			return b.f_score > a.f_score;
 		}
 	});
 
-	/**
-	 * @type {Node}
-	 * @memberOf AI
-	 */
-	var tree = {
-		"children" : []
-	};
+	fringe.queue(tree);
 
 	/**
 	 * past path cost
@@ -86,7 +92,7 @@ function AI(table, player) {
 	 * 
 	 * @param attackerInfo
 	 * @param defenderInfo
-	 * @return
+	 * @return {number}
 	 * @memberOf AI
 	 */
 	function h(attackerInfo, defenderInfo) {
@@ -99,11 +105,12 @@ function AI(table, player) {
 	/**
 	 * @param attackerInfo
 	 * @param defenderInfo
-	 * @return
+	 * @return {number}
 	 * @memberOf AI
 	 */
 	function getDefenderDamageBonus(attackerInfo, defenderInfo) {
 		var bonus;
+
 		if (attackerInfo.disk.attack >= defenderInfo.disk.toughness) {
 			bonus = defenderInfo.disk.cost
 					* (DEFENDER_DIED_BONUS + 1 - (attackerInfo.disk.attack - defenderInfo.disk.toughness)
@@ -116,10 +123,16 @@ function AI(table, player) {
 
 	}
 
+	function getActions() {
+		// TODO
+		// get all the disks that can activate
+		// get all the options for each disk
+	}
+
 	/**
 	 * @param attackerInfo
 	 * @param defenderInfo
-	 * @return
+	 * @return {number}
 	 * @memberOf AI
 	 */
 	function getAttackerDamagePenalty(attackerInfo, defenderInfo) {
@@ -138,7 +151,7 @@ function AI(table, player) {
 	/**
 	 * @param attackerInfo
 	 * @param defenderInfo
-	 * @return
+	 * @return {number}
 	 * @memberOf AI
 	 */
 	function getMovementPoints(attackerInfo, defenderInfo) {
@@ -154,7 +167,7 @@ function AI(table, player) {
 	}
 
 	/**
-	 * @param {Node}
+	 * @param {AiNode}
 	 *            node
 	 * @memberOf AI
 	 */
@@ -178,7 +191,7 @@ function AI(table, player) {
 	 * @param diskNumber
 	 * @param diskCount
 	 * @param memento
-	 * @returns {Node}
+	 * @returns {AiNode}
 	 * @memberOf AI
 	 */
 	function addToTree(parent, type, value, diskNumber, diskCount, memento) {
@@ -186,14 +199,14 @@ function AI(table, player) {
 		// children
 		// data
 		/**
-		 * @type Node
+		 * @type AiNode
 		 */
 		var node = {};
 		node.parent = parent;
 
 		node.type = type;
 		node.children = [];
-		node.node.value = value;
+		node.node.f_score = value;
 
 		console.log(parent);
 		if (parent) {
@@ -207,6 +220,7 @@ function AI(table, player) {
 	 * this is the entry point. example usage: var solution=search();
 	 * execute(solution); this only finishes the current round
 	 * 
+	 * @returns {AiNode}
 	 * @memberOf AI
 	 */
 	this.search = function() {
@@ -232,6 +246,23 @@ function AI(table, player) {
 		// activation segment AI
 		else if ($this.table.getSegment() == $this.table.SEGMENT.ACTIVATION) {
 
+			// get the round
+			var stopRound = $this.table.getRound() + $this.depth;
+
+			// while the fringe has nodes
+			// and noone has won and we haven't reached the max depth
+			// && $this.table.getWinners().length === 0
+			while (fringe.length > 0) {
+				// TODO
+				// get the node in fringe with the highest f_score
+				var current = fringe.peek();
+				if ($this.table.getWinners().length > 0) {
+					return current;
+				}
+				fringe.dequeue();
+				// get
+			}
+
 			// get actions(disks that can activate)
 			var friendlyDiskNumbers = getFriendlyDisks();
 			console.log(friendlyDiskNumbers);
@@ -248,7 +279,7 @@ function AI(table, player) {
 	/**
 	 * return them in lowest value first
 	 * 
-	 * @return
+	 * @return {Array}
 	 * @memberOf AI
 	 */
 	function getFriendlyDisks() {
@@ -310,7 +341,7 @@ function AI(table, player) {
 	 *            friendlyDiskNumbers - array of friendly disk numbers
 	 * @param {number}
 	 *            diskCount
-	 * @param {Node}
+	 * @param {AiNode}
 	 *            parent
 	 * @memberOf AI
 	 */
@@ -339,7 +370,7 @@ function AI(table, player) {
 	/**
 	 * @param {number}
 	 *            attackerDiskNumber
-	 * @param {Node}
+	 * @param {AiNode}
 	 *            attackerParentNode
 	 * @memberOf AI
 	 */

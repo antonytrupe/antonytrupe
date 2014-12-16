@@ -7,7 +7,7 @@
 	<packaging>war</packaging>
 
 	<properties>
-		<appengine.target.version>1.9.10</appengine.target.version>
+		<appengine.target.version>1.9.14</appengine.target.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<jersey.version>1.17.1</jersey.version>
 	</properties>
@@ -132,7 +132,6 @@
 					</execution>
 				</executions>
 			</plugin>
-
 
 			<plugin>
 				<artifactId>maven-war-plugin</artifactId>
