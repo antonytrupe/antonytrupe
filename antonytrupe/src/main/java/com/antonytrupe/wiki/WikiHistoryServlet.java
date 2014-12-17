@@ -25,8 +25,8 @@ public class WikiHistoryServlet extends HttpServlet {
 
 		request.setAttribute("history", history);
 		request.setAttribute("title", title);
-		request.getRequestDispatcher("/wikiHistory.jsp").forward(request,
-				response);
+		request.getRequestDispatcher("/views/wiki/wikiHistory.jsp").forward(
+				request, response);
 
 	}
 

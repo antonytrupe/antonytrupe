@@ -28,7 +28,7 @@ public class WikiServlet extends HttpServlet {
 					WikiDao.parseServerContent(page.getName()));
 		}
 		request.setAttribute("title", page.getName());
-		request.getRequestDispatcher("/wiki.jsp").forward(request, response);
+		request.getRequestDispatcher("/views/wiki/wiki.jsp").forward(request, response);
 
 	}
 

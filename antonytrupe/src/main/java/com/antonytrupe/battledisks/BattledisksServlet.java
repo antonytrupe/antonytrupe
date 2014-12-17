@@ -19,7 +19,7 @@ public class BattledisksServlet extends HttpServlet {
 		
 
 		// request.setAttribute("title", page.getName());
-		request.getRequestDispatcher("/battledisks/index.jsp").forward(request,
+		request.getRequestDispatcher("/views/thediskgame/index.jsp").forward(request,
 				response);
 	}
 }

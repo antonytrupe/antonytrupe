@@ -45,7 +45,7 @@ public class WikiEditServlet extends HttpServlet {
 
 		request.setAttribute("content", page.getContent());
 		request.setAttribute("title", page.getName());
-		request.getRequestDispatcher("/wikiEdit.jsp")
+		request.getRequestDispatcher("/views/wiki/wikiEdit.jsp")
 				.forward(request, response);
 
 	}
