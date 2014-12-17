@@ -40,17 +40,31 @@
 		<servlet-name>OpenIdServlet</servlet-name>
 		<url-pattern>/openid/</url-pattern>
 	</servlet-mapping>
+	
+	
 
+	<servlet>
+		<description>BattledisksAPIServlet</description>
+		<display-name>BattledisksAPIServlet</display-name>
+		<servlet-name>BattledisksAPIServlet</servlet-name>
+		<servlet-class>com.antonytrupe.battledisks.APIServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>BattledisksAPIServlet</servlet-name>
+		<url-pattern>/battledisks/api</url-pattern>
+	</servlet-mapping>
+	
 	<servlet>
 		<description>BattledisksServlet</description>
 		<display-name>BattledisksServlet</display-name>
 		<servlet-name>BattledisksServlet</servlet-name>
-		<servlet-class>com.antonytrupe.battledisks.APIServlet</servlet-class>
+		<servlet-class>com.antonytrupe.battledisks.BattledisksServlet</servlet-class>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>BattledisksServlet</servlet-name>
-		<url-pattern>/battledisks/api</url-pattern>
+		<url-pattern>/battledisks/*</url-pattern>
 	</servlet-mapping>
+	
 	
 	<servlet>
 		<description>WikiHistoryServlet</description>
