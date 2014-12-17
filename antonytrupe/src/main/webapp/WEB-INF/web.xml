@@ -40,8 +40,6 @@
 		<servlet-name>OpenIdServlet</servlet-name>
 		<url-pattern>/openid/</url-pattern>
 	</servlet-mapping>
-	
-	
 
 	<servlet>
 		<description>BattledisksAPIServlet</description>
@@ -53,7 +51,7 @@
 		<servlet-name>BattledisksAPIServlet</servlet-name>
 		<url-pattern>/battledisks/api</url-pattern>
 	</servlet-mapping>
-	
+
 	<servlet>
 		<description>BattledisksServlet</description>
 		<display-name>BattledisksServlet</display-name>
@@ -62,10 +60,10 @@
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>BattledisksServlet</servlet-name>
-		<url-pattern>/battledisks/*</url-pattern>
+		<url-pattern>/thediskgame/*</url-pattern>
 	</servlet-mapping>
-	
-	
+
+
 	<servlet>
 		<description>WikiHistoryServlet</description>
 		<display-name>WikiHistoryServlet</display-name>
@@ -98,11 +96,15 @@
 		<servlet-name>WikiServlet</servlet-name>
 		<url-pattern>/p/*</url-pattern>
 	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>WikiServlet</servlet-name>
+		<url-pattern>/</url-pattern>
+	</servlet-mapping>
 
 	<jsp-config>
 		<jsp-property-group>
 			<url-pattern>*.jsp</url-pattern>
-			<scripting-invalid>false</scripting-invalid>
+			<scripting-invalid>true</scripting-invalid>
 		</jsp-property-group>
 	</jsp-config>
 

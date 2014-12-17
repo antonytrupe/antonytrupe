@@ -5,12 +5,12 @@
 <!-- Configuration file for UrlRewriteFilter http://www.tuckey.org/urlrewrite/ -->
 <urlrewrite>
 
-	<rule>
+	<rule enabled="false">
 		<from>^/battledisks/tutorial/*$</from>
 		<to>/battledisks/tutorial.jsp</to>
 	</rule>
 
-	<rule>
+	<rule enabled="false">
 		<note>
 			The rule means that requests to /test/status/ will be redirected
 			to /rewrite-status the url will be rewritten.
@@ -19,12 +19,12 @@
 		<to type="redirect">%{context-path}/rewrite-status</to>
 	</rule>
 
-	<rule>
+	<rule enabled="false">
 		<from>^/$</from>
 		<to last="true">/p/home</to>
 	</rule>
 
-	<rule>
+	<rule enabled="false">
 		<from>^(?:\/)++(?:wiki(?:Edit|History)*\.jsp)*+([^\/]+)$</from>
 		<to last="true">/p/$1</to>
 	</rule>
