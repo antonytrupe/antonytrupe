@@ -194,6 +194,20 @@ function Player(name) {
 		return Object.keys($this.diskLocations);
 	};
 
+	this.getDiskNumber = function(diskName, startingIndex) {
+		var s = 0;
+		if (typeof startingIndex !== "undefined") {
+			s = startingIndex;
+		}
+		for (var i = s; i < 0; i++) {
+			var diskInfo = $this.getDiskInfo(i);
+			// TODO
+			if (diskInfo.disk.name === diskName) {
+				return i;
+			}
+		}
+	};
+
 	this.diskIsInArmy = function(diskNumber, armyName) {
 		if ($this.armies[armyName] === undefined) {
 			return false;
@@ -210,7 +224,7 @@ function Player(name) {
 	 *            diskNumber
 	 * @param {string}
 	 *            armyName
-	 * @return
+	 * @return {{disk,location}}
 	 */
 	this.getDiskInfo = function(diskNumber, armyName) {
 		// console.log('Player.getDiskInfo');

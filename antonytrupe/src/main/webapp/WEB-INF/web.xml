@@ -41,25 +41,51 @@
 		<url-pattern>/openid/</url-pattern>
 	</servlet-mapping>
 
+
 	<servlet>
-		<description>BattledisksAPIServlet</description>
-		<display-name>BattledisksAPIServlet</display-name>
-		<servlet-name>BattledisksAPIServlet</servlet-name>
-		<servlet-class>com.antonytrupe.battledisks.APIServlet</servlet-class>
+		<servlet-name>default</servlet-name>
+		<servlet-class>org.mortbay.jetty.servlet.DefaultServlet</servlet-class>
 	</servlet>
 	<servlet-mapping>
-		<servlet-name>BattledisksAPIServlet</servlet-name>
-		<url-pattern>/battledisks/api</url-pattern>
+		<servlet-name>default</servlet-name>
+		<url-pattern>*.js</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>default</servlet-name>
+		<url-pattern>*.css</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>default</servlet-name>
+		<url-pattern>*.jpg</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>default</servlet-name>
+		<url-pattern>*.htm</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>default</servlet-name>
+		<url-pattern>*.html</url-pattern>
 	</servlet-mapping>
 
 	<servlet>
-		<description>BattledisksServlet</description>
-		<display-name>BattledisksServlet</display-name>
-		<servlet-name>BattledisksServlet</servlet-name>
-		<servlet-class>com.antonytrupe.battledisks.BattledisksServlet</servlet-class>
+		<description>TheDiskGameAPIServlet</description>
+		<display-name>TheDiskGameAPIServlet</display-name>
+		<servlet-name>TheDiskGameAPIServlet</servlet-name>
+		<servlet-class>com.antonytrupe.thediskgame.APIServlet</servlet-class>
 	</servlet>
 	<servlet-mapping>
-		<servlet-name>BattledisksServlet</servlet-name>
+		<servlet-name>TheDiskGameAPIServlet</servlet-name>
+		<url-pattern>/thediskgame/api</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<description>TheDiskGameServlet</description>
+		<display-name>TheDiskGameServlet</display-name>
+		<servlet-name>TheDiskGameServlet</servlet-name>
+		<servlet-class>com.antonytrupe.thediskgame.TheDiskGameServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>TheDiskGameServlet</servlet-name>
 		<url-pattern>/thediskgame/*</url-pattern>
 	</servlet-mapping>
 

@@ -1,5 +1,4 @@
 <%@ taglib prefix="antonytrupe" tagdir="/WEB-INF/tags/"%>
-<%@ taglib prefix="tdg" tagdir="/WEB-INF/tags/thediskgame"%>
 
 <!DOCTYPE html>
 <html>
@@ -16,6 +15,5 @@
 </head>
 <body>
 	<antonytrupe:loginout></antonytrupe:loginout>
-	<tdg:table></tdg:table>
 </body>
 </html>

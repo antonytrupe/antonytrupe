@@ -69,11 +69,18 @@ function AI(table, player) {
 	 * 
 	 * @memberOf AI
 	 */
-	var fringe = new PriorityQueue({
-		comparator : function(a, b) {
-			return b.f_score > a.f_score;
+	/*
+	 * var fringe = new PriorityQueue({ comparator : function(a, b) { return
+	 * b.f_score > a.f_score; } });
+	 */
+	var fringe = {
+		"queue" : function() {
+		},
+		"dequeue" : function() {
+		},
+		"peek" : function() {
 		}
-	});
+	};
 
 	fringe.queue(tree);
 
