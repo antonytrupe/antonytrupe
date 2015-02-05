@@ -1,4 +1,6 @@
 /**
+ * @param {string}
+ *            description
  * @param {number}
  *            maxPlayers
  * @param {number}
@@ -16,7 +18,7 @@
  * @constructor
  * @class
  */
-function Table(maxPlayers, maxPoints, activations, startingDisks,
+function Table(description, maxPlayers, maxPoints, activations, startingDisks,
 		reinforcements, alignmentRestriction, scenario) {
 	"use strict";
 
@@ -49,8 +51,9 @@ function Table(maxPlayers, maxPoints, activations, startingDisks,
 	/**
 	 * @memberOf Table
 	 */
-	this.ai = new AI($this);
-
+	// having a member object that has a reference back to the enclosing object
+	// makes serializing fail
+	// this.ai = new AI($this);
 	/**
 	 * each memento has a unique id, but its always the most recent one because
 	 * we need to know the latest version.
@@ -79,6 +82,11 @@ function Table(maxPlayers, maxPoints, activations, startingDisks,
 	// things that don't change, or only have info added to them, do not need to
 	// be in the mememto
 
+	/**
+	 * @memberOf Table
+	 */
+	this.description = description;
+	
 	/**
 	 * @memberOf Table
 	 */
@@ -2206,8 +2214,8 @@ function Table(maxPlayers, maxPoints, activations, startingDisks,
 			$this.addMemento();
 		}
 		// TODO holy cow, this is not the right place for this at all
-		var solution = $this.ai.search();
-		$this.ai.execute(solution);
+		// var solution = $this.ai.search();
+		// $this.ai.execute(solution);
 	};
 
 	/**
@@ -2651,6 +2659,7 @@ function Table(maxPlayers, maxPoints, activations, startingDisks,
 	 * @memberOf Table
 	 */
 	this.stringify = function(excludedKeys) {
+		return JSON.stringify($this);
 		return JSON.stringify($this, function(key, value) {
 			// $this.debug("typeof " + key + ":" + typeof key);
 			// $this.debug("typeof value" + ":" + typeof value);

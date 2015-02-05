@@ -412,9 +412,8 @@ public class GameEngine {
 			return e;
 		}
 
-		@SuppressWarnings({ "unused", "unchecked" })
-		@Deprecated
-		private Entity save(String clazz, Map<String, Object> properties) {
+		@SuppressWarnings("unchecked")
+		public Entity save(String clazz, Map<String, Object> properties) {
 			DatastoreService datastore = DatastoreServiceFactory
 					.getDatastoreService();
 			// Entity e = new Entity(KeyFactory.createKey(clazz, name));

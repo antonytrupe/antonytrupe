@@ -7,6 +7,9 @@ function UI(container) {
 	"use strict";
 	var $this = this;
 
+	/**
+	 * @memberOf UI
+	 */
 	this.container = container;
 
 	// string
@@ -421,9 +424,17 @@ function UI(container) {
 		this.print(ctx, t, x, y, angle, o);
 	};
 
+	/**
+	 * 
+	 * @param ctx
+	 * @param info
+	 * @param highlightsCtx
+	 * @param o
+	 */
 	this.drawDisk = function(ctx, info, highlightsCtx, o) {
-		// console.log("UI.drawDisk");
-		// console.log(info);
+		//console.log("UI.drawDisk");
+		//console.log(info);
+		//console.log(ctx);
 
 		var options = $.extend(true, {}, {
 			// hugh : '',

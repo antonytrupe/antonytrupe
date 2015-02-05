@@ -1,4 +1,4 @@
-﻿html {
+html {
 	height: 100%;
 }
 
@@ -24,7 +24,7 @@ td,th {
 }
 
 .previous {
-	display: none;
+	//display: none;
 }
 
 #mp {
