@@ -1,3 +1,4 @@
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <!DOCTYPE html>
 <html style="height: 100%;">
 <head>
@@ -5,19 +6,20 @@
 <link rel="canonical" href="http://www.antonytrupe.com/battledisks/">
 <link href='http://fonts.googleapis.com/css?family=Open+Sans'
 	rel='stylesheet' type='text/css'>
-<link rel="stylesheet" href="/thediskgame.css" type="text/css" media="all">
+<link rel="stylesheet" href="/thediskgame.css" type="text/css"
+	media="all">
 
 <script
 	src="//cdnjs.cloudflare.com/ajax/libs/headjs/1.0.3/head.load.min.js"></script>
 <script type="text/javascript">
 	head.js("https://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js",
 	//	"/battledisks/battledisks.min.js",
-	"/com/antonytrupe/battledisks/Main.js",
-			"/com/antonytrupe/battledisks/Player.js",
-			"/com/antonytrupe/battledisks/Table.js",
-			"/com/antonytrupe/battledisks/Disk.js",
-			"/com/antonytrupe/battledisks/Point.js",
-			"/com/antonytrupe/battledisks/API.js", function() {
+	"/com/antonytrupe/thediskgame/Main.js",
+			"/com/antonytrupe/thediskgame/Player.js",
+			"/com/antonytrupe/thediskgame/Table.js",
+			"/com/antonytrupe/thediskgame/Disk.js",
+			"/com/antonytrupe/thediskgame/Point.js",
+			"/com/antonytrupe/thediskgame/API.js", function() {
 				new Main().newMission();
 			});
 </script>
@@ -55,6 +57,14 @@
 </head>
 <body>
 
+	<div style="position: absolute;">
+		<h3>Missions</h3>
+		<c:forEach items="${allMissions}" var="mission">
+			<li><a href="/thediskgame/missionEditor/${mission.key}">${mission.key}
+			</a></li>
+		</c:forEach>
+	</div>
+
 	<div id="container" style="text-align: center;">
 		<h3>New Mission</h3>
 		<form id="form" action="/thediskgame/api" method="GET"
@@ -64,13 +74,14 @@
 			<div>
 				<label class="one" for="campaign">Campaign:</label> <span
 					class="two"> <input id="campaign" name="campaign"
-					value="My Campaign" />
+					value="${campaign!=null?campaign:'My Campaign'}" />
 				</span>
 			</div>
 
 			<div>
 				<label class="one" for="mission">Mission:</label> <span class="two">
-					<input id="mission" name="mission" value="My Mission" />
+					<input id="mission" name="mission"
+					value="${mission!=null?mission:'My Mission'}" />
 				</span>
 			</div>
 
@@ -84,19 +95,22 @@
 
 			<div>
 				<label class="one" for="startingDisks">Starting Disks:</label> <span
-					class="two"> <input value="6" type="number"
+					class="two"> <input
+					value="${startingDisks!=null?startingDisks:6}" type="number"
 					name="startingDisks" id="startingDisks" min="1" max="10" />
 				</span>
 			</div>
 			<div>
 				<label class="one" for="reinforcements">Reinforcement per
-					Round:</label> <span class="two"> <input value="6" type="number"
+					Round:</label> <span class="two"> <input
+					value="${reinforcements!=null?reinforcements:3}" type="number"
 					name="reinforcements" id="reinforcements" min="1" max="10" />
 				</span>
 			</div>
 			<div>
 				<label class="one" for="activations">Activations per round:</label>
-				<span class="two"> <input value="3" type="number"
+				<span class="two"> <input
+					value="${activations!=null?activations:3}" type="number"
 					name="activations" id="activations" min="1" max="5" />
 				</span>
 			</div>
@@ -105,9 +119,14 @@
 				<label class="one" for="alignmentRestriction">Alignment
 					Restriction:</label> <span class="two"> <select
 					name="alignmentRestriction" id="alignmentRestriction">
-						<option value="Neutral">Neutral Allowed</option>
-						<option value="Single">Single Alignment</option>
-						<option value="None">None</option>
+						<option value="Neutral"
+							${alignmentRestriction==Neutral?"selected=\"selected\"":""}>Neutral
+							Allowed</option>
+						<option value="Single"
+							${alignmentRestriction=="Single"?" selected=\"selected\"":""}>Single
+							Alignment</option>
+						<option value="None"
+							${alignmentRestriction=="None"?" selected=\"selected\"":""}>None</option>
 				</select>
 				</span>
 			</div>
@@ -115,7 +134,8 @@
 			<div>
 				<label class="one" for="maxPlayers">Players:</label> <span
 					class="two"> <input name="maxPlayers" id="maxPlayers"
-					type="number" min="2" max="6" value="2" />
+					type="number" min="2" max="6"
+					value="${maxPlayers!=null?maxPlayers:2}" />
 				</span>
 			</div>
 
@@ -125,12 +145,15 @@
 
 					<!--  -->
 					<label class="one" for="playerControl1">Player Control:</label><span
-						class="two"> <input name="control1" id="playerControl1" type="radio"
-						value="player" checked="checked" />
+						class="two"> <input name="control1" id="playerControl1"
+						type="radio" value="player"
+						${control1!="ai"?" checked=\"checked\"":""} />
 					</span>
 					<!--  -->
-					<label class="one" for="aiControl1">AI Control:</label><span class="two">
-						<input name="control1" id="aiControl1" type="radio" value="ai" />
+					<label class="one" for="aiControl1">AI Control:</label><span
+						class="two"> <input name="control1" id="aiControl1"
+						type="radio" value="ai"
+						${control1=="ai"?" checked=\"checked\"":""} />
 					</span>
 
 					<!--  -->
@@ -143,7 +166,8 @@
 					<!--  -->
 					<label class="one" for="maxPoints1">Army Points:</label> <span
 						class="two"> <input name="maxPoints1" id="maxPoints1"
-						type="number" min="10" max="500" value="50" />
+						type="number" min="10" max="500"
+						value="${maxPoints1!=null?maxPoints1:50}" />
 					</span>
 				</fieldset>
 			</div>
@@ -154,13 +178,15 @@
 
 					<!--  -->
 					<label class="one" for="playerControl2">Player Control:</label><span
-						class="two"> <input name="control2" id="playerControl2" type="radio"
-						value="player" />
+						class="two"> <input name="control2" id="playerControl2"
+						type="radio" value="player"
+						${control2=="player"?" checked=\"checked\"":""} />
 					</span>
 					<!--  -->
-					<label class="one" for="aiControl2">AI Control:</label><span class="two">
-						<input name="control2" id="aiControl2" type="radio" value="ai"
-						checked="checked" />
+					<label class="one" for="aiControl2">AI Control:</label><span
+						class="two"> <input name="control2" id="aiControl2"
+						type="radio" value="ai"
+						${control2!="player"?" checked=\"checked\"":""} />
 					</span>
 
 					<!--  -->
@@ -173,7 +199,8 @@
 					<!--  -->
 					<label class="one" for="maxPoints2">Army Points:</label> <span
 						class="two"> <input name="maxPoints2" id="maxPoints2"
-						type="number" min="10" max="500" value="50" />
+						type="number" min="10" max="500"
+						value="${maxPoints2!=null?maxPoints2:50}" />
 					</span>
 				</fieldset>
 			</div>

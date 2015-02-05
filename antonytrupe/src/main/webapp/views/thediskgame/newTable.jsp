@@ -1,42 +1,32 @@
+<%@ taglib prefix="tdg" tagdir="/WEB-INF/tags/thediskgame"%>
 <!DOCTYPE html>
-<html style="height: 100%;">
+<html ng-app="thediskgame" style="height: 100%;">
 <head>
 <title>battledisks - antonytrupe.com</title>
 <link rel="canonical" href="http://www.antonytrupe.com/battledisks/">
 <link href='http://fonts.googleapis.com/css?family=Open+Sans'
 	rel='stylesheet' type='text/css'>
-<link rel="stylesheet" href="style.css" type="text/css" media="all">
+<link rel="stylesheet" href="/thediskgame.css" type="text/css"
+	media="all">
 
-<script src="//cdnjs.cloudflare.com/ajax/libs/headjs/1.0.3/head.load.min.js"></script>
-<script type="text/javascript">
-	head.js("https://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js",
-	//	"/battledisks/battledisks.min.js",
-	"/com/antonytrupe/battledisks/Main.js",
-			"/com/antonytrupe/battledisks/Player.js",
-			"/com/antonytrupe/battledisks/Table.js",
-			"/com/antonytrupe/battledisks/Disk.js",
-			"/com/antonytrupe/battledisks/Point.js",
-			"/com/antonytrupe/battledisks/API.js", function() {
-				new Main().newTable();
-			});
+<!-- javascript includes -->
+<tdg:javascriptIncludes jsFiles="${jsFiles}" />
+
+<!-- angular javascript stuff -->
+<script>
+	head.ready(function() {
+		var app = angular.module('thediskgame', []);
+		app.controller('newTable', [ '$scope', function($scope) {
+			//
+			console.log('newTable');
+			
+			console.log(${playerJSON});
+			 this.player = $scope.player = window['player'] = ${playerJSON};
+			 
+		} ]);
+	});
 </script>
 
-<script type="text/javascript">
-	var _gaq = _gaq || [];
-	_gaq.push([ '_setAccount', 'UA-4582706-4' ]);
-	_gaq.push([ '_trackPageview' ]);
-
-	(function() {
-		var ga = document.createElement('script');
-		ga.type = 'text/javascript';
-		ga.async = true;
-		ga.src = ('https:' == document.location.protocol ? 'https://ssl'
-				: 'http://www')
-				+ '.google-analytics.com/ga.js';
-		var s = document.getElementsByTagName('script')[0];
-		s.parentNode.insertBefore(ga, s);
-	})();
-</script>
 <style>
 .one {
 	text-align: right;
@@ -52,26 +42,19 @@
 </style>
 </head>
 <body>
-	<div class="sidebar" id="sideLeft">
-		<div id="navigation">
-			<a href="./">battledisks</a><br /> <a id="log_in"
-				href="/login.html?return_to=battledisks%2Fapi%3Faction%3DLOG_IN">log
-				in</a><br /> <a id="shop" href="shop.html">shop</a><br /> <a
-				class="table_list" href="table_list.html">table list</a><br /> <a
-				class="new_table"
-				href="/login.html?return_to=battledisks%2Fnew_table.html">new
-				table</a><br /> <a class="leaderboard" href=leaderboard.html>leaderboard</a><br />
-		</div>
-	</div>
+	<tdg:header gravatar="${gravatar}" />
+
 	<div id="container" style="text-align: center;">
-		<h3>New Table</h3>
-		<form id="form" action="/battledisks/api" method="GET"
-			style="text-align: center;">
+		<h3>New Game</h3>
+		<form ng-controller="newTable as newTable" id="form"
+			action="/thediskgame/api" method="GET" style="text-align: center;">
 			<input type="hidden" name="action" value="CREATE_TABLE" />
 
 			<div>
 				<label class="one" for="army">Army:</label> <span class="two">
-					<select id="armyName" name="armyName"></select>
+					<select id="armyName" name="armyName">
+						<option ng-repeat="(armyName,army) in player.armies">{{armyName}}</option>
+				</select>
 				</span>
 			</div>
 

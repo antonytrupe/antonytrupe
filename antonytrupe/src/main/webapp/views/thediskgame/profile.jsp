@@ -11,12 +11,12 @@
 			//"/ca/jimr/gae/profiler/resources/jquery.tmpl.min.js",
 			//"/ca/jimr/gae/profiler/resources/mini_profiler.js",
 			//"/battledisks/battledisks.min.js",
-			"/com/antonytrupe/battledisks/Main.js",
-			"/com/antonytrupe/battledisks/Point.js",
-			"/com/antonytrupe/battledisks/Player.js",
-			"/com/antonytrupe/battledisks/UI.js",
-			"/com/antonytrupe/battledisks/ProfileUI.js",
-			"/com/antonytrupe/battledisks/API.js",
+			"/com/antonytrupe/thediskgame/Main.js",
+			"/com/antonytrupe/thediskgame/Point.js",
+			"/com/antonytrupe/thediskgame/Player.js",
+			"/com/antonytrupe/thediskgame/UI.js",
+			"/com/antonytrupe/thediskgame/ProfileUI.js",
+			"/com/antonytrupe/thediskgame/API.js",
 			//wait for everything to load
 			function() {
 				//wait for the template iframe to load
@@ -49,7 +49,7 @@
 
 <link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
 <!-- <link href="/ca/jimr/gae/profiler/resources/mini_profiler.css" rel="stylesheet" type="text/css"	media="all"> -->
-<link href="style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/thediskgame.css" type="text/css" rel="stylesheet" media="all">
 
 </head>
 <body>
