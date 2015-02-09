@@ -1,7 +1,7 @@
 /**
+ *   
  * @constructor
- * @param {string}
- *            container
+ * @param container
  */
 function UI(container) {
 	"use strict";
@@ -104,38 +104,39 @@ function UI(container) {
 	this.mouseScrollHandler = function(event) {
 		// console.log("UI.mouseScrollHandler");
 
-		var mapWidth = $(this.container).width() / PIXELS_PER_INCH * this.scale;
-		var mapHeight = $(this.container).height() / PIXELS_PER_INCH
-				* this.scale;
+		var mapWidth = $($this.container).width() / PIXELS_PER_INCH
+				* $this.scale;
+		var mapHeight = $($this.container).height() / PIXELS_PER_INCH
+				* $this.scale;
 		var newMapWidth;
 		var newMapHeight;
 
 		var tl = this.getTableLocation(0, 0);
 
-		if (event.originalEvent.wheelDelta > 0 && this.scale > 0.4) {
-			this.scale /= 1.1;
-		} else if (event.originalEvent.wheelDelta < 0 && this.scale < 20) {
-			this.scale /= 0.9;
+		if (event.originalEvent.wheelDelta > 0 && $this.scale > 0.4) {
+			$this.scale /= 1.1;
+		} else if (event.originalEvent.wheelDelta < 0 && $this.scale < 20) {
+			$this.scale /= 0.9;
 		}
 
-		newMapWidth = $(this.container).width() / PIXELS_PER_INCH * this.scale;
-		newMapHeight = $(this.container).height() / PIXELS_PER_INCH
-				* this.scale;
+		newMapWidth = $($this.container).width() / PIXELS_PER_INCH * this.scale;
+		newMapHeight = $($this.container).height() / PIXELS_PER_INCH
+				* $this.scale;
 
 		var newMapX = tl.x
-				- ((event.originalEvent.pageX - $(this.container).position().left)
-						/ $(this.container).width() * (newMapWidth - mapWidth));
+				- ((event.originalEvent.offsetX - $($this.container).position().left)
+						/ $($this.container).width() * (newMapWidth - mapWidth));
 
 		var newMapY = tl.y
-				- ((event.originalEvent.pageY - $(this.container).position().top)
-						/ $(this.container).height() * (newMapHeight - mapHeight));
+				- ((event.originalEvent.offsetY - $($this.container).position().top)
+						/ $($this.container).height() * (newMapHeight - mapHeight));
 
-		newMapX *= PIXELS_PER_INCH / this.scale;
-		newMapY *= PIXELS_PER_INCH / this.scale;
+		newMapX *= PIXELS_PER_INCH / $this.scale;
+		newMapY *= PIXELS_PER_INCH / $this.scale;
 
-		this.offset.x = -newMapX;
-		this.offset.y = -newMapY;
-		this.draw();
+		$this.offset.x = -newMapX;
+		$this.offset.y = -newMapY;
+		$this.draw();
 	};
 
 	this.matchesFilter = function(disk) {
@@ -169,8 +170,6 @@ function UI(container) {
 	this.mouseMoveHandler = function(event) {
 		// console.log("UI.mouseMoveHandler");
 
-		// console.log(event.pageX);
-
 		// not sure we need to do this
 		$this = this;
 
@@ -179,17 +178,17 @@ function UI(container) {
 
 		var redraw = false;
 
-		if (event.pageX < this.edgeScrollWidth) {
-			xScroll = (this.edgeScrollWidth - event.pageX);
-		} else if ($(this.container).width() - event.pageX < this.edgeScrollWidth) {
-			xScroll = -(this.edgeScrollWidth + event.pageX - $(this.container)
+		if (event.offsetX < this.edgeScrollWidth) {
+			xScroll = (this.edgeScrollWidth - event.offsetX);
+		} else if ($(this.container).width() - event.offsetX < this.edgeScrollWidth) {
+			xScroll = -(this.edgeScrollWidth + event.offsetX - $(this.container)
 					.width());
 		}
 
-		if (event.pageY < this.edgeScrollWidth) {
-			yScroll = (this.edgeScrollWidth - event.pageY);
-		} else if ($(this.container).height() - event.pageY < this.edgeScrollWidth) {
-			yScroll = -(this.edgeScrollWidth + event.pageY - $(this.container)
+		if (event.offsetY < this.edgeScrollWidth) {
+			yScroll = (this.edgeScrollWidth - event.offsetY);
+		} else if ($(this.container).height() - event.offsetY < this.edgeScrollWidth) {
+			yScroll = -(this.edgeScrollWidth + event.offsetY - $(this.container)
 					.height());
 		}
 
@@ -198,8 +197,8 @@ function UI(container) {
 
 		if (this.lastMouseEvent !== null && this.mousedown) {
 			// console.log('sliding');
-			this.offset.x += event.pageX - this.lastMouseEvent.pageX;
-			this.offset.y += event.pageY - this.lastMouseEvent.pageY;
+			this.offset.x += event.offsetX - this.lastMouseEvent.offsetX;
+			this.offset.y += event.offsetY - this.lastMouseEvent.offsetY;
 			this.mousemove = true;
 			redraw = true;
 		}
@@ -225,6 +224,8 @@ function UI(container) {
 		this.lastMouseEvent = event;
 
 		if (redraw) {
+			// use this instead of $this because $this is a private reference
+			// and the base UI doesn't have a draw method
 			this.draw();
 		}
 	};
@@ -432,9 +433,9 @@ function UI(container) {
 	 * @param o
 	 */
 	this.drawDisk = function(ctx, info, highlightsCtx, o) {
-		//console.log("UI.drawDisk");
-		//console.log(info);
-		//console.log(ctx);
+		// console.log("UI.drawDisk");
+		// console.log(info);
+		// console.log(ctx);
 
 		var options = $.extend(true, {}, {
 			// hugh : '',

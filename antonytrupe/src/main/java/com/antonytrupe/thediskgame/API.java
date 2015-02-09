@@ -2437,7 +2437,7 @@ class API {
 				String maxPoints2 = (String) getParameter("maxPoints2",
 						parameters);
 
-				// TODO create mission
+				//   create mission
 				Mission.save(campaign, mission, scenario, startingDisks,
 						reinforcements, activations, alignmentRestriction,
 						maxPlayers, control1, army1, maxPoints1, control2,

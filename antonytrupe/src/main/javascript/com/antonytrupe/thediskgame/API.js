@@ -75,8 +75,7 @@ function API(options) {
 			"use strict";
 			// console.log('API.sendRequest');
 
-			// TODO
-
+		 
 			if (cancelPreviousRequests(options)) {
 				// cancel any request in flight
 				abort();
@@ -96,6 +95,7 @@ function API(options) {
 				},
 				error : function(result) {
 					// console.log(result);
+					// TODO move doOnError, or something
 					this.doOnError(result, onError);
 				}
 			});
@@ -127,6 +127,15 @@ function API(options) {
 			// TODO add a callback to save the disk locally
 			sendRequest(data, onSuccess, onError);
 		};
+
+		this.saveReinforcement = function(data, onSuccess, onError) {
+			sendRequest(data, onSuccess, onError);
+		};
+
+		this.endReinforcements = function(data, onSuccess, onError) {
+			sendRequest(data, onSuccess, onError);
+		};
+
 	};
 	var remoteApi = new RemoteAPI();
 
@@ -135,7 +144,7 @@ function API(options) {
 	 */
 	var LocalAPI = function() {
 		this.getTable = function() {
-			// TODO
+			// TODO LocalAPI.getTable
 		};
 
 		this.getDisk = function(diskName) {
@@ -275,7 +284,7 @@ function API(options) {
 			"action" : "END_REINFORCEMENTS",
 			"id" : tableId
 		};
-		remoteApi.sendRequest(data, onSuccess, onError);
+		remoteApi.endReinforcements(data, onSuccess, onError);
 	};
 
 	this.fireMissiles = function(tableId, diskIndex, missile, tablePoint,
@@ -551,7 +560,9 @@ function API(options) {
 			"point" : JSON.stringify(tableClickPoint),
 			"mementoId" : $this.getLastMementoId(tableId)
 		};
-		remoteApi.sendRequest(data, onSuccess, onError);
+
+		remoteApi.saveReinforcement(data, onSuccess, onError);
+		// remoteApi.sendRequest(data, onSuccess, onError);
 	};
 
 }

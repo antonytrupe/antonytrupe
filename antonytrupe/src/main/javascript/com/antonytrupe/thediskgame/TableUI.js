@@ -28,8 +28,15 @@ function TableUI(api, table, container) {
 
 	/**
 	 * @type {Player}
+	 * @memberOf Table
 	 */
 	this.player = new Player();
+
+	/**
+	 * @type {String}
+	 * @memberOf Table
+	 */
+	this.currentPlayer = null;
 
 	this.playbackTimeoutID = null;
 
@@ -42,12 +49,14 @@ function TableUI(api, table, container) {
 	this.mode = this.MODE.PLAY;
 
 	/**
-	 * @type {?number}
+	 * @type {Number}
+	 * @memberOf Table
 	 */
 	this.selectedDisk = null;
 
 	/**
-	 * @type {?string}
+	 * @type {string}
+	 * @memberOf Table
 	 */
 	this.action = null;
 
@@ -58,6 +67,9 @@ function TableUI(api, table, container) {
 
 	this.mouseScreenLocation = null;
 
+	/**
+	 * @memberOf Table
+	 */
 	this.mementoId = null;
 
 	/**
@@ -121,7 +133,7 @@ function TableUI(api, table, container) {
 	// start the playback pump
 	this.playbackTimeoutID = setTimeout(function() {
 		$this.displayNextMemento();
-	}, $this.REFRESH_DELAY);
+	}, REFRESH_DELAY);
 
 	$("#contextMenu").mouseleave(function() {
 		// console.log("contextMenu mouseleave");
@@ -255,31 +267,26 @@ function TableUI(api, table, container) {
 	// attach the click handler
 	$(container).click(
 			function(v) {
-				$this.mouseClickHandler($this
-						.getTableLocation(v.pageX, v.pageY), v.which);
+				$this.mouseClickHandler($this.getTableLocation(v.offsetX,
+						v.offsetY), v.which);
 			});
 
 	// attach the mousedown handler
 	$(container).mousedown(
 			function(v) {
-				$this.mouseDownHandler(
-						$this.getTableLocation(v.pageX, v.pageY), v.which, v);
+				$this.mouseDownHandler($this.getTableLocation(v.offsetX,
+						v.offsetY), v.which, v);
 			});
 
 	// attach the mouseup handler
 	$(container).mouseup(
 			function(v) {
-				$this.mouseUpHandler($this.getTableLocation(v.pageX, v.pageY),
-						v.which);
+				$this.mouseUpHandler($this.getTableLocation(v.offsetX,
+						v.offsetY), v.which);
 			});
 
-	// capture and ignore right clicks
-	$(container).bind("contextmenu", function(v) {
-		return false;
-	});
-
 	$(container).mousemove(function(v) {
-		$this._mouseMoveHandler(new Point(v.pageX, v.pageY), v);
+		$this._mouseMoveHandler(new Point(v.offsetX, v.offsetY), v);
 	});
 
 	$(container).bind('mousewheel', function(event) {
@@ -383,7 +390,7 @@ function TableUI(api, table, container) {
 	};
 
 	this.contextMenu = function(screenLocation) {
-		// console.log('TableUI.contextMenu');
+		console.log('TableUI.contextMenu');
 
 		// hide all options
 		$("#contextMenu .menuItem").css("display", "none");
@@ -409,9 +416,12 @@ function TableUI(api, table, container) {
 			show = true;
 		}
 
+		console.log($this.currentPlayer);
+		console.log($this.table.getPlayerInfo($this.currentPlayer));
+
 		// END_REINFORCEMENTS
 		if (($this.table.getSegment() === "JOIN" || $this.table.getSegment() === "REINFORCEMENTS")
-				&& $this.currentPlayer !== null
+				&& $this.currentPlayer
 				&& $this.currentPlayer !== ""
 				&& $this.table.getPlayerInfo($this.currentPlayer).segment === "REINFORCEMENTS") {
 			$("#contextMenu .END_REINFORCEMENTS").css("display", "block");
@@ -992,12 +1002,24 @@ function TableUI(api, table, container) {
 
 	};
 
+	/**
+	 * Will draw a given disk after making sure disks below the disk are also
+	 * drawn. Includes highlighting to call player attention to disks that need
+	 * to have something done to them(pick attacker/defender, etc).
+	 * 
+	 * @param diskNumber
+	 *            the disk to draw
+	 */
 	this.drawBottomDiskFirst = function(diskNumber) {
 		// console.log("TableUI.drawBottomDiskFirst");
+		// console.log(diskNumber);
 
 		var info = table.getDiskInfo(diskNumber);
+		// console.log(info);
 
-		this.disksToDraw.remove(diskNumber.toString());
+		// console.log($this.disksToDraw);
+
+		$this.disksToDraw.remove(diskNumber.toString());
 
 		// console.log(diskNumber);
 		// console.log($this.table);
@@ -1645,15 +1667,17 @@ function TableUI(api, table, container) {
 	 *            mouseButton
 	 */
 	this.mouseClickHandler = function(tableClickPoint, mouseButton) {
-		// console.log("TableUI.mouseClickHandler");
+		console.log("TableUI.mouseClickHandler");
 
 		// only react to left clicks when not moving the mouse
 		if (mouseButton !== 1 || $this.mousemove) {
 			$this.mousemove = false;
+			console.log('early exit of mouseClickHandler');
 			return;
 		}
 
 		var clickedDisk = $this.selectDisk(tableClickPoint);
+		console.log(clickedDisk);
 
 		// click during JOIN or REINFORCEMENTS
 		if (($this.table.getSegment() === "JOIN" || $this.table.getSegment() === "REINFORCEMENTS")
@@ -1759,7 +1783,7 @@ function TableUI(api, table, container) {
 	 *            event optional
 	 */
 	this.mouseDownHandler = function(tablePoint, mouseButton, event) {
-		// console.log("TableUI.mouseDownHandler");
+		console.log("TableUI.mouseDownHandler");
 
 		// $this.pressedMouseButton = mouseButton;
 		$this.lastMouseEvent = event;
@@ -1857,7 +1881,7 @@ function TableUI(api, table, container) {
 	 *            mouseButton
 	 */
 	this.mouseUpHandler = function(tablePoint, mouseButton) {
-		// console.log("TableUI.mouseUpHandler");
+		console.log("TableUI.mouseUpHandler");
 
 		$this.lastMouseEvent = null;
 		$this.mousedown = false;
@@ -1948,10 +1972,10 @@ function TableUI(api, table, container) {
 	 * continues remote polling
 	 */
 	this.onSuccess = function(result) {
-		// console.log('TableUI.onSuccess');
-		// console.log(result);
+		console.log('TableUI.onSuccess');
+		console.log(result);
 
-		$this.player.update(result.player);
+		// $this.player.update(result.player);
 
 		if (typeof result.table == "undefined"
 				|| typeof result.table.id == "undefined") {
@@ -2013,11 +2037,11 @@ function TableUI(api, table, container) {
 			$this.table.restore($this.api.getMemento($this.table.getId(),
 					$this.mementoId + 1));
 			// display it
-			$this.update({});
+			// $this.update({});
 			// pause
 			$this.playbackTimeoutID = setTimeout(function() {
 				$this.displayNextMemento();
-			}, $this.REFRESH_DELAY);
+			}, REFRESH_DELAY);
 		}
 	};
 
@@ -2049,7 +2073,7 @@ function TableUI(api, table, container) {
 	 * @param diskNumber
 	 */
 	this.saveReinforcement = function(diskNumber) {
-		// console.log("TableUI.saveReinforcment");
+		console.log("TableUI.saveReinforcment");
 
 		$this.table.saveReinforcement($this.currentPlayer, diskNumber,
 				$this.table.getDiskInfo(diskNumber).mementoInfo.location);
@@ -2140,17 +2164,16 @@ function TableUI(api, table, container) {
 	 * updates the slider's max, updates the loading icon, updates board info,
 	 * updates navigation links, updates current player
 	 * 
-	 * @param {{user}}
-	 *            result
+	 * @param result
 	 */
 	this.update = function(result) {
-		console.log('TableUI.update');
-		console.log(result);
+		// console.log('TableUI.update');
+		// console.log(result);
 
 		// TODO take into account the playback mode
 
-		console.log('ui mementoId:' + $this.mementoId);
-		console.log('table mementoId:' + $this.table.mementoId);
+		// console.log('ui mementoId:' + $this.mementoId);
+		// console.log('table mementoId:' + $this.table.mementoId);
 
 		// get the ui's mementoId
 		var mementoId = $this.mementoId;
@@ -2170,7 +2193,7 @@ function TableUI(api, table, container) {
 		}
 
 		// update slider
-		console.log($this.table.mementoId);
+		// console.log($this.table.mementoId);
 		$("#slider").slider({
 			// "min" : 0,
 			"max" : $this.table.mementoId,
@@ -2195,7 +2218,7 @@ function TableUI(api, table, container) {
 		if (result.user) {
 			// console.log(result.user);
 			// console.log($this.currentPlayer);
-			$this.updateLinks();
+			// $this.updateLinks();
 		}
 
 		// if the player is in the middle of placing a reinforcement disk
@@ -2236,3 +2259,21 @@ function TableUI(api, table, container) {
 		// return location;
 	};
 }
+
+/**
+ * @param args
+ * @return {Array}
+ * @this {Array}
+ */
+Array.prototype.remove = function(args) {
+	"use strict";
+	var what, a = arguments, L = a.length, ax;
+	while (L && this.length) {
+		what = a[--L];
+		while ((ax = this.indexOf(what)) !== -1) {
+			this.splice(ax, 1);
+		}
+	}
+	// bug in JSDT
+	return this;
+};
