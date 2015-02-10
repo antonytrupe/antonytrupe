@@ -3,7 +3,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>battledisks - antonytrupe.com</title>
+<title>thediskgame - antonytrupe.com</title>
 <link rel="canonical" href="http://www.antonytrupe.com/thediskgame/">
 
 
@@ -22,5 +22,9 @@
 </head>
 <body>
 	<tdg:header gravatar="${gravatar}" />
+
+	<a href="/thediskgame/games">list of games</a>
+	<br />
+	<a href="/thediskgame/game">start a new game</a>
 </body>
 </html>

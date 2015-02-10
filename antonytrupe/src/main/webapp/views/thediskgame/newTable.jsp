@@ -43,6 +43,7 @@
 </head>
 <body>
 	<tdg:header gravatar="${gravatar}" />
+	<a href="/thediskgame/games">view games</a>
 
 	<div id="container" style="text-align: center;">
 		<h3>New Game</h3>

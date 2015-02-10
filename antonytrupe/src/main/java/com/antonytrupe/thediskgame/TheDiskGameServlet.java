@@ -238,7 +238,12 @@ public class TheDiskGameServlet extends HttpServlet {
 				"/thediskgame/game/" + game.get("id"), "UTF-8"));
 
 		request.setAttribute("tableJson", game.get("json"));
-		request.setAttribute("playerJson", player.get("json"));
+		String playerJson = "{}";
+
+		if (player != null) {
+			playerJson = (String) player.get("json");
+		}
+		request.setAttribute("playerJson", playerJson);
 
 		request.getRequestDispatcher(viewPath + "table.jsp").forward(request,
 				response);
