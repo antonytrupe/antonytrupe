@@ -46,40 +46,40 @@
 </head>
 <body>
 	<form class="openid" method="post"
-		action="/openid/?return_to=" style="text-align: center;">
+		action="/oauth2/?redirect_uri=" style="text-align: center;">
 		<div>
 			<ul class="providers">
 				<!--google -->
 				<li class="direct" title="Google">
 					<div
 						style="background-image: url(/openid-logos.png); background-position: 0 0; width: 102px; height: 62px"></div>
-					<span>https://www.google.com/accounts/o8/id</span>
+					<span>https://accounts.google.com/o/oauth2/auth</span>
 				</li>
-				<!--facebook class=username?-->
+				<!--facebook -->
 				<li class="direct" title="Facebook user name">
 					<div
 						style="background-image: url(/openid-logos.png); background-position: 0 124px; width: 102px; height: 62px"></div>
-					<span>http://{endpoint not yet released}</span>
+					<span>https://www.facebook.com/dialog/oauth</span>
 				</li>
-				<!-- yahoo -->
+				<!-- yahoo 
 				<li class="direct" title="Yahoo">
 					<div
 						style="background-image: url(/openid-logos.png); background-position: 0 517px; width: 102px; height: 62px"></div>
 					<span>http://me.yahoo.com/</span>
-				</li>
+				</li>-->
 				<!-- stackexchange -->
 				<li class="direct" title="StackExchange">
 					<div
 						style="background-image: url(/openid-logos.png); background-position: 0 62px; width: 102px; height: 62px"></div>
 					<span>https://openid.stackexchange.com/</span>
 				</li>
-				<!-- myopenid -->
+				<!-- myopenid 
 				<li class="username" title="MyOpenID user name">
 					<div
 						style="background-image: url(/openid-logos.png); background-position: 0 393px; width: 102px; height: 62px"></div>
 					<span>http://<strong>username</strong>.myopenid.com/
 				</span>
-				</li>
+				</li>-->
 			</ul>
 		</div>
 		<fieldset>

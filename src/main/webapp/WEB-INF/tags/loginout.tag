@@ -1,16 +1,16 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <%@ tag description="Overall Page template" pageEncoding="UTF-8"%>
 <%@ attribute name="user"%>
-<%@ attribute name="return_to"%>
+<%@ attribute name="redirect_uri"%>
 
 <c:choose>
 	<c:when test="${user!=null}">
-		<c:set var="href" value="/login.html?return_to=${return_to}" />
+		<c:set var="href" value="/login.html?return_to=${redirect_uri}" />
 		<c:set var="text" value="log in" />
 	</c:when>
 
 	<c:otherwise>
-		<c:set var="href" value="/openid/?logout=logout&return_to=${return_to}" />
+		<c:set var="href" value="/openid/?logout=logout&redirect_uri=${redirect_uri}" />
 		<c:set var="text" value="log out" />
 
 	</c:otherwise>

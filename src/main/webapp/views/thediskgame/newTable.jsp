@@ -14,17 +14,26 @@
 
 <!-- angular javascript stuff -->
 <script>
-	head.ready(function() {
-		var app = angular.module('thediskgame', []);
-		app.controller('newTable', [ '$scope', function($scope) {
-			//
-			console.log('newTable');
-			
-			console.log(${playerJSON});
-			 this.player = $scope.player = window['player'] = ${playerJSON};
-			 
-		} ]);
-	});
+console.log(5);
+head.ready(function() {
+	console.log(5);
+	var app = angular.module('thediskgame', []);
+	app.controller('newTable', [ '$scope', function($scope) {
+		//
+		//console.log('newTable');
+		
+		//console.log(${playerJSON});
+		this.player = $scope.player = window['player'] = new Player();
+		this.player.update(${playerJson});
+		 
+		 $scope.selectedArmyName=Object.keys(this.player.armies)[0];
+		 
+		 $scope.armyNames=this.player.getArmies();
+		 
+		 //$scope.selectedArmyInfo=player.getArmyInfo($scope.selectedArmyName);
+		 
+	} ]);
+});
 </script>
 
 <style>
@@ -32,6 +41,7 @@
 	text-align: right;
 	display: inline-block;
 	width: 40%;
+	vertical-align: top;
 }
 
 .two {
@@ -52,16 +62,16 @@
 			<input type="hidden" name="action" value="CREATE_TABLE" />
 
 			<div>
-				<label class="one" for="army">Army:</label> <span class="two">
-					<select id="armyName" name="armyName">
-						<option ng-repeat="(armyName,army) in player.armies">{{armyName}}</option>
-				</select>
+				<label class="one" for="army">Army:</label>
+				<span class="two">
+					<select id="armyName" name="armyName" ng-model="selectedArmyName" style="vertical-align: top;">
+						<option ng-repeat="armyName in armyNames">{{armyName}}</option>
+					</select>
+					<div style="display: inline-block; position: absolute;">
+						<div><span>{{player.getArmyInfo(selectedArmyName).points}} point {{player.getArmyInfo(selectedArmyName).faction}}</span></div>
+						<div ng-repeat="(faction,points) in player.getArmyInfo(selectedArmyName).factions">{{faction}}:{{points}}</div>
+					</div>
 				</span>
-			</div>
-
-			<div>
-				<label class="one">Your Army's Points:</label> <span class="two"
-					id="selectedArmyPoints"> </span>
 			</div>
 
 			<div>

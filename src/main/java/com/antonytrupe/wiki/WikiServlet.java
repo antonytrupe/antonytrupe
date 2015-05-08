@@ -1,6 +1,8 @@
 package com.antonytrupe.wiki;
 
 import java.io.IOException;
+
+import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -28,7 +30,8 @@ public class WikiServlet extends HttpServlet {
 					WikiDao.parseServerContent(page.getName()));
 		}
 		request.setAttribute("title", page.getName());
-		request.getRequestDispatcher("/views/wiki/wiki.jsp").forward(request, response);
+		RequestDispatcher requestDispatcher = request.getRequestDispatcher("/views/wiki/wiki.jsp");
+		requestDispatcher.forward(request, response);
 
 	}
 

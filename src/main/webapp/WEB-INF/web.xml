@@ -13,35 +13,6 @@
 		<location>/404.html</location>
 	</error-page>
 
-	<filter>
-		<filter-name>UrlRewriteFilter</filter-name>
-		<filter-class>org.tuckey.web.filters.urlrewrite.UrlRewriteFilter</filter-class>
-		<init-param>
-			<param-name>confReloadCheckInterval</param-name>
-			<param-value>-1</param-value>
-		</init-param>
-		<init-param>
-			<param-name>logLevel</param-name>
-			<param-value>WARN</param-value>
-		</init-param>
-	</filter>
-	<filter-mapping>
-		<filter-name>UrlRewriteFilter</filter-name>
-		<url-pattern>/*</url-pattern>
-		<dispatcher>REQUEST</dispatcher>
-		<dispatcher>FORWARD</dispatcher>
-	</filter-mapping>
-
-	<servlet>
-		<servlet-name>OpenIdServlet</servlet-name>
-		<servlet-class>com.antonytrupe.authentication.OpenIdServlet</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>OpenIdServlet</servlet-name>
-		<url-pattern>/openid/</url-pattern>
-	</servlet-mapping>
-
-
 	<servlet>
 		<servlet-name>default</servlet-name>
 		<servlet-class>org.mortbay.jetty.servlet.DefaultServlet</servlet-class>
@@ -69,6 +40,23 @@
 	<servlet-mapping>
 		<servlet-name>default</servlet-name>
 		<url-pattern>*.jsp</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>OAuth2Servlet</servlet-name>
+		<servlet-class>com.antonytrupe.authentication.OAuth2Servlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>OAuth2Servlet</servlet-name>
+		<url-pattern>/oauth2/</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>OAuth2Servlet</servlet-name>
+		<url-pattern>/oauth2/*</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>OAuth2Servlet</servlet-name>
+		<url-pattern>/oauth2</url-pattern>
 	</servlet-mapping>
 
 	<servlet>

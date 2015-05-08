@@ -96,7 +96,7 @@ function API(options) {
 				error : function(result) {
 					// console.log(result);
 					// TODO move doOnError, or something
-					this.doOnError(result, onError);
+					$this.doOnError(result, onError);
 				}
 			});
 		}

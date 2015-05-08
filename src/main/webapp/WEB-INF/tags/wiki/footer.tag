@@ -5,6 +5,6 @@
 <div class="footer">
 	<a href="/history/${title}" style="font-weight: bold;" title="history">history</a>
 	<a href="/edit/${title}" style="font-weight: bold;" title="edit">edit</a>
-	<a href="login.html?return_to=/${title}" style="font-weight: bold;"
+	<a href="/login.html?redirect_uri=/${title}%2523${title}" style="font-weight: bold;"
 		title="log in">log in</a>
 </div>

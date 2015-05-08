@@ -124,6 +124,13 @@ public class TheDiskGameServlet extends HttpServlet {
 			}
 		}
 
+		String playerJson = "{}";
+
+		if (player != null) {
+			playerJson = (String) player.get("json");
+		}
+		request.setAttribute("playerJson", playerJson);
+
 		String pathInfo = request.getPathInfo();
 		if (pathInfo == null) {
 
@@ -152,7 +159,7 @@ public class TheDiskGameServlet extends HttpServlet {
 				try {
 					long parseInt = Long.parseLong(gameId);
 					ScriptableObject game = API.Table.get(parseInt, 0);
-					game(game, player);
+					game(game);
 				} catch (NumberFormatException e) {
 					newGame(player);
 				} catch (GameEngineException e) {
@@ -216,8 +223,8 @@ public class TheDiskGameServlet extends HttpServlet {
 				response);
 	}
 
-	private void game(ScriptableObject game, ScriptableObject player)
-			throws ServletException, IOException {
+	private void game(ScriptableObject game) throws ServletException,
+			IOException {
 
 		List<String> jsFiles = new ArrayList<String>() {
 			{
@@ -238,12 +245,6 @@ public class TheDiskGameServlet extends HttpServlet {
 				"/thediskgame/game/" + game.get("id"), "UTF-8"));
 
 		request.setAttribute("tableJson", game.get("json"));
-		String playerJson = "{}";
-
-		if (player != null) {
-			playerJson = (String) player.get("json");
-		}
-		request.setAttribute("playerJson", playerJson);
 
 		request.getRequestDispatcher(viewPath + "table.jsp").forward(request,
 				response);
@@ -269,8 +270,8 @@ public class TheDiskGameServlet extends HttpServlet {
 
 		// add the player json as an attribute
 		if (player != null) {
-			String playerJSON = (String) player.get("json");
-			request.setAttribute("playerJSON", playerJSON);
+			String playerJson = (String) player.get("json");
+			request.setAttribute("playerJson", playerJson);
 		}
 
 		request.getRequestDispatcher(viewPath + "newTable.jsp").forward(

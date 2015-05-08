@@ -20,11 +20,17 @@
 <tdg:javascriptIncludes jsFiles="${jsFiles}" />
 
 </head>
-<body>
+<body style="text-align: center;">
 	<tdg:header gravatar="${gravatar}" />
 
-	<a href="/thediskgame/games">list of games</a>
-	<br />
-	<a href="/thediskgame/game">start a new game</a>
+	<a href="/thediskgame/games"
+		style="font-size: 2em; padding: 1em; margin: 1em; background-color: #659CEF; border-radius: 1em; color: white; display: inline-block; border: medium black solid;">Join
+		Game</a>
+
+	<a href="/thediskgame/game"
+		style="font-size: 2em; padding: 1em; margin: 1em; background-color: #659CEF; border-radius: 1em; color: white; display: inline-block; border: medium black solid;">New
+		Game</a>
+
+
 </body>
 </html>

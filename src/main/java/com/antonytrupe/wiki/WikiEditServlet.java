@@ -1,13 +1,14 @@
 package com.antonytrupe.wiki;
 
 import java.io.IOException;
-import java.security.Principal;
 import java.util.Date;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import com.antonytrupe.authentication.OAuth2Servlet;
 
 @SuppressWarnings("serial")
 public class WikiEditServlet extends HttpServlet {
@@ -19,14 +20,13 @@ public class WikiEditServlet extends HttpServlet {
 		String content = (String) request.getParameter("content");
 
 		// make sure someone is logged in first
-		Principal userPrincipal = request.getUserPrincipal();
+		String email = OAuth2Servlet.getAuthenticatedUser(request);
 
-		if (userPrincipal != null) {
-			String userName = userPrincipal.getName();
+		if (email != null) {
 
 			String remoteAddr = request.getRemoteAddr();
 
-			new WikiDao().save(new Page(title, content, remoteAddr, userName,
+			new WikiDao().save(new Page(title, content, remoteAddr, email,
 					new Date()));
 		}
 		response.sendRedirect("/" + title);
@@ -45,8 +45,8 @@ public class WikiEditServlet extends HttpServlet {
 
 		request.setAttribute("content", page.getContent());
 		request.setAttribute("title", page.getName());
-		request.getRequestDispatcher("/views/wiki/wikiEdit.jsp")
-				.forward(request, response);
+		request.getRequestDispatcher("/views/wiki/wikiEdit.jsp").forward(
+				request, response);
 
 	}
 

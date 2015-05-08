@@ -69,13 +69,13 @@ $.fn.openid = function() {
 		var regexS = "[\\?&]" + name + "=([^&#]*)";
 		var regex = new RegExp(regexS);
 		var results = regex.exec(window.location.href);
-		console.log(window.location.href);
+		//console.log(window.location.href);
 		if (results === null) {
 			return "";
 		}
-		console.log(results[1]);
-		console.log(results[1].replace(/\+/g, " "));
-		console.log(decodeURIComponent(results[1].replace(/\+/g, " ")));
+		//console.log(results[1]);
+		//console.log(results[1].replace(/\+/g, " "));
+		//console.log(decodeURIComponent(results[1].replace(/\+/g, " ")));
 		return decodeURIComponent(results[1].replace(/\+/g, " "));
 	};
 
@@ -95,13 +95,13 @@ $.fn.openid = function() {
 	$this.find('li span').hide();
 	$this.find('li').css('line-height', 0).css('cursor', 'pointer');
 	// $this.find('li:eq(0)').click();
-	// encode and set the return_to parameter in the url to the return_to
+	// encode and set the redirect_uri parameter in the url to the redirect_uri
 	// parameter in the form action
 	console.log($this.attr('action'));
-	console.log(getParameterByName('return_to'));
-	console.log($this.attr('action') + getParameterByName('return_to'));
+	console.log(getParameterByName('redirect_uri'));
+	console.log($this.attr('action') + getParameterByName('redirect_uri'));
 	$this
 			.attr('action', $this.attr('action')
-					+ getParameterByName('return_to'));
+					+ getParameterByName('redirect_uri'));
 	return this;
 };

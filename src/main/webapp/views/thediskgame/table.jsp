@@ -31,6 +31,7 @@
 			
 			//ui.player.update(${playerJson});
 			var player = window['player'] = ${playerJson};
+			//console.log(player);
 			ui.update({'user':player.name});
 			//console.log(ui.currentPlayer);
 			// $(ui.init);
@@ -76,7 +77,7 @@
 		<div ng-controller="table as table" style="height: 100%;">
 
 
-			<div id="tableInfo" class="collapsible rightHighlight sidebar"
+			<div id="tableInfo" ng-cloak class="collapsible rightHighlight sidebar"
 				style="float: right; clear: both; box-shadow: -4px 5px 15px rgba(0, 0, 0, 0.35);">
 				<div>{{table.description}}</div>
 				<div id="slider" style="margin: 4px 12px;"></div>

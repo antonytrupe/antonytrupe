@@ -4,6 +4,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.security.InvalidKeyException;
 import java.security.SignatureException;
@@ -67,8 +68,6 @@ import com.google.appengine.api.datastore.Query.FilterOperator;
 import com.google.appengine.api.datastore.Query.FilterPredicate;
 import com.google.appengine.api.datastore.Query.SortDirection;
 import com.google.appengine.api.datastore.Text;
-import com.google.appengine.api.users.User;
-import com.google.appengine.api.users.UserServiceFactory;
 import com.google.appengine.api.utils.SystemProperty;
 import com.google.apphosting.api.ApiProxy.OverQuotaException;
 import com.google.gson.JsonElement;
@@ -1242,10 +1241,12 @@ class API {
 
 	protected static String getUser(final HttpServletRequest request) {
 		Step step = MiniProfiler.step("API.getUser");
+
 		try {
-			final User currentUser = UserServiceFactory.getUserService()
-					.getCurrentUser();
-			return currentUser != null ? currentUser.getEmail() : null;
+			// final User currentUser = UserServiceFactory.getUserService()
+			// .getCurrentUser();
+			// return currentUser != null ? currentUser.getEmail() : null;
+			return (String) request.getSession().getAttribute("email");
 		} finally {
 			step.close();
 		}
@@ -1650,14 +1651,13 @@ class API {
 	}
 
 	private Long getMementoId(final Map<String, Object> parameters) {
-		Step step = MiniProfiler.step("API.getOpenAndActiveTables");
+		Step step = MiniProfiler.step("API.getMementoId");
 		try {
 			Object parameter = API.getParameter("mementoId", parameters);
 			Long mementoId = -1L;
 
 			if (parameter != null) {
 				mementoId = Long.parseLong((String) parameter);
-				;
 			}
 			return mementoId;
 		} finally {
@@ -1805,6 +1805,16 @@ class API {
 
 						if (!(Boolean) joinResult.get("success")) {
 							// TODO give joinResult to the user
+
+						} else {
+							// redirect the user to the game they just joined
+							response.sendRedirect("/thediskgame/game/"
+									+ tableId
+									+ "/"
+									+ URLEncoder.encode(
+											(String) table.get("description"),
+											"UTF-8"));
+							return null;
 						}
 
 					}
@@ -1812,6 +1822,9 @@ class API {
 					// GameEngineException
 					mailUnitTest(createUnitTest(table));
 					throw gee;
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 				}
 				//
 				json.append("\"id\":");
@@ -1872,8 +1885,13 @@ class API {
 
 								final Long tableId = getId(table);
 
-								json.append("\"id\":");
-								json.append(tableId);
+								response.sendRedirect("/thediskgame/game/"
+										+ tableId
+										+ "/"
+										+ URLEncoder.encode((String) table
+												.get("description"), "UTF-8"));
+								return null;
+
 							} else {
 								json.append(",\"messages\":[");
 								// give joinResult to the user
@@ -1890,6 +1908,12 @@ class API {
 						// GameEngineException
 						mailUnitTest(createUnitTest(table));
 						throw gee;
+					} catch (UnsupportedEncodingException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
 					}
 
 				}
@@ -2437,7 +2461,7 @@ class API {
 				String maxPoints2 = (String) getParameter("maxPoints2",
 						parameters);
 
-				//   create mission
+				// create mission
 				Mission.save(campaign, mission, scenario, startingDisks,
 						reinforcements, activations, alignmentRestriction,
 						maxPlayers, control1, army1, maxPoints1, control2,

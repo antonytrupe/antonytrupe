@@ -9,7 +9,7 @@
 	head.js("//ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js",
 			"https://ajax.googleapis.com/ajax/libs/jqueryui/1/jquery-ui.min.js",
 			"//ajax.googleapis.com/ajax/libs/angularjs/1.3.10/angular.min.js",
-			"//angular-ui.github.io/bootstrap/ui-bootstrap-tpls-0.12.0.js",
+			"//angular-ui.github.io/bootstrap/ui-bootstrap-tpls-0.12.0.js"<c:if test="${not empty jsFiles}">,</c:if>
 			<c:forEach var="js" varStatus="varStatus" items="${jsFiles}">
 			"/com/antonytrupe/thediskgame/${js}.js"
 			<c:if test="${varStatus.index lt fn:length(jsFiles)-1}">,</c:if>

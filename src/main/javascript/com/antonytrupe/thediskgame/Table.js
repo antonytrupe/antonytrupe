@@ -86,7 +86,7 @@ function Table(description, maxPlayers, maxPoints, activations, startingDisks,
 	 * @memberOf Table
 	 */
 	this.description = description;
-	
+
 	/**
 	 * @memberOf Table
 	 */
@@ -1339,6 +1339,15 @@ function Table(description, maxPlayers, maxPoints, activations, startingDisks,
 			index = 0;
 		}
 		return $this.playerOrder[index];
+	};
+
+	/**
+	 * @return {Array}
+	 * @memberOf Table
+	 */
+	this.getPlayers = function() {
+		// TODO getPlayers
+		return $this.playerOrder;
 	};
 
 	/**
