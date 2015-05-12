@@ -26,76 +26,35 @@ import org.apache.commons.codec.binary.Base64;
 @SuppressWarnings("serial")
 public class OAuth2Servlet extends HttpServlet {
 
-	private static final String GOOGLE_AUTHORIZATION_ENDPOINT = "https://accounts.google.com/o/oauth2/auth";
-	private static final String GOOGLE_TOKEN_ENDPOINT = "https://www.googleapis.com/oauth2/v3/token";
-
-	private static final String FACEBOOK_AUTHORIZATION_ENDPOINT = "https://www.facebook.com/dialog/oauth";
-	private static final String FACEBOOK_TOKEN_ENDPOINT = "https://graph.facebook.com/v2.3/oauth/access_token";
-
-	private static final String SCOPE = "email";
-	private static final String RESPONSE_TYPE = "code";
-	private static final String GOOGLE_CLIENT_SECRET = "RqP32ldeaqRp1qhtCpFlYDtl";
-	private static final String GOOGLE_CLIENT_ID = "450354004958-h19tr12i7jong5csikfvodjl0o09kfbr.apps.googleusercontent.com";
-
-	private static final String FACEBOOK_CLIENT_ID = "1641471272753055";
-	private static final String REDIRECT_URI = "http://localhost:8888/oauth2/";
-	private static final String GRANT_TYPE = "authorization_code";
-	private static final String FACEBOOK_CLIENT_SECRET = "6f7dde985883441ab4b714ed157063fc";
-
-	private String getCsfrToken() {
-		String state = new BigInteger(130, new SecureRandom()).toString(32);
-		return state;
-	}
-
 	public static String getAuthenticatedUser(HttpServletRequest req) {
 		return (String) req.getSession().getAttribute("email");
 	}
 
-	private String getGoogleAuthorizationUrl(String csfrToken)
-			throws UnsupportedEncodingException {
-		StringBuilder url = new StringBuilder(GOOGLE_AUTHORIZATION_ENDPOINT);
-		url.append("?");
-		url.append("client_id=").append(GOOGLE_CLIENT_ID);
-		url.append("&");
-		url.append("response_type=").append(RESPONSE_TYPE);
-		url.append("&");
-		url.append("scope=").append(SCOPE);
-		url.append("&");
-		url.append("redirect_uri=").append(
-				URLEncoder.encode(REDIRECT_URI, StandardCharsets.UTF_8.name()));
+	private static final String GOOGLE_AUTHORIZATION_ENDPOINT = "https://accounts.google.com/o/oauth2/auth";
 
-		url.append("&");
-		url.append("state=").append(csfrToken);
+	private static final String GOOGLE_TOKEN_ENDPOINT = "https://www.googleapis.com/oauth2/v3/token";
+	private static final String FACEBOOK_AUTHORIZATION_ENDPOINT = "https://www.facebook.com/dialog/oauth";
 
-		return url.toString();
-	}
+	private static final String FACEBOOK_TOKEN_ENDPOINT = "https://graph.facebook.com/v2.3/oauth/access_token";
+	private static final String SCOPE = "email";
+	private static final String RESPONSE_TYPE = "code";
+	private static final String GOOGLE_CLIENT_SECRET = "RqP32ldeaqRp1qhtCpFlYDtl";
 
-	private String getFacebookAuthorizationUrl(String csfrToken)
-			throws UnsupportedEncodingException {
-		StringBuilder url = new StringBuilder(FACEBOOK_AUTHORIZATION_ENDPOINT);
-		url.append("?");
-		url.append("client_id=").append(FACEBOOK_CLIENT_ID);
-		url.append("&");
-		url.append("redirect_uri=").append(
-				URLEncoder.encode(REDIRECT_URI, StandardCharsets.UTF_8.name()));
+	private static final String GOOGLE_CLIENT_ID = "450354004958-h19tr12i7jong5csikfvodjl0o09kfbr.apps.googleusercontent.com";
+	private static final String FACEBOOK_CLIENT_ID = "1641471272753055";
+ 	private static String REDIRECT_URI;
+	private static final String GRANT_TYPE = "authorization_code";
 
-		url.append("&");
-		url.append("state=").append(csfrToken);
-		url.append("&");
-		url.append("scope=").append(SCOPE);
-		url.append("&");
-		url.append("response_type=").append(RESPONSE_TYPE);
-
-		return url.toString();
-	}
-
-	@Override
-	protected void doPost(HttpServletRequest req, HttpServletResponse resp) {
-		doGet(req, resp);
-	}
+	private static final String FACEBOOK_CLIENT_SECRET = "6f7dde985883441ab4b714ed157063fc";
 
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) {
+		String serverName = req.getServerName();
+		int serverPort = req.getServerPort();
+
+		// http://localhost:8888/oauth2/
+		REDIRECT_URI = "http://" + serverName
+				+ (serverPort != 80 ? ":" + serverPort : "") + "/oauth2/";
 		// get the state token from the request
 		String requestCsfr = req.getParameter("state");
 		String sessionCsfr = (String) req.getSession().getAttribute("state");
@@ -174,41 +133,14 @@ public class OAuth2Servlet extends HttpServlet {
 		}
 	}
 
-	private String getFacebookEmail(String facebookAccessToken) {
-		// TODO Auto-generated method stub
-		try {
-			HttpURLConnection connection = (HttpURLConnection) new URL(
-					"https://graph.facebook.com/v2.3/me?access_token="
-							+ facebookAccessToken).openConnection();
+	@Override
+	protected void doPost(HttpServletRequest req, HttpServletResponse resp) {
+		doGet(req, resp);
+	}
 
-			connection.setDoOutput(true); // Triggers POST.
-			connection.setRequestProperty("Accept-Charset",
-					StandardCharsets.UTF_8.name());
-			connection.setRequestProperty("Content-Type",
-					"application/x-www-form-urlencoded;charset="
-							+ StandardCharsets.UTF_8.name());
-
-			// try (OutputStream output = connection.getOutputStream()) {
-			// output.write("".getBytes(StandardCharsets.UTF_8.name()));
-			// }
-
-			try (InputStream response = connection.getInputStream()) {
-
-				JsonReaderFactory factory = Json.createReaderFactory(null);
-
-				JsonReader reader = factory.createReader(response);
-				JsonObject a = (JsonObject) reader.readObject();
-				JsonValue email = a.get("email");
-				return email.toString();
-
-			}
-
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-		return null;
+	private String getCsfrToken() {
+		String state = new BigInteger(130, new SecureRandom()).toString(32);
+		return state;
 	}
 
 	private String getFacebookAccessToken(String code) {
@@ -272,6 +204,79 @@ public class OAuth2Servlet extends HttpServlet {
 			e.printStackTrace();
 		}
 		return null;
+	}
+
+	private String getFacebookAuthorizationUrl(String csfrToken)
+			throws UnsupportedEncodingException {
+		StringBuilder url = new StringBuilder(FACEBOOK_AUTHORIZATION_ENDPOINT);
+		url.append("?");
+		url.append("client_id=").append(FACEBOOK_CLIENT_ID);
+		url.append("&");
+		url.append("redirect_uri=").append(
+				URLEncoder.encode(REDIRECT_URI, StandardCharsets.UTF_8.name()));
+
+		url.append("&");
+		url.append("state=").append(csfrToken);
+		url.append("&");
+		url.append("scope=").append(SCOPE);
+		url.append("&");
+		url.append("response_type=").append(RESPONSE_TYPE);
+
+		return url.toString();
+	}
+
+	private String getFacebookEmail(String facebookAccessToken) {
+		try {
+			HttpURLConnection connection = (HttpURLConnection) new URL(
+					"https://graph.facebook.com/v2.3/me?access_token="
+							+ facebookAccessToken).openConnection();
+
+			connection.setDoOutput(true); // Triggers POST.
+			connection.setRequestProperty("Accept-Charset",
+					StandardCharsets.UTF_8.name());
+			connection.setRequestProperty("Content-Type",
+					"application/x-www-form-urlencoded;charset="
+							+ StandardCharsets.UTF_8.name());
+
+			// try (OutputStream output = connection.getOutputStream()) {
+			// output.write("".getBytes(StandardCharsets.UTF_8.name()));
+			// }
+
+			try (InputStream response = connection.getInputStream()) {
+
+				JsonReaderFactory factory = Json.createReaderFactory(null);
+
+				JsonReader reader = factory.createReader(response);
+				JsonObject a = (JsonObject) reader.readObject();
+				JsonValue email = a.get("email");
+				return email.toString();
+
+			}
+
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		return null;
+	}
+
+	private String getGoogleAuthorizationUrl(String csfrToken)
+			throws UnsupportedEncodingException {
+		StringBuilder url = new StringBuilder(GOOGLE_AUTHORIZATION_ENDPOINT);
+		url.append("?");
+		url.append("client_id=").append(GOOGLE_CLIENT_ID);
+		url.append("&");
+		url.append("response_type=").append(RESPONSE_TYPE);
+		url.append("&");
+		url.append("scope=").append(SCOPE);
+		url.append("&");
+		url.append("redirect_uri=").append(
+				URLEncoder.encode(REDIRECT_URI, StandardCharsets.UTF_8.name()));
+
+		url.append("&");
+		url.append("state=").append(csfrToken);
+
+		return url.toString();
 	}
 
 	private JsonObject getGoogleToken(String code) {

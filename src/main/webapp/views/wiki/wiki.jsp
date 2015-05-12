@@ -50,7 +50,7 @@ body,table td,select,button {
 	font-size: small;
 }
 </style>
-<title><c:if test="${title !='home'}">${title}|</c:if>antonytrupe.com</title>
+<title><c:if test="${title !='home'}">${title}|</c:if>${domain}</title>
 </head>
 <body>${content}
 	<w:footer title="${title}"></w:footer>

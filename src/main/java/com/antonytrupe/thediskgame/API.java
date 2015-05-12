@@ -1823,8 +1823,7 @@ class API {
 					mailUnitTest(createUnitTest(table));
 					throw gee;
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+ 					e.printStackTrace();
 				}
 				//
 				json.append("\"id\":");
@@ -1909,11 +1908,9 @@ class API {
 						mailUnitTest(createUnitTest(table));
 						throw gee;
 					} catch (UnsupportedEncodingException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
+ 						e.printStackTrace();
 					} catch (IOException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
+ 						e.printStackTrace();
 					}
 
 				}
