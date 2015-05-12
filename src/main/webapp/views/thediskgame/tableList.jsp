@@ -1,6 +1,6 @@
 <%@ taglib prefix="tdg" tagdir="/WEB-INF/tags/thediskgame"%>
 <!DOCTYPE html>
-<html ng-app="thediskgame.tableList" ng-cloak>
+<html data-ng-app="thediskgame.tableList" data-ng-cloak>
 <head>
 <title>The Disk Game - antonytrupe.com</title>
 <link rel="canonical" href="http://www.antonytrupe.com/thediskgame/">
@@ -117,12 +117,12 @@ ol.table, ul.table {
 <body>
 	<tdg:header gravatar="${gravatar}" />
 	<a href="/thediskgame/game/new">New Game</a>
-	<div ng-controller="tableList as tableList" id="container" ng-cloak>
+	<div data-ng-controller="tableList as tableList" id="container" data-ng-cloak>
 		<h3>My Games</h3>
-		<ul ng-cloak id="my_tables" style="text-align: left;">
-			<li ng-repeat="table in myTables"><a
+		<ul data-ng-cloak id="my_tables" style="text-align: left;">
+			<li data-ng-repeat="table in myTables"><a
 				href="/thediskgame/game/{{table.id+'/'+table.description.replace(' ','+')}}">{{table.description+':'+table.id}}</a>
-				<span ng-model="table" ng-controller="tableInfo as tableInfo">{{table1.getPlayers()}}</span>
+				<span data-ng-model="table" data-ng-controller="tableInfo as tableInfo">{{table1.getPlayers()}}</span>
 			</li>
 		</ul>
 
@@ -132,28 +132,28 @@ ol.table, ul.table {
 		<!-- table join view -->
 
 
-		<ul ng-cloak class="table" id="open_tables">
+		<ul data-ng-cloak class="table" id="open_tables">
 
 			<li><span>Name</span> <span>Points</span> <span>Players</span> <span>Current
 					Players</span> <span>Current Phase</span> <div>
 
 					<form action="/thediskgame/api?action=JOIN_TABLE" method="post"
 						style="display: inline-block;">
-						<input ng-cloak type="hidden" value="{{table.id}}" name="id" /> <select
-							id="army" name="army" ng-model="selectedArmyName">
-							<option ng-repeat="armyName in armyNames" ng-cloak>{{armyName}}</option>
+						<input data-ng-cloak type="hidden" value="{{table.id}}" name="id" /> <select
+							id="army" name="army" data-ng-model="selectedArmyName">
+							<option data-ng-repeat="armyName in armyNames" data-ng-cloak>{{armyName}}</option>
 						</select>
 					</form> <!-- total points --> <span>{{player.getArmyInfo(selectedArmyName).points}}
 						point </span> <!-- alignments --> <span>{{Object.keys(player.getArmyInfo(selectedArmyName).alignments).join('/')}}</span>
 
 					<!-- all factions --> <span
-					ng-repeat="(faction,points) in player.getArmyInfo(selectedArmyName).factions">{{faction}}({{points}})</span>
+					data-ng-repeat="(faction,points) in player.getArmyInfo(selectedArmyName).factions">{{faction}}({{points}})</span>
 
 			</div></li>
 
-			<li ng-controller="tableInfo as table" ng-model="tableData"
-				ng-class-odd="'odd'" ng-class-even="'even'"
-				ng-repeat="tableData in openTables|filter:excludeTables:myTables">
+			<li data-ng-controller="tableInfo as table" data-ng-model="tableData"
+				data-ng-class-odd="'odd'" data-ng-class-even="'even'"
+				data-ng-repeat="tableData in openTables|filter:excludeTables:myTables">
 				<!-- description --> <a style="vertical-align: top;"
 				href="/thediskgame/game/{{table.id+'/'+table.description.replace(' ','+')}}">{{table.description}}</a>
 
@@ -165,8 +165,8 @@ ol.table, ul.table {
 		</ul>
 
 		<h3>In-progress Games</h3>
-		<ul ng-cloak
-			ng-repeat="table in activeTables|filter:excludeTables:myTables"
+		<ul data-ng-cloak
+			data-ng-repeat="table in activeTables|filter:excludeTables:myTables"
 			id="active_tables" style="text-align: left;">
 			<li><a
 				href="/thediskgame/game/{{table.id+'/'+table.description.replace(' ','+')}}">{{table.description+':'+table.id}}</a></li>

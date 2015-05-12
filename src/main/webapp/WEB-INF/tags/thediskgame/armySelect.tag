@@ -15,16 +15,16 @@ head.ready(function() {
 		} ]);
 	});
 </script>
-<div ng-controller="armySelector as armySelector">
-	<select id="armyName" name="armyName" ng-model="selectedArmyName"
+<div data-ng-controller="armySelector as armySelector">
+	<select id="armyName" name="armyName" data-ng-model="selectedArmyName"
 		style="vertical-align: top;">
-		<option ng-repeat="armyName in armyNames">{{armyName}}</option>
+		<option data-ng-repeat="armyName in armyNames">{{armyName}}</option>
 	</select>
 	<div style="display: inline-block; position: absolute;">
 		<div>
 			<span>{{player.getArmyInfo(selectedArmyName).points}} point
 				{{player.getArmyInfo(selectedArmyName).faction}}</span>
 		</div>
-		<div ng-repeat="(faction,points) in player.getArmyInfo(selectedArmyName).factions">{{faction}}:{{points}}</div>
+		<div data-ng-repeat="(faction,points) in player.getArmyInfo(selectedArmyName).factions">{{faction}}:{{points}}</div>
 	</div>
 </div>

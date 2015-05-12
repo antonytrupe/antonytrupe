@@ -1,6 +1,6 @@
 ﻿<%@ taglib prefix="tdg" tagdir="/WEB-INF/tags/thediskgame"%>
 <!DOCTYPE html>
-<html ng-app="thediskgame">
+<html data-ng-app="thediskgame">
 <head>
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=9">
@@ -74,48 +74,48 @@
 
 	<div style="position: fixed; top: 4em; bottom: 0px; left: 0; right: 0;">
 		<!-- start table -->
-		<div ng-controller="table as table" style="height: 100%;">
+		<div data-ng-controller="table as table" style="height: 100%;">
 
 
-			<div id="tableInfo" ng-cloak class="collapsible rightHighlight sidebar"
+			<div id="tableInfo" data-ng-cloak class="collapsible rightHighlight sidebar"
 				style="float: right; clear: both; box-shadow: -4px 5px 15px rgba(0, 0, 0, 0.35);">
 				<div>{{table.description}}</div>
 				<div id="slider" style="margin: 4px 12px;"></div>
 
 				<!--  -->
 				<ol style="display: inline-block;">
-					<li ng-show="table.getSegment()=='JOIN'"><span>JOIN</span>
+					<li data-ng-show="table.getSegment()=='JOIN'"><span>JOIN</span>
 						<ol
-							ng-repeat="player in table.playerOrder|isPlayerInSegment:'JOIN'">
+							data-ng-repeat="player in table.playerOrder|isPlayerInSegment:'JOIN'">
 							<li>{{table.getPlayerInfo(player).name}}</li>
-						</ol></li>
+						</ol> 
 					</li>
 					<li><span>REINFORCEMENTS</span>
 						<ol
-							ng-repeat="player in table.playerOrder|isPlayerInSegment:'REINFORCEMENTS'">
+							data-ng-repeat="player in table.playerOrder|isPlayerInSegment:'REINFORCEMENTS'">
 							<li>{{table.getPlayerInfo(player).name}}</li>
 						</ol></li>
 					<li><span>ACTIVATION</span>
 						<ol
-							ng-repeat="player in table.playerOrder|isPlayerInSegment:'ACTIVATION'">
+							data-ng-repeat="player in table.playerOrder|isPlayerInSegment:'ACTIVATION'">
 							<li>{{table.getPlayerInfo(player).name}}</li>
 						</ol></li>
 					<li><span>MISSILE</span>
 						<ol
-							ng-repeat="player in table.playerOrder|isPlayerInSegment:'MISSILE'">
+							data-ng-repeat="player in table.playerOrder|isPlayerInSegment:'MISSILE'">
 							<li>{{table.getPlayerInfo(player).name}}</li>
 						</ol></li>
 					<li><span>COMBAT</span>
 						<ol
-							ng-repeat="player in table.playerOrder|isPlayerInSegment:'COMBAT'">
+							data-ng-repeat="player in table.playerOrder|isPlayerInSegment:'COMBAT'">
 							<li>{{table.getPlayerInfo(player).name}}</li>
 						</ol></li>
 					<li><span>REMOVE_COUNTERS</span>
 						<ol
-							ng-repeat="player in table.playerOrder|isPlayerInSegment:'REMOVE_COUNTERS'">
+							data-ng-repeat="player in table.playerOrder|isPlayerInSegment:'REMOVE_COUNTERS'">
 							<li>{{table.getPlayerInfo(player).name}}</li>
 						</ol></li>
-					<li ng-show="table.getSegment()=='FINISHED'"><span>FINISHED</span></li>
+					<li data-ng-show="table.getSegment()=='FINISHED'"><span>FINISHED</span></li>
 				</ol>
 
 			</div>

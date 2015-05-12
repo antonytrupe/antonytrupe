@@ -3,7 +3,7 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<!DOCTYPE html PUBLIC >
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
@@ -95,17 +95,17 @@ body,table td,select,button {
 	}
 </script>
 </head>
-<body ng-app="wiki" ng-controller="edit">
+<body data-ng-app="wiki" data-ng-controller="edit">
 	<form action="/edit/${title}" method="POST" style="float: left;"
 		name="form" id="form">
 		<!--ng-model="page.content"  -->
-		<textarea id="content" name="content" ng-model="page.content"
+		<textarea id="content" name="content" data-ng-model="page.content"
 			style="height: 860px; width: 900px; margin: 0px;">${content}</textarea>
 		<button type=submit style="display: block;">Submit</button>
-		<button type=reset style="display: block;" ng-click="reset()">Reset</button>
+		<button type=reset style="display: block;" data-ng-click="reset()">Reset</button>
 	</form>
 	<!-- data bound ng-bind-html="page.content | to_trusted" -->
 	<div style="float: left; margin-left: 6px;"
-		ng-bind-html="page.content | wiki | to_trusted">${content}</div>
+		data-ng-bind-html="page.content | wiki | to_trusted">${content}</div>
 </body>
 </html>

@@ -1,6 +1,6 @@
 <%@ taglib prefix="tdg" tagdir="/WEB-INF/tags/thediskgame"%>
 <!DOCTYPE html>
-<html ng-app="thediskgame">
+<html data-ng-app="thediskgame">
 <head>
 <title>Disk Editor - The Disk Game - antonytrupe.com</title>
 <link rel="canonical" href="http://www.antonytrupe.com/thediskgame/">
@@ -80,7 +80,7 @@ head.ready(
 	</div>
 
 	<div style="display: inline-block;">
-		<div ng-controller="diskEditor as diskEditor"
+		<div data-ng-controller="diskEditor as diskEditor"
 			style="text-align: center;">
 			<!-- <h2 id="diskName">{{diskEditor.disk.name||"New Disk"}}</h2>  -->
 			<form id="disk" style="text-align: center; display: table;"
@@ -88,105 +88,105 @@ head.ready(
 				<div>
 					<label class="one" for="name">Name:</label> <span class="two">
 						<input type="search" name="name" id="name"
-						ng-model="diskEditor.disk.name" ng-change="change()" />
+						data-ng-model="diskEditor.disk.name" data-ng-change="change()" />
 						<button id="find"
 							onclick="window.location='/thediskgame/diskEditor/'+$('#name').val();return false;">find</button>
-						<del ng-show="diskEditor.originalDisk.name!=diskEditor.disk.name">{{diskEditor.originalDisk.name}}</del>
+						<del data-ng-show="diskEditor.originalDisk.name!=diskEditor.disk.name">{{diskEditor.originalDisk.name}}</del>
 					</span>
 				</div>
 				<div>
 					<label class="one" for="type">Disk Type:</label> <span class="two">
-						<select name="type" id="type" ng-model="diskEditor.disk.type"
-						ng-change="change()">
+						<select name="type" id="type" data-ng-model="diskEditor.disk.type"
+						data-ng-change="change()">
 							<option value="creature">Creature</option>
 							<option value="spell">Spell</option>
 							<option value="missile">Missile</option>
 							<option value="land">Land</option>
-					</select> <del ng-show="diskEditor.originalDisk.type!=diskEditor.disk.type">{{diskEditor.originalDisk.type}}</del>
+					</select> <del data-ng-show="diskEditor.originalDisk.type!=diskEditor.disk.type">{{diskEditor.originalDisk.type}}</del>
 					</span>
 				</div>
 				<div>
 					<label class="one" for="attack">Attack:</label> <span class="two">
 						<input name="attack" id="attack" type="number" min="0" max="30"
-						ng-model="diskEditor.disk.attack" ng-change="change()" /> <del
-							ng-show="diskEditor.originalDisk.attack!=diskEditor.disk.attack">{{diskEditor.originalDisk.attack}}</del>
+						data-ng-model="diskEditor.disk.attack" data-ng-change="change()" /> <del
+							data-ng-show="diskEditor.originalDisk.attack!=diskEditor.disk.attack">{{diskEditor.originalDisk.attack}}</del>
 					</span>
 				</div>
 				<div>
 					<label class="one" for="defense">Defense:</label> <span class="two">
 						<input name="defense" id="defense" type="number" min="0" max="30"
-						ng-model="diskEditor.disk.defense" ng-change="change()" /> <del
-							ng-show="diskEditor.originalDisk.defense!=diskEditor.disk.defense">{{diskEditor.originalDisk.defense}}</del>
+						data-ng-model="diskEditor.disk.defense" data-ng-change="change()" /> <del
+							data-ng-show="diskEditor.originalDisk.defense!=diskEditor.disk.defense">{{diskEditor.originalDisk.defense}}</del>
 					</span>
 				</div>
 				<div>
 					<label class="one" for="toughness">Toughness:</label> <span
 						class="two"> <input name="toughness" id="toughness"
 						type="number" min="0" max="30"
-						ng-model="diskEditor.disk.toughness" ng-change="change()" /> <del
-							ng-show="diskEditor.originalDisk.toughness!=diskEditor.disk.toughness">{{diskEditor.originalDisk.toughness}}</del>
+						data-ng-model="diskEditor.disk.toughness" data-ng-change="change()" /> <del
+							data-ng-show="diskEditor.originalDisk.toughness!=diskEditor.disk.toughness">{{diskEditor.originalDisk.toughness}}</del>
 					</span>
 				</div>
 				<div>
 					<label class="one" for="movement">Movement:</label> <span
 						class="two"> <input name="movement" id="movement"
-						type="number" min="0" max="30" ng-model="diskEditor.disk.movement"
-						ng-change="change()" /> <del
-							ng-show="diskEditor.originalDisk.movement!=diskEditor.disk.movement">{{diskEditor.originalDisk.movement}}</del>
+						type="number" min="0" max="30" data-ng-model="diskEditor.disk.movement"
+						data-ng-change="change()" /> <del
+							data-ng-show="diskEditor.originalDisk.movement!=diskEditor.disk.movement">{{diskEditor.originalDisk.movement}}</del>
 					</span>
 				</div>
 				<div>
 					<label class="one" for="wounds">Wounds:</label> <span class="two">
 						<input name="wounds" id="wounds" type="number" min="1" max="4"
-						ng-model="diskEditor.disk.wounds" ng-change="change()" /> <del
-							ng-show="diskEditor.originalDisk.wounds!=diskEditor.disk.wounds">{{diskEditor.originalDisk.wounds}}</del>
+						data-ng-model="diskEditor.disk.wounds" data-ng-change="change()" /> <del
+							data-ng-show="diskEditor.originalDisk.wounds!=diskEditor.disk.wounds">{{diskEditor.originalDisk.wounds}}</del>
 					</span>
 				</div>
 				<div>
 					<label class="one" for="flying">Flying:</label> <span class="two">
 						<input name="flying" id="flying" type="checkbox"
-						ng-model="diskEditor.disk.flying" ng-change="change()" /> <del
-							ng-show="diskEditor.originalDisk.flying!=diskEditor.disk.flying">{{diskEditor.originalDisk.flying}}</del>
+						data-ng-model="diskEditor.disk.flying" data-ng-change="change()" /> <del
+							data-ng-show="diskEditor.originalDisk.flying!=diskEditor.disk.flying">{{diskEditor.originalDisk.flying}}</del>
 					</span>
 				</div>
 				<div>
 					<label class="one" for="swashbuckler">Swashbuckler:</label> <span
 						class="two"> <input name="swashbuckler" id="swashbuckler"
-						type="checkbox" ng-model="diskEditor.disk.swashbuckler"
-						ng-change="change()" /> <del
-							ng-show="diskEditor.originalDisk.swashbuckler!=diskEditor.disk.swashbuckler">{{diskEditor.originalDisk.swashbuckler}}</del>
+						type="checkbox" data-ng-model="diskEditor.disk.swashbuckler"
+						data-ng-change="change()" /> <del
+							data-ng-show="diskEditor.originalDisk.swashbuckler!=diskEditor.disk.swashbuckler">{{diskEditor.originalDisk.swashbuckler}}</del>
 					</span>
 				</div>
 				<div>
 					<label class="one" for="missileImmunity">Immune to
 						Missiles:</label> <span class="two"> <input name="missileImmunity"
 						id="missileImmunity" type="checkbox"
-						ng-model="diskEditor.disk.missileImmunity" ng-change="change()" />
+						data-ng-model="diskEditor.disk.missileImmunity" data-ng-change="change()" />
 						<del
-							ng-show="diskEditor.originalDisk.missileImmunity!=diskEditor.disk.missileImmunity">{{diskEditor.originalDisk.missileImmunity}}</del>
+							data-ng-show="diskEditor.originalDisk.missileImmunity!=diskEditor.disk.missileImmunity">{{diskEditor.originalDisk.missileImmunity}}</del>
 					</span>
 				</div>
 				<div>
 					<label class="one" for="firstblow">First Blow:</label> <span
 						class="two"> <input name="firstblow" id="firstblow"
-						type="checkbox" ng-model="diskEditor.disk.firstblow"
-						ng-change="change()" /> <del
-							ng-show="diskEditor.originalDisk.firstblow!=diskEditor.disk.firstblow">{{diskEditor.originalDisk.firstblow}}</del>
+						type="checkbox" data-ng-model="diskEditor.disk.firstblow"
+						data-ng-change="change()" /> <del
+							data-ng-show="diskEditor.originalDisk.firstblow!=diskEditor.disk.firstblow">{{diskEditor.originalDisk.firstblow}}</del>
 					</span>
 				</div>
 				<div>
 					<label class="one" for="archer">Archer:</label> <span class="two">
 						<input name="archer" id="archer" type="checkbox"
-						ng-model="diskEditor.disk.archer" ng-change="change()" /> <del
-							ng-show="diskEditor.originalDisk.archer!=diskEditor.disk.archer">{{diskEditor.originalDisk.archer}}</del>
+						data-ng-model="diskEditor.disk.archer" data-ng-change="change()" /> <del
+							data-ng-show="diskEditor.originalDisk.archer!=diskEditor.disk.archer">{{diskEditor.originalDisk.archer}}</del>
 					</span>
 				</div>
-				<fieldset id="archerInfo" ng-show="diskEditor.disk.archer">
+				<fieldset id="archerInfo" data-ng-show="diskEditor.disk.archer">
 					<div>
 						<label class="one" for="arrows">Arrows:</label> <span class="two">
 							<input name="arrows" id="arrows" type="number" min="0" max="9"
-							ng-model="diskEditor.disk.arrows" ng-change="change()" /> <del
-								ng-show="diskEditor.originalDisk.arrows!=diskEditor.disk.arrows">{{diskEditor.originalDisk.arrows}}</del>
+							data-ng-model="diskEditor.disk.arrows" data-ng-change="change()" /> <del
+								data-ng-show="diskEditor.originalDisk.arrows!=diskEditor.disk.arrows">{{diskEditor.originalDisk.arrows}}</del>
 						</span>
 					</div>
 					<div>
@@ -223,7 +223,7 @@ head.ready(
 				<div>
 					<label class="one" for="faction">Faction:</label> <span class="two">
 						<select name="faction" id="faction"
-						ng-model="diskEditor.disk.faction" ng-change="change()">
+						data-ng-model="diskEditor.disk.faction" data-ng-change="change()">
 							<option value="Acolyte">Acolyte</option>
 							<option value="Dragon">Dragon</option>
 							<option value="Dwarf">Dwarf</option>

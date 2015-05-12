@@ -1,6 +1,6 @@
 <%@ taglib prefix="tdg" tagdir="/WEB-INF/tags/thediskgame"%>
 <!DOCTYPE html>
-<html ng-app="thediskgame" style="height: 100%;">
+<html data-ng-app="thediskgame" style="height: 100%;">
 <head>
 <title>battledisks - antonytrupe.com</title>
 <link rel="canonical" href="http://www.antonytrupe.com/battledisks/">
@@ -57,19 +57,19 @@ head.ready(function() {
 
 	<div id="container" style="text-align: center;">
 		<h3>New Game</h3>
-		<form ng-controller="newTable as newTable" id="form"
+		<form data-ng-controller="newTable as newTable" id="form"
 			action="/thediskgame/api" method="GET" style="text-align: center;">
 			<input type="hidden" name="action" value="CREATE_TABLE" />
 
 			<div>
 				<label class="one" for="army">Army:</label>
 				<span class="two">
-					<select id="armyName" name="armyName" ng-model="selectedArmyName" style="vertical-align: top;">
-						<option ng-repeat="armyName in armyNames">{{armyName}}</option>
+					<select id="armyName" name="armyName" data-ng-model="selectedArmyName" style="vertical-align: top;">
+						<option data-ng-repeat="armyName in armyNames">{{armyName}}</option>
 					</select>
 					<div style="display: inline-block; position: absolute;">
 						<div><span>{{player.getArmyInfo(selectedArmyName).points}} point {{player.getArmyInfo(selectedArmyName).faction}}</span></div>
-						<div ng-repeat="(faction,points) in player.getArmyInfo(selectedArmyName).factions">{{faction}}:{{points}}</div>
+						<div data-ng-repeat="(faction,points) in player.getArmyInfo(selectedArmyName).factions">{{faction}}:{{points}}</div>
 					</div>
 				</span>
 			</div>
