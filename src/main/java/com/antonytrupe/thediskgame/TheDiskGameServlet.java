@@ -59,7 +59,7 @@ public class TheDiskGameServlet extends HttpServlet {
 				request, response);
 	}
 
-	private void tableList() throws ServletException, IOException {
+	private void gameList() throws ServletException, IOException {
 		String openTables = API.Table.getOpen();
 		request.setAttribute("openTables", openTables);
 
@@ -132,8 +132,10 @@ public class TheDiskGameServlet extends HttpServlet {
 		request.setAttribute("playerJson", playerJson);
 
 		String pathInfo = request.getPathInfo();
+		// String contextPath = request.getContextPath();
+		String requestURI = request.getRequestURI();
+		// StringBuffer requestURL = request.getRequestURL();
 		if (pathInfo == null) {
-
 			pathInfo = "";
 		}
 		// remove leading backslash
@@ -171,7 +173,22 @@ public class TheDiskGameServlet extends HttpServlet {
 			break;
 
 		case "games":
-			tableList();
+			// TODO make them log in first
+			if (player == null) {
+				String string = "/login.html?redirect_uri="
+						+ URLEncoder.encode(
+								"/thediskgame/api?action=LOG_IN"
+										+ URLEncoder.encode(
+												"&return_to="
+														+ URLEncoder.encode(
+																requestURI,
+																"UTF-8"),
+												"UTF-8"), "UTF-8");
+				response.sendRedirect(string);
+				return;
+			}
+
+			gameList();
 			break;
 
 		case "missioneditor":

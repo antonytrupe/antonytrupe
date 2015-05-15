@@ -1246,7 +1246,8 @@ class API {
 			// final User currentUser = UserServiceFactory.getUserService()
 			// .getCurrentUser();
 			// return currentUser != null ? currentUser.getEmail() : null;
-			return (String) request.getSession().getAttribute("email");
+			String email = (String) request.getSession().getAttribute("email");
+			return email;
 		} finally {
 			step.close();
 		}
@@ -1823,7 +1824,7 @@ class API {
 					mailUnitTest(createUnitTest(table));
 					throw gee;
 				} catch (IOException e) {
- 					e.printStackTrace();
+					e.printStackTrace();
 				}
 				//
 				json.append("\"id\":");
@@ -1908,9 +1909,9 @@ class API {
 						mailUnitTest(createUnitTest(table));
 						throw gee;
 					} catch (UnsupportedEncodingException e) {
- 						e.printStackTrace();
+						e.printStackTrace();
 					} catch (IOException e) {
- 						e.printStackTrace();
+						e.printStackTrace();
 					}
 
 				}

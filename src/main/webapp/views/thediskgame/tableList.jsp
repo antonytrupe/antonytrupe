@@ -49,6 +49,8 @@ head.ready(function() {
 		
 		this.player = $scope.player = window['player'] = playerService.getPlayer();
 		
+		console.log(this.player);
+		console.log(this.player.armies);
 		$scope.selectedArmyName=Object.keys(this.player.armies)[0];
 		 
 		$scope.armyNames=this.player.getArmies();
