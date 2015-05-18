@@ -1,6 +1,8 @@
 package com.antonytrupe.wiki;
 
 import java.io.IOException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.Date;
 
 import javax.servlet.ServletException;
@@ -29,7 +31,9 @@ public class WikiEditServlet extends HttpServlet {
 			new WikiDao().save(new Page(title, content, remoteAddr, email,
 					new Date()));
 		}
-		response.sendRedirect("/" + title);
+		String decodedName = URLDecoder.decode(title, "UTF-8"); 
+		String encodedName = URLEncoder.encode(decodedName, "UTF-8");
+		response.sendRedirect("/" + encodedName);
 	}
 
 	public void doGet(HttpServletRequest request, HttpServletResponse response)

@@ -1,6 +1,8 @@
 package com.antonytrupe.wiki;
 
 import java.io.IOException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
@@ -22,14 +24,17 @@ public class WikiServlet extends HttpServlet {
 			page = new Page(title);
 		}
 
+		String decodedName = URLDecoder.decode(title, "UTF-8");
+		String encodedName = URLEncoder.encode(decodedName, "UTF-8");
 		if (page.getContent() != null) {
 			request.setAttribute("content",
 					WikiDao.parseServerContent(page.getContent()));
 		} else {
 			request.setAttribute("content",
-					WikiDao.parseServerContent(page.getName()));
+					WikiDao.parseServerContent(decodedName));
 		}
-		request.setAttribute("title", page.getName());
+		request.setAttribute("decodedName", decodedName);
+		request.setAttribute("encodedName", encodedName);
 		request.setAttribute("domain",
 				request.getServerName().replaceAll("www.", ""));
 		RequestDispatcher requestDispatcher = request

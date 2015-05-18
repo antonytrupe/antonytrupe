@@ -71,10 +71,24 @@ body,table td,select,button {
 					//console.log(text);
 					return text.replace(/\[{2}([^\|\]]*)(?:\|?)(.*?)\]{2}?/g,
 							function(match, $1, $2, offset, string) {
-								console.log('$1:' + $1);
-								console.log('$2:' + $2);
+								//console.log('$1:' + $1);
+								//console.log('$2:' + $2);
 								return '<a href="/' + $1 + '">'
 										+ ($2 ? $2 : $1) + "</a>";
+							});
+				};
+			});
+	
+	angular.module('wiki').filter(
+			'newline',
+			function() {
+				return function(text) {
+					console.log('newline');
+					return text.replace(/(\r\n|\n)/g,
+							function(match, $1, $2, offset, string) {
+								//console.log('$1:' + $1);
+								//console.log('$2:' + $2);
+								return '<br />';
 							});
 				};
 			});
@@ -106,6 +120,6 @@ body,table td,select,button {
 	</form>
 	<!-- data bound ng-bind-html="page.content | to_trusted" -->
 	<div style="float: left; margin-left: 6px;"
-		data-ng-bind-html="page.content | wiki | to_trusted">${content}</div>
+		data-ng-bind-html="page.content | wiki | newline | to_trusted">${content}</div>
 </body>
 </html>

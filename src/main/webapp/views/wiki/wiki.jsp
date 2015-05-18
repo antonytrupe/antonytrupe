@@ -50,9 +50,9 @@ body,table td,select,button {
 	font-size: small;
 }
 </style>
-<title><c:if test="${title !='home'}">${title}|</c:if>${domain}</title>
+<title><c:if test="${decodedName !='home'}">${decodedName}|</c:if>${domain}</title>
 </head>
 <body>${content}
-	<w:footer title="${title}"></w:footer>
+	<w:footer encodedName="${encodedName}"></w:footer>
 </body>
 </html>
