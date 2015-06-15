@@ -25,7 +25,7 @@
 
 @font-face {
 	font-family: Open Sans;
-	src: url("http://fonts.googleapis.com/css?family=Open+Sans")
+	src: url("https://fonts.googleapis.com/css?family=Open+Sans")
 		format("opentype");
 }
 

@@ -87,9 +87,6 @@ head.ready(function() {
 	rel='stylesheet' type='text/css'>
 <link rel="stylesheet" href="/thediskgame.css" type="text/css"
 	media="all">
-<!-- 
-<link href="//netdna.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css" rel="stylesheet">
- -->
 
 <style>
 ol.table, ul.table {
@@ -104,6 +101,7 @@ ol.table, ul.table {
 .table>li>* {
 	display: table-cell;
 	border-bottom: thin black solid;
+	margin: 1em;
 }
 
 .table>.even {
@@ -119,15 +117,16 @@ ol.table, ul.table {
 <body>
 	<tdg:header gravatar="${gravatar}" />
 	<a href="/thediskgame/game/new">New Game</a>
-	<div data-ng-controller="tableList as tableList" id="container" data-ng-cloak>
+	<div data-ng-controller="tableList as tableList" id="container"
+		data-ng-cloak>
 		<h3>My Games</h3>
 		<ul data-ng-cloak id="my_tables" style="text-align: left;">
 			<li data-ng-repeat="table in myTables"><a
 				href="/thediskgame/game/{{table.id+'/'+table.description.replace(' ','+')}}">{{table.description+':'+table.id}}</a>
-				<span data-ng-model="table" data-ng-controller="tableInfo as tableInfo">{{table1.getPlayers()}}</span>
+				<span data-ng-model="table"
+				data-ng-controller="tableInfo as tableInfo">{{table1.getPlayers()}}</span>
 			</li>
 		</ul>
-
 
 		<!--  -->
 		<h3>Joinable Games</h3>
@@ -137,21 +136,27 @@ ol.table, ul.table {
 		<ul data-ng-cloak class="table" id="open_tables">
 
 			<li><span>Name</span> <span>Points</span> <span>Players</span> <span>Current
-					Players</span> <span>Current Phase</span> <div>
+					Players</span> <span>Current Phase</span>
+				<div>
 
 					<form action="/thediskgame/api?action=JOIN_TABLE" method="post"
 						style="display: inline-block;">
-						<input data-ng-cloak type="hidden" value="{{table.id}}" name="id" /> <select
-							id="army" name="army" data-ng-model="selectedArmyName">
+						<input data-ng-cloak type="hidden" value="{{table.id}}" name="id" />
+						<select id="army" name="army" data-ng-model="selectedArmyName">
 							<option data-ng-repeat="armyName in armyNames" data-ng-cloak>{{armyName}}</option>
 						</select>
-					</form> <!-- total points --> <span>{{player.getArmyInfo(selectedArmyName).points}}
-						point </span> <!-- alignments --> <span>{{Object.keys(player.getArmyInfo(selectedArmyName).alignments).join('/')}}</span>
+					</form>
+					<!-- total points -->
+					<span>{{player.getArmyInfo(selectedArmyName).points}} point
+					</span>
+					<!-- alignments -->
+					<span>{{Object.keys(player.getArmyInfo(selectedArmyName).alignments).join('/')}}</span>
 
-					<!-- all factions --> <span
-					data-ng-repeat="(faction,points) in player.getArmyInfo(selectedArmyName).factions">{{faction}}({{points}})</span>
+					<!-- all factions -->
+					<span
+						data-ng-repeat="(faction,points) in player.getArmyInfo(selectedArmyName).factions">{{faction}}({{points}})</span>
 
-			</div></li>
+				</div></li>
 
 			<li data-ng-controller="tableInfo as table" data-ng-model="tableData"
 				data-ng-class-odd="'odd'" data-ng-class-even="'even'"

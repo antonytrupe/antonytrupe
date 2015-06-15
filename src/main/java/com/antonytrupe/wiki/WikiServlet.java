@@ -10,6 +10,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.antonytrupe.authentication.OAuth2Servlet;
+
 @SuppressWarnings("serial")
 public class WikiServlet extends HttpServlet {
 	public void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -26,6 +28,11 @@ public class WikiServlet extends HttpServlet {
 
 		String decodedName = URLDecoder.decode(title, "UTF-8");
 		String encodedName = URLEncoder.encode(decodedName, "UTF-8");
+		
+		//user stuff
+		String email = OAuth2Servlet.getAuthenticatedUser(request);
+		request.setAttribute("email", email);
+		
 		if (page.getContent() != null) {
 			request.setAttribute("content",
 					WikiDao.parseServerContent(page.getContent()));

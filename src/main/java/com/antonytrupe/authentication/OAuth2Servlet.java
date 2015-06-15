@@ -17,6 +17,7 @@ import javax.json.JsonObject;
 import javax.json.JsonReader;
 import javax.json.JsonReaderFactory;
 import javax.json.JsonValue;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -25,6 +26,8 @@ import org.apache.commons.codec.binary.Base64;
 
 @SuppressWarnings("serial")
 public class OAuth2Servlet extends HttpServlet {
+
+	private static final String REDIRECT_URI_NAME = "redirect_uri";
 
 	public static String getAuthenticatedUser(HttpServletRequest req) {
 		return (String) req.getSession().getAttribute("email");
@@ -42,7 +45,7 @@ public class OAuth2Servlet extends HttpServlet {
 
 	private static final String GOOGLE_CLIENT_ID = "450354004958-h19tr12i7jong5csikfvodjl0o09kfbr.apps.googleusercontent.com";
 	private static final String FACEBOOK_CLIENT_ID = "1641471272753055";
- 	private static String REDIRECT_URI;
+	private static String REDIRECT_URI;
 	private static final String GRANT_TYPE = "authorization_code";
 
 	private static final String FACEBOOK_CLIENT_SECRET = "6f7dde985883441ab4b714ed157063fc";
@@ -55,80 +58,102 @@ public class OAuth2Servlet extends HttpServlet {
 		// http://localhost:8888/oauth2/
 		REDIRECT_URI = "http://" + serverName
 				+ (serverPort != 80 ? ":" + serverPort : "") + "/oauth2/";
-		// get the state token from the request
-		String requestCsfr = req.getParameter("state");
-		String sessionCsfr = (String) req.getSession().getAttribute("state");
 
-		if (requestCsfr != null && sessionCsfr != null
-				&& requestCsfr.compareTo(sessionCsfr) == 0) {
-			// we're coming back from valid login
-			// Exchange code for access token and ID token
-			String code = req.getParameter(RESPONSE_TYPE);
-			String as = (String) req.getSession().getAttribute(
-					"authorization_endpoint");
-			String redirect_uri = (String) req.getSession().getAttribute(
-					"redirect_uri");
-
-			String email = null;
-			switch (as) {
-			case GOOGLE_AUTHORIZATION_ENDPOINT:
-				JsonObject token = getGoogleToken(code);
-				email = token.get("email").toString();
-				break;
-			case FACEBOOK_AUTHORIZATION_ENDPOINT:
-				String facebookAccessToken = getFacebookAccessToken(code);
-				email = getFacebookEmail(facebookAccessToken);
-
-				break;
-			}
+		// String pathInfo = req.getPathInfo();
+		if (req.getPathInfo().contains("logout")) {
+			Cookie[] cookies = req.getCookies();
+			if (cookies != null)
+				for (int i = 0; i < cookies.length; i++) {
+					cookies[i].setValue("");
+					cookies[i].setPath("/");
+					cookies[i].setMaxAge(0);
+					resp.addCookie(cookies[i]);
+				}
+			String redirect_uri = req.getParameter(REDIRECT_URI_NAME);
 			try {
-				// stash the email somewhere useful
-				req.getSession().setAttribute("email", email);
 				resp.sendRedirect(redirect_uri);
 			} catch (IOException e) {
+				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			return;
-		}
+		} else {
+			// get the state token from the request
+			String requestCsfr = req.getParameter("state");
+			String sessionCsfr = (String) req.getSession()
+					.getAttribute("state");
 
-		else if (requestCsfr == null) {
-			// new login flow
-			String openid_identifier = (String) req
-					.getParameter("openid_identifier");
-			String url = null;
-			String csfrToken = getCsfrToken();
-			// save the state/csfr in the session
-			req.getSession().setAttribute("state", csfrToken);
-			try {
-				switch (openid_identifier) {
+			if (requestCsfr != null && sessionCsfr != null
+					&& requestCsfr.compareTo(sessionCsfr) == 0) {
+				// we're coming back from valid login
+				// Exchange code for access token and ID token
+				String code = req.getParameter(RESPONSE_TYPE);
+				String as = (String) req.getSession().getAttribute(
+						"authorization_endpoint");
+				String redirect_uri = (String) req.getSession().getAttribute(
+						REDIRECT_URI_NAME);
+
+				String email = null;
+				switch (as) {
 				case GOOGLE_AUTHORIZATION_ENDPOINT:
-					req.getSession().setAttribute("authorization_endpoint",
-							GOOGLE_AUTHORIZATION_ENDPOINT);
-					url = getGoogleAuthorizationUrl(csfrToken);
+					JsonObject token = getGoogleToken(code);
+					email = token.get("email").toString();
 					break;
 				case FACEBOOK_AUTHORIZATION_ENDPOINT:
-					req.getSession().setAttribute("authorization_endpoint",
-							FACEBOOK_AUTHORIZATION_ENDPOINT);
-					url = getFacebookAuthorizationUrl(csfrToken);
-					break;
-				default:
-					openid_identifier = "";
+					String facebookAccessToken = getFacebookAccessToken(code);
+					email = getFacebookEmail(facebookAccessToken);
+
 					break;
 				}
-			} catch (UnsupportedEncodingException e1) {
-				e1.printStackTrace();
+				try {
+					// stash the email somewhere useful
+					req.getSession().setAttribute("email", email);
+					resp.sendRedirect(redirect_uri);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				return;
 			}
 
-			// save the location to redirect back to in the session
-			String reredirect_uri = req.getParameter("redirect_uri");
-			req.getSession().setAttribute("redirect_uri", reredirect_uri);
+			else if (requestCsfr == null) {
+				// new login flow
+				String openid_identifier = (String) req
+						.getParameter("openid_identifier");
+				String url = null;
+				String csfrToken = getCsfrToken();
+				// save the state/csfr in the session
+				req.getSession().setAttribute("state", csfrToken);
+				try {
+					switch (openid_identifier) {
+					case GOOGLE_AUTHORIZATION_ENDPOINT:
+						req.getSession().setAttribute("authorization_endpoint",
+								GOOGLE_AUTHORIZATION_ENDPOINT);
+						url = getGoogleAuthorizationUrl(csfrToken);
+						break;
+					case FACEBOOK_AUTHORIZATION_ENDPOINT:
+						req.getSession().setAttribute("authorization_endpoint",
+								FACEBOOK_AUTHORIZATION_ENDPOINT);
+						url = getFacebookAuthorizationUrl(csfrToken);
+						break;
+					default:
+						openid_identifier = "";
+						break;
+					}
+				} catch (UnsupportedEncodingException e1) {
+					e1.printStackTrace();
+				}
 
-			try {
+				// save the location to redirect back to in the session
+				String reredirect_uri = req.getParameter(REDIRECT_URI_NAME);
+				req.getSession()
+						.setAttribute(REDIRECT_URI_NAME, reredirect_uri);
 
-				resp.sendRedirect(url);
-				return;
-			} catch (IOException e) {
-				e.printStackTrace();
+				try {
+
+					resp.sendRedirect(url);
+					return;
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
 			}
 		}
 	}

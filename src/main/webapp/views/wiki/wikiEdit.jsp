@@ -31,13 +31,13 @@
 		format("opentype");
 }
 
-html,body {
+html, body {
 	height: 100%;
 	margin: 0 !important;
 	font-family: Open Sans !important
 }
 
-a,a:visited {
+a, a:visited {
 	color: #0066cc;
 	text-decoration: none;
 }
@@ -47,7 +47,7 @@ a:hover {
 	text-decoration: underline;
 }
 
-body,table td,select,button {
+body, table td, select, button {
 	font-family: Arial Unicode MS, Arial, sans-serif;
 	font-size: small;
 }
@@ -78,23 +78,32 @@ body,table td,select,button {
 							});
 				};
 			});
-	
+
 	angular.module('wiki').filter(
 			'newline',
 			function() {
 				return function(text) {
 					console.log('newline');
-					return text.replace(/(\r\n|\n)/g,
-							function(match, $1, $2, offset, string) {
-								//console.log('$1:' + $1);
-								//console.log('$2:' + $2);
-								return '<br />';
-							});
+					return text.replace(/(\r\n|\n)/g, function(match, $1, $2,
+							offset, string) {
+						//console.log('$1:' + $1);
+						//console.log('$2:' + $2);
+						return '<br />';
+					});
 				};
 			});
 
 	function edit($scope) {
 		//console.log(document.getElementById("content").innerHTML);
+
+		$scope.newline = function() {
+			console.log('newline');
+			console.log(document.getElementById('content').value);
+			var a = document.getElementById('content').value;
+			a = a.replace(/(?:\<br \/\>)(\r?\n)/g, '<br />\n');
+			console.log(a);
+			$scope.page.content = a;
+		};
 
 		$scope.reset = function() {
 			document.getElementById("form").reset();
@@ -114,12 +123,13 @@ body,table td,select,button {
 		name="form" id="form">
 		<!--ng-model="page.content"  -->
 		<textarea id="content" name="content" data-ng-model="page.content"
+			data-ng-change="newline()" id="content"
 			style="height: 860px; width: 900px; margin: 0px;">${content}</textarea>
 		<button type=submit style="display: block;">Submit</button>
 		<button type=reset style="display: block;" data-ng-click="reset()">Reset</button>
 	</form>
 	<!-- data bound ng-bind-html="page.content | to_trusted" -->
 	<div style="float: left; margin-left: 6px;"
-		data-ng-bind-html="page.content | wiki | newline | to_trusted">${content}</div>
+		data-ng-bind-html="page.content | wiki | to_trusted">${content}</div>
 </body>
 </html>

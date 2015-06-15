@@ -65,6 +65,6 @@ body,table td,select,button {
 			</tr>
 		</c:forEach>
 	</table>
-	<w:footer title="${title}"></w:footer>
+	<w:footer encodedName="${encodedName}"></w:footer>
 </body>
 </html>
