@@ -15,18 +15,18 @@
 
 
 <nav
-	style="background-color: grey; color: white; vertical-align: middle; height: 4em; text-align: left;">
+	style="background-color: grey; color: white; vertical-align: middle; height: 2em; text-align: left;">
 	<!-- logo -->
 	<a
-		style="font-size: 2em; color: black; text-decoration: none; text-shadow: white 0px 0px 4px; font-weight: bold; padding-left: .5em; padding-top: .25em; display: inline-block; margin: 0;"
+		style="font-size: 1em; color: black; text-decoration: none; text-shadow: white 0px 0px 4px; font-weight: bold; padding-left: .5em; padding-top: .25em; display: inline-block; margin: 0;"
 		href="/thediskgame/">Orbis Bella:The Disk Game</a>
 
 	<!--  -->
 	<span style="position: fixed; right: 0;"> <c:choose>
 			<c:when test="${playerName != null}">
 				<!-- profile -->
-				<img src="https://secure.gravatar.com/avatar/${gravatar}?d=mm&s=64"
-					style="height: 4em; border-radius: 6px;" />
+				<img src="https://secure.gravatar.com/avatar/${gravatar}?d=mm&s=32"
+					style="height: 2em; border-radius: 6px;" />
 				<!-- http://www.antonytrupe.com/antonytrupe/openid?logout=logout&return_to=%2Fbattledisks%2F -->
 				<a href="/openid/?logout=logout&redirect_uri=${hereEncoded}">log
 					out</a>

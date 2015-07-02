@@ -11,23 +11,33 @@
 <!-- angular javascript stuff -->
 <script>
 head.ready( 
- function(){
-	var app=angular.module('thediskgame',[]);
-	 app.controller('diskEditor',['$scope',function($scope){
-		this.disk = $scope.disk = window['disk'] = new Disk();
-		this.disk.update(${diskJson});
-		
-		this.originalDisk=$scope.originalDisk=window['originalDisk']=new Disk();
-		this.originalDisk.update(${diskJson});
- 		
-		this.ui = $scope.ui = window['ui'] = new DiskUI('#table');
- 		
- 		$scope.change=function()
- 		{
- 			$scope.ui.update($scope.disk);
- 		};
-		ui.update(this.disk);
-	 }]);
+  function(){
+    var app=angular.module('thediskgame',[]);
+	app.controller('diskEditor',['$scope',function($scope){
+      this.init=function(diskJson){
+        this.disk = $scope.disk = window['disk'] = new Disk();
+        this.disk.update(diskJson);
+        
+        this.originalDisk = $scope.originalDisk=window['originalDisk']=new Disk();
+        $scope.originalDisk.update( diskJson );
+        
+        this.ui = $scope.ui = window['ui'] = new DiskUI('#table');
+      };
+      
+      this.init(${diskJson});
+      
+      $scope.change=function(){
+        $scope.ui.update($scope.disk);
+      };
+      ui.update(this.disk);
+    }]);
+    app.controller('diskList',['$scope',function($scope){
+      this.init=function(disksJson){
+    	console.log(disksJson);
+        this.disks = window.disks=$scope.disks = disksJson;
+      };
+      this.init(${allDisks});
+    }]);
 });
 </script>
 
@@ -74,11 +84,22 @@ head.ready(
 		</fieldset>
 	</form>
 	<hr />
+	<!-- the list of disks -->
+	<div data-ng-controller="diskList as diskList" style="display:inline-block;vertical-align:top;">
+      <ul>
+        <li data-ng-repeat="(diskName,diskInfo) in disks">
+          <a href="/thediskgame/diskeditor/{{diskName}}" >{{diskName}}</a>
+        </li>
+      </ul>
+	</div>
+	
+	<!-- the canvas to draw the disk -->
 	<div style="display: inline-block; vertical-align: top;">
 		<canvas id="canvas" style="margin: 0 auto;" width="560px"
 			height="550px"></canvas>
 	</div>
 
+	<!-- the form to edit/create the disk -->
 	<div style="display: inline-block;">
 		<div data-ng-controller="diskEditor as diskEditor"
 			style="text-align: center;">

@@ -90,7 +90,7 @@ public class OAuth2Servlet extends HttpServlet {
 				switch (as) {
 				case GOOGLE_AUTHORIZATION_ENDPOINT:
 					JsonObject token = getGoogleToken(code);
-					email = token.get("email").toString();
+					email = token.get("email").toString().replace("\"", "");
 					break;
 				case FACEBOOK_AUTHORIZATION_ENDPOINT:
 					String facebookAccessToken = getFacebookAccessToken(code);
