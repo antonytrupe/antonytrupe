@@ -2026,8 +2026,7 @@ function TableUI(api, table, container) {
 		}, 2000);
 	};
 
-	// TODO
-	this.displayNextMemento = function() {
+ 	this.displayNextMemento = function() {
 		if ($this.initialized) {
 			return;
 		}

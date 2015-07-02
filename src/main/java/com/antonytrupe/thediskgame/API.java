@@ -301,6 +301,19 @@ class API {
 			}
 		}
 
+		public static HashMap<Object, HashMap<String, Object>> getAll() {
+			Step step = MiniProfiler.step("API.Disk.getAll");
+			try {
+				// final ScriptableObject disk = create();
+
+				final HashMap<Object, HashMap<String, Object>> hashMap = ge.persistence
+						.getAll("Disk");
+				return hashMap;
+			} finally {
+				step.close();
+			}
+		}
+
 	}
 
 	static class Mission {

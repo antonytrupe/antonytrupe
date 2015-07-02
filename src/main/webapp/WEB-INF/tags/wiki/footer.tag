@@ -12,9 +12,6 @@
 				title="edit">edit</a>
 			<a href="/oauth2/logout?logout=logout&redirect_uri=/${encodedName}"
 				style="font-weight: bold;" title="log in">log out</a>
-				
-				<!-- http://www.antonytrupe.com/openid/?logout=logout&redirect_uri=%2Fthediskgame%2F -->
-
 		</c:when>
 		<c:otherwise>
 			<a href="/login.html?redirect_uri=/${encodedName}%2523${encodedName}"

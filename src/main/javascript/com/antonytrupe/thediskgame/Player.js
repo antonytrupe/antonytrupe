@@ -201,7 +201,6 @@ function Player(name) {
 		}
 		for (var i = s; i < 0; i++) {
 			var diskInfo = $this.getDiskInfo(i);
-			// TODO
 			if (diskInfo.disk.name === diskName) {
 				return i;
 			}

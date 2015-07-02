@@ -131,7 +131,7 @@ function AI(table, player) {
 	}
 
 	function getActions() {
-		// TODO
+		// TODO implement getActions
 		// get all the disks that can activate
 		// get all the options for each disk
 	}

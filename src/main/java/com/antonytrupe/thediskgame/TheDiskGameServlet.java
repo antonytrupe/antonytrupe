@@ -23,6 +23,10 @@ import com.google.appengine.api.blobstore.BlobstoreServiceFactory;
 
 @SuppressWarnings("serial")
 public class TheDiskGameServlet extends HttpServlet {
+	private static final String DISKEDITOR = "diskeditor";
+	private static final String MISSIONEDITOR = "missioneditor";
+	private static final String GAMES = "games";
+	private static final String GAME = "game";
 	private static String viewPath = "/views/thediskgame/";
 	private HttpServletRequest request;
 	private HttpServletResponse response;
@@ -146,7 +150,7 @@ public class TheDiskGameServlet extends HttpServlet {
 
 		switch (action.toLowerCase()) {
 
-		case "game":
+		case GAME:
 			String gameId = "new";
 			if (parts.length > 1 && parts[1] != null) {
 
@@ -172,8 +176,8 @@ public class TheDiskGameServlet extends HttpServlet {
 
 			break;
 
-		case "games":
-			// TODO make them log in first
+		case GAMES:
+			//   make them log in first
 			if (player == null) {
 				String string = "/login.html?redirect_uri="
 						+ URLEncoder.encode(
@@ -191,7 +195,7 @@ public class TheDiskGameServlet extends HttpServlet {
 			gameList();
 			break;
 
-		case "missioneditor":
+		case MISSIONEDITOR:
 
 			HashMap<String, Object> mission = new HashMap<String, Object>();
 			if (parts.length >= 2) {
@@ -206,7 +210,7 @@ public class TheDiskGameServlet extends HttpServlet {
 			missionEditor(mission);
 			break;
 
-		case "diskeditor":
+		case DISKEDITOR:
 			ScriptableObject disk = null;
 			if (parts.length >= 2) {
 				String diskName = URLDecoder.decode(parts[1], "UTF-8");
@@ -311,6 +315,9 @@ public class TheDiskGameServlet extends HttpServlet {
 				add("DiskUI");
 			}
 		};
+		
+		HashMap<Object, HashMap<String, Object>> allDisks = API.Disk.getAll();
+		request.setAttribute("allDisks", allDisks);
 
 		request.setAttribute("jsFiles", jsFiles);
 

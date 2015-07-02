@@ -1767,7 +1767,6 @@ function Table(description, maxPlayers, maxPoints, activations, startingDisks,
 	 * @memberOf Table
 	 */
 	this.isOverLapping = function(one, two) {
-		// TODO 0
 
 		// $this.debug('one.location:' + JSON.stringify(one.location));
 

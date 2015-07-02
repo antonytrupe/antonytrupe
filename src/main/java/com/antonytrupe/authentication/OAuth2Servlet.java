@@ -56,8 +56,7 @@ public class OAuth2Servlet extends HttpServlet {
 		int serverPort = req.getServerPort();
 
 		// http://localhost:8888/oauth2/
-		REDIRECT_URI = "http://" + serverName
-				+ (serverPort != 80 ? ":" + serverPort : "") + "/oauth2/";
+		REDIRECT_URI = "http://" + serverName + (serverPort != 80 ? ":" + serverPort : "") + "/oauth2/";
 
 		// String pathInfo = req.getPathInfo();
 		if (req.getPathInfo().contains("logout")) {
@@ -73,24 +72,19 @@ public class OAuth2Servlet extends HttpServlet {
 			try {
 				resp.sendRedirect(redirect_uri);
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		} else {
 			// get the state token from the request
 			String requestCsfr = req.getParameter("state");
-			String sessionCsfr = (String) req.getSession()
-					.getAttribute("state");
+			String sessionCsfr = (String) req.getSession().getAttribute("state");
 
-			if (requestCsfr != null && sessionCsfr != null
-					&& requestCsfr.compareTo(sessionCsfr) == 0) {
+			if (requestCsfr != null && sessionCsfr != null && requestCsfr.compareTo(sessionCsfr) == 0) {
 				// we're coming back from valid login
 				// Exchange code for access token and ID token
 				String code = req.getParameter(RESPONSE_TYPE);
-				String as = (String) req.getSession().getAttribute(
-						"authorization_endpoint");
-				String redirect_uri = (String) req.getSession().getAttribute(
-						REDIRECT_URI_NAME);
+				String as = (String) req.getSession().getAttribute("authorization_endpoint");
+				String redirect_uri = (String) req.getSession().getAttribute(REDIRECT_URI_NAME);
 
 				String email = null;
 				switch (as) {
@@ -116,8 +110,7 @@ public class OAuth2Servlet extends HttpServlet {
 
 			else if (requestCsfr == null) {
 				// new login flow
-				String openid_identifier = (String) req
-						.getParameter("openid_identifier");
+				String openid_identifier = (String) req.getParameter("openid_identifier");
 				String url = null;
 				String csfrToken = getCsfrToken();
 				// save the state/csfr in the session
@@ -125,13 +118,11 @@ public class OAuth2Servlet extends HttpServlet {
 				try {
 					switch (openid_identifier) {
 					case GOOGLE_AUTHORIZATION_ENDPOINT:
-						req.getSession().setAttribute("authorization_endpoint",
-								GOOGLE_AUTHORIZATION_ENDPOINT);
+						req.getSession().setAttribute("authorization_endpoint", GOOGLE_AUTHORIZATION_ENDPOINT);
 						url = getGoogleAuthorizationUrl(csfrToken);
 						break;
 					case FACEBOOK_AUTHORIZATION_ENDPOINT:
-						req.getSession().setAttribute("authorization_endpoint",
-								FACEBOOK_AUTHORIZATION_ENDPOINT);
+						req.getSession().setAttribute("authorization_endpoint", FACEBOOK_AUTHORIZATION_ENDPOINT);
 						url = getFacebookAuthorizationUrl(csfrToken);
 						break;
 					default:
@@ -144,8 +135,7 @@ public class OAuth2Servlet extends HttpServlet {
 
 				// save the location to redirect back to in the session
 				String reredirect_uri = req.getParameter(REDIRECT_URI_NAME);
-				req.getSession()
-						.setAttribute(REDIRECT_URI_NAME, reredirect_uri);
+				req.getSession().setAttribute(REDIRECT_URI_NAME, reredirect_uri);
 
 				try {
 
@@ -171,30 +161,21 @@ public class OAuth2Servlet extends HttpServlet {
 	private String getFacebookAccessToken(String code) {
 
 		try {
-			HttpURLConnection connection = (HttpURLConnection) new URL(
-					FACEBOOK_TOKEN_ENDPOINT).openConnection();
+			HttpURLConnection connection = (HttpURLConnection) new URL(FACEBOOK_TOKEN_ENDPOINT).openConnection();
 
 			connection.setDoOutput(true); // Triggers POST.
-			connection.setRequestProperty("Accept-Charset",
-					StandardCharsets.UTF_8.name());
+			connection.setRequestProperty("Accept-Charset", StandardCharsets.UTF_8.name());
 			connection.setRequestProperty("Content-Type",
-					"application/x-www-form-urlencoded;charset="
-							+ StandardCharsets.UTF_8.name());
+					"application/x-www-form-urlencoded;charset=" + StandardCharsets.UTF_8.name());
 
-			String query = String
-					.format("code=%s&client_id=%s&client_secret=%s&redirect_uri=%s&grant_type=%s",
-							URLEncoder.encode(code,
-									StandardCharsets.UTF_8.name()), URLEncoder
-									.encode(FACEBOOK_CLIENT_ID,
-											StandardCharsets.UTF_8.name()),
-							URLEncoder.encode(FACEBOOK_CLIENT_SECRET,
-									StandardCharsets.UTF_8.name()), URLEncoder
-									.encode(REDIRECT_URI,
-											StandardCharsets.UTF_8.name()),
-							URLEncoder.encode(GRANT_TYPE,
-									StandardCharsets.UTF_8.name())
+			String query = String.format("code=%s&client_id=%s&client_secret=%s&redirect_uri=%s&grant_type=%s",
+					URLEncoder.encode(code, StandardCharsets.UTF_8.name()),
+					URLEncoder.encode(FACEBOOK_CLIENT_ID, StandardCharsets.UTF_8.name()),
+					URLEncoder.encode(FACEBOOK_CLIENT_SECRET, StandardCharsets.UTF_8.name()),
+					URLEncoder.encode(REDIRECT_URI, StandardCharsets.UTF_8.name()),
+					URLEncoder.encode(GRANT_TYPE, StandardCharsets.UTF_8.name())
 
-					);
+			);
 
 			try (OutputStream output = connection.getOutputStream()) {
 				output.write(query.getBytes(StandardCharsets.UTF_8.name()));
@@ -231,14 +212,12 @@ public class OAuth2Servlet extends HttpServlet {
 		return null;
 	}
 
-	private String getFacebookAuthorizationUrl(String csfrToken)
-			throws UnsupportedEncodingException {
+	private String getFacebookAuthorizationUrl(String csfrToken) throws UnsupportedEncodingException {
 		StringBuilder url = new StringBuilder(FACEBOOK_AUTHORIZATION_ENDPOINT);
 		url.append("?");
 		url.append("client_id=").append(FACEBOOK_CLIENT_ID);
 		url.append("&");
-		url.append("redirect_uri=").append(
-				URLEncoder.encode(REDIRECT_URI, StandardCharsets.UTF_8.name()));
+		url.append("redirect_uri=").append(URLEncoder.encode(REDIRECT_URI, StandardCharsets.UTF_8.name()));
 
 		url.append("&");
 		url.append("state=").append(csfrToken);
@@ -253,15 +232,12 @@ public class OAuth2Servlet extends HttpServlet {
 	private String getFacebookEmail(String facebookAccessToken) {
 		try {
 			HttpURLConnection connection = (HttpURLConnection) new URL(
-					"https://graph.facebook.com/v2.3/me?access_token="
-							+ facebookAccessToken).openConnection();
+					"https://graph.facebook.com/v2.3/me?access_token=" + facebookAccessToken).openConnection();
 
 			connection.setDoOutput(true); // Triggers POST.
-			connection.setRequestProperty("Accept-Charset",
-					StandardCharsets.UTF_8.name());
+			connection.setRequestProperty("Accept-Charset", StandardCharsets.UTF_8.name());
 			connection.setRequestProperty("Content-Type",
-					"application/x-www-form-urlencoded;charset="
-							+ StandardCharsets.UTF_8.name());
+					"application/x-www-form-urlencoded;charset=" + StandardCharsets.UTF_8.name());
 
 			// try (OutputStream output = connection.getOutputStream()) {
 			// output.write("".getBytes(StandardCharsets.UTF_8.name()));
@@ -285,8 +261,7 @@ public class OAuth2Servlet extends HttpServlet {
 		return null;
 	}
 
-	private String getGoogleAuthorizationUrl(String csfrToken)
-			throws UnsupportedEncodingException {
+	private String getGoogleAuthorizationUrl(String csfrToken) throws UnsupportedEncodingException {
 		StringBuilder url = new StringBuilder(GOOGLE_AUTHORIZATION_ENDPOINT);
 		url.append("?");
 		url.append("client_id=").append(GOOGLE_CLIENT_ID);
@@ -295,8 +270,7 @@ public class OAuth2Servlet extends HttpServlet {
 		url.append("&");
 		url.append("scope=").append(SCOPE);
 		url.append("&");
-		url.append("redirect_uri=").append(
-				URLEncoder.encode(REDIRECT_URI, StandardCharsets.UTF_8.name()));
+		url.append("redirect_uri=").append(URLEncoder.encode(REDIRECT_URI, StandardCharsets.UTF_8.name()));
 
 		url.append("&");
 		url.append("state=").append(csfrToken);
@@ -307,29 +281,20 @@ public class OAuth2Servlet extends HttpServlet {
 	private JsonObject getGoogleToken(String code) {
 		try {
 
-			HttpURLConnection connection = (HttpURLConnection) new URL(
-					GOOGLE_TOKEN_ENDPOINT).openConnection();
+			HttpURLConnection connection = (HttpURLConnection) new URL(GOOGLE_TOKEN_ENDPOINT).openConnection();
 			connection.setDoOutput(true); // Triggers POST.
-			connection.setRequestProperty("Accept-Charset",
-					StandardCharsets.UTF_8.name());
+			connection.setRequestProperty("Accept-Charset", StandardCharsets.UTF_8.name());
 			connection.setRequestProperty("Content-Type",
-					"application/x-www-form-urlencoded;charset="
-							+ StandardCharsets.UTF_8.name());
+					"application/x-www-form-urlencoded;charset=" + StandardCharsets.UTF_8.name());
 
-			String query = String
-					.format("code=%s&client_id=%s&client_secret=%s&redirect_uri=%s&grant_type=%s",
-							URLEncoder.encode(code,
-									StandardCharsets.UTF_8.name()), URLEncoder
-									.encode(GOOGLE_CLIENT_ID,
-											StandardCharsets.UTF_8.name()),
-							URLEncoder.encode(GOOGLE_CLIENT_SECRET,
-									StandardCharsets.UTF_8.name()), URLEncoder
-									.encode(REDIRECT_URI,
-											StandardCharsets.UTF_8.name()),
-							URLEncoder.encode(GRANT_TYPE,
-									StandardCharsets.UTF_8.name())
+			String query = String.format("code=%s&client_id=%s&client_secret=%s&redirect_uri=%s&grant_type=%s",
+					URLEncoder.encode(code, StandardCharsets.UTF_8.name()),
+					URLEncoder.encode(GOOGLE_CLIENT_ID, StandardCharsets.UTF_8.name()),
+					URLEncoder.encode(GOOGLE_CLIENT_SECRET, StandardCharsets.UTF_8.name()),
+					URLEncoder.encode(REDIRECT_URI, StandardCharsets.UTF_8.name()),
+					URLEncoder.encode(GRANT_TYPE, StandardCharsets.UTF_8.name())
 
-					);
+			);
 
 			try (OutputStream output = connection.getOutputStream()) {
 				output.write(query.getBytes(StandardCharsets.UTF_8.name()));
@@ -343,12 +308,10 @@ public class OAuth2Servlet extends HttpServlet {
 				JsonObject a = (JsonObject) reader.readObject();
 				String id_token_encoded = a.getString("id_token");
 				String[] id_token_encoded_parts = id_token_encoded.split("\\.");
-				byte[] payloadDecodedBytes = Base64
-						.decodeBase64(id_token_encoded_parts[1]);
+				byte[] payloadDecodedBytes = Base64.decodeBase64(id_token_encoded_parts[1]);
 				String payloadDecoded = new String(payloadDecodedBytes);
 
-				JsonReader b = factory.createReader(new StringReader(
-						payloadDecoded));
+				JsonReader b = factory.createReader(new StringReader(payloadDecoded));
 				JsonObject payloadJson = b.readObject();
 				return payloadJson;
 				// System.out.println(email);
