@@ -239,7 +239,7 @@ public class GameEngine {
 				} catch (CacheException ce) {
 				}
 			} catch (EntityNotFoundException enf) {
-				// enf.printStackTrace();
+				  enf.printStackTrace();
 			}
 			return object;
 		}

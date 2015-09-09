@@ -7,7 +7,7 @@
 	<packaging>war</packaging>
 
 	<properties>
-		<appengine.target.version>1.9.22</appengine.target.version>
+		<appengine.target.version>1.9.26</appengine.target.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<jersey.version>1.17.1</jersey.version>
 	</properties>
@@ -35,13 +35,13 @@
 		<dependency>
 			<groupId>org.mozilla</groupId>
 			<artifactId>rhino</artifactId>
-			<version>1.7.6</version>
+			<version>1.7.7</version>
 		</dependency>
 
 		<dependency>
 			<groupId>ca.jimr</groupId>
 			<artifactId>gae-mini-profiler</artifactId>
-			<version>2.0.2</version>
+			<version>2.0.3</version>
 			<type>jar</type>
 			<scope>compile</scope>
 		</dependency>
@@ -65,21 +65,9 @@
 		</dependency>
 
 		<dependency>
-			<groupId>org.glassfish</groupId>
-			<artifactId>javax.json</artifactId>
-			<version>1.0.4</version>
-		</dependency>
-
-		<dependency>
 			<groupId>jstl</groupId>
 			<artifactId>jstl</artifactId>
 			<version>1.2</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.tuckey</groupId>
-			<artifactId>urlrewritefilter</artifactId>
-			<version>4.0.4</version>
 		</dependency>
 
 		<dependency>

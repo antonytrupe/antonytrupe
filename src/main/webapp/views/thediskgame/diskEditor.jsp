@@ -33,7 +33,7 @@ head.ready(
     }]);
     app.controller('diskList',['$scope',function($scope){
       this.init=function(disksJson){
-    	console.log(disksJson);
+    	//console.log(disksJson);
         this.disks = window.disks=$scope.disks = disksJson;
       };
       this.init(${allDisks});
@@ -73,7 +73,7 @@ head.ready(
 	<h1 style="text-align: center; margin: 0;">Disk Editor</h1>
 	<hr />
 	<div style="text-align: center; margin: 0; padding: 0;">
-		<a href="/battledisks/api?action=DOWNLOAD_DISKS">download all
+		<a href="/thediskgame/api?action=DOWNLOAD_DISKS">download all
 			disks</a>
 	</div>
 	<form action="${uploadurl}" method="POST" enctype="multipart/form-data"

@@ -1,28 +1,41 @@
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="tdg" tagdir="/WEB-INF/tags/thediskgame"%>
 <!DOCTYPE html>
-<html style="height: 100%;">
+<html style="height: 100%;" data-ng-app="thediskgame">
 <head>
 <title>battledisks - antonytrupe.com</title>
 <link rel="canonical" href="http://www.antonytrupe.com/battledisks/">
+
+<!-- javascript includes -->
+<tdg:javascriptIncludes jsFiles="${jsFiles}" />
+
+<!-- angular javascript stuff -->
+<script>
+head.ready( 
+  function(){
+    var app=angular.module('thediskgame',[]);
+	app.controller('missionEditor',['$scope',function($scope){
+		this.init=function(missionJson){
+	        this.mission = $scope.mission = window['mission'] = missionJson;
+ 	      };
+      
+	      this.init(${missionJson});
+   
+    }]);
+	app.controller('missionList',['$scope',function($scope){
+	      this.init=function(missions){
+	    	//console.log(disksJson);
+	        this.missions = window.missions=$scope.missions = missions;
+	      };
+	      this.init(${allMissionsJson});
+	    }]);
+});
+</script>
+
 <link href='http://fonts.googleapis.com/css?family=Open+Sans'
 	rel='stylesheet' type='text/css'>
 <link rel="stylesheet" href="/thediskgame.css" type="text/css"
 	media="all">
-
-<script
-	src="//cdnjs.cloudflare.com/ajax/libs/headjs/1.0.3/head.load.min.js"></script>
-<script type="text/javascript">
-	head.js("https://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js",
-	//	"/battledisks/battledisks.min.js",
-	"/com/antonytrupe/thediskgame/Main.js",
-			"/com/antonytrupe/thediskgame/Player.js",
-			"/com/antonytrupe/thediskgame/Table.js",
-			"/com/antonytrupe/thediskgame/Disk.js",
-			"/com/antonytrupe/thediskgame/Point.js",
-			"/com/antonytrupe/thediskgame/API.js", function() {
-				new Main().newMission();
-			});
-</script>
 
 <script type="text/javascript">
 	var _gaq = _gaq || [];
@@ -56,13 +69,16 @@
 </style>
 </head>
 <body>
+	<tdg:header gravatar="${gravatar}" />
 
-	<div style="position: absolute;">
+	<!-- the list of missions -->
+	<div style="display: inline-block;">
 		<h3>Missions</h3>
+		<ul>
 		<c:forEach items="${allMissions}" var="mission">
-			<li><a href="/thediskgame/missionEditor/${mission.key}">${mission.key}
-			</a></li>
+			<li><a href="/thediskgame/missionEditor/${mission.key}">${mission.key}</a></li>
 		</c:forEach>
+		</ul>
 	</div>
 
 	<div id="container" style="text-align: center;">

@@ -6,12 +6,14 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map.Entry;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.mozilla.javascript.NativeObject;
 import org.mozilla.javascript.ScriptableObject;
 
 import com.antonytrupe.MD5Util;
@@ -22,34 +24,52 @@ import com.google.gson.Gson;
 
 @SuppressWarnings("serial")
 public class TheDiskGameServlet extends HttpServlet {
-	private static final String DISKEDITOR = "diskeditor";
-	private static final String MISSIONEDITOR = "missioneditor";
-	private static final String GAMES = "games";
-	private static final String GAME = "game";
+
+	public enum PAGE {
+		DISKEDITOR("diskeditor"), MISSIONEDITOR("missioneditor"), GAMES("games"), GAME("game"), INDEX(
+				"index"), ARMYEDITOR("armyeditor"), USERS("users");
+
+		private String pageName;
+
+		PAGE(String pageName) {
+			this.pageName = pageName;
+		}
+
+		public static PAGE fromString(String text) {
+			if (text != null) {
+				for (PAGE b : PAGE.values()) {
+					if (text.equalsIgnoreCase(b.pageName)) {
+						return b;
+					}
+				}
+			}
+			return INDEX;
+		}
+	};
+
 	private static String viewPath = "/views/thediskgame/";
 	private HttpServletRequest request;
 	private HttpServletResponse response;
 
-	private void missionEditor(HashMap<String, Object> mission) throws ServletException, IOException {
+	private void missionEditor(String campaignName, String missionName) throws ServletException, IOException {
 
-		request.setAttribute("campaign", mission.get("campaign"));
-		request.setAttribute("mission", mission.get("mission"));
-		request.setAttribute("scenario", mission.get("scenario"));
-		request.setAttribute("startingDisks", mission.get("startingDisks"));
-		request.setAttribute("reinforcements", mission.get("reinforcements"));
-		request.setAttribute("activations", mission.get("activations"));
-		request.setAttribute("alignmentRestriction", mission.get("alignmentRestriction"));
-		request.setAttribute("maxPlayers", mission.get("maxPlayers"));
-		request.setAttribute("control1", mission.get("control1"));
-		request.setAttribute("army1", mission.get("army1"));
-		request.setAttribute("maxPoints1", mission.get("maxPoints1"));
-		request.setAttribute("control2", mission.get("control2"));
-		request.setAttribute("army2", mission.get("army2"));
-		request.setAttribute("maxPoints2", mission.get("maxPoints2"));
+		// get the mission
+		HashMap<String, Object> mission = API.Mission.get(campaignName, missionName);
+		String missionJson = new Gson().toJson(mission);
+		request.setAttribute("missionJson", missionJson);
+		// request.setAttribute("mission", mission);
+
+		if (mission != null) {
+			for (Entry<String, Object> a : mission.entrySet()) {
+				request.setAttribute(a.getKey(), a.getValue());
+			}
+		}
 
 		// get all the campaigns/missions
-		HashMap<Object, HashMap<String, Object>> missions = API.Mission.getAll();
-		request.setAttribute("allMissions", missions);
+		HashMap<Object, HashMap<String, Object>> allMissions = API.Mission.getAll();
+		request.setAttribute("allMissions", allMissions);
+		String allMissionsJson = new Gson().toJson(allMissions);
+		request.setAttribute("allMissionsJson", allMissionsJson);
 
 		request.setAttribute("here", "/thediskgame/missionEditor");
 		request.setAttribute("hereEncoded", URLEncoder.encode("/thediskgame/missionEditor", "UTF-8"));
@@ -139,9 +159,13 @@ public class TheDiskGameServlet extends HttpServlet {
 		pathInfo = pathInfo.replaceAll("^/", "");
 
 		String[] parts = pathInfo.split("/");
-		final String action = parts[0].replace("#", "");
+		final PAGE action = PAGE.fromString(parts[0].replace("#", "").replace(".jsp", ""));
 
-		switch (action.toLowerCase()) {
+		switch (action) {
+
+		case USERS:
+			users();
+			break;
 
 		case GAME:
 			String gameId = "new";
@@ -183,19 +207,38 @@ public class TheDiskGameServlet extends HttpServlet {
 			gameList();
 			break;
 
-		case MISSIONEDITOR:
+		case ARMYEDITOR:
+			String armyName = null;
+			if (parts.length == 2 && parts[1] != null) {
 
-			HashMap<String, Object> mission = new HashMap<String, Object>();
-			if (parts.length >= 2) {
-				String missionName = URLDecoder.decode(parts[1], "UTF-8");
-				try {
-					mission = API.Mission.get(missionName);
-				} catch (GameEngineException e) {
-					e.printStackTrace();
-				}
+				armyName = parts[1];
+			}
+			if (parts.length >= 3 && parts[1] != null && parts[2] != null) {
+
+				armyName = parts[2] + "/" + parts[2];
 			}
 
-			missionEditor(mission);
+			try {
+				armyEditor(player, armyName);
+			} catch (GameEngineException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+			break;
+
+		case MISSIONEDITOR:
+			String campaignName = null;
+			if (parts.length >= 2) {
+				campaignName = URLDecoder.decode(parts[1], "UTF-8");
+
+			}
+			String missionName = null;
+			if (parts.length >= 3) {
+				missionName = URLDecoder.decode(parts[2], "UTF-8");
+
+			}
+
+			missionEditor(campaignName, missionName);
 			break;
 
 		case DISKEDITOR:
@@ -215,11 +258,59 @@ public class TheDiskGameServlet extends HttpServlet {
 				e.printStackTrace();
 			}
 			break;
+		case INDEX:// fall through to default
 		default:
 			index();
 			break;
 		}
 
+	}
+
+	private void users() throws ServletException, IOException {
+		// TODO Auto-generated method stub
+		request.getRequestDispatcher(viewPath + "profile.jsp").forward(request, response);
+	}
+
+	private void armyEditor(ScriptableObject player, String armyName)
+			throws ServletException, IOException, GameEngineException {
+		// TODO armyEditor
+		NativeObject playerArmies = null;
+		Object playerDisks = null;
+		Object playerName = null;
+		Object army = null;
+		if (player != null) {
+			playerArmies = (NativeObject) player.get("armies");
+			playerDisks = player.get("disks");
+			playerName = player.get("name");
+			army = playerArmies.get(armyName);
+		}
+		if (armyName != null) {
+			army = API.Army.get(armyName);
+		}
+
+		HashMap<Object, HashMap<String, Object>> globalArmies = API.Army.getAll();
+		request.setAttribute("globalArmies", globalArmies);
+
+		request.setAttribute("playerArmies", playerArmies);
+
+		request.setAttribute("armyName", armyName);
+
+		String playerArmiesJson = new Gson().toJson(playerArmies);
+		request.setAttribute("playerArmiesJson", playerArmiesJson);
+
+		request.setAttribute("playerDisks", playerDisks);
+		String playerDisksJson = new Gson().toJson(playerDisks);
+		request.setAttribute("playerDisksJson", playerDisksJson);
+
+		HashMap<Object, HashMap<String, Object>> allDisks = API.Disk.getAll();
+		request.setAttribute("allDisks", allDisks);
+
+		request.setAttribute("playerName", playerName);
+
+		request.setAttribute("here", "/thediskgame/armyeditor/" + armyName);
+		request.setAttribute("hereEncoded", URLEncoder.encode("/thediskgame/armyeditor/" + armyName, "UTF-8"));
+
+		request.getRequestDispatcher(viewPath + "armyEditor.jsp").forward(request, response);
 	}
 
 	private void index() throws ServletException, IOException {

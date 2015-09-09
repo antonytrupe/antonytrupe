@@ -84,7 +84,7 @@ class API {
 		// activation
 		MOVE_DISK, ACTIVATE_DISK, END_ACTIVATIONS, SAVE_REINFORCEMENT, END_REINFORCEMENTS, END_MISSILES, FIRE_MISSILES,
 		//
-		SAVE_ARMY, DELETE_ARMY,
+		SAVE_ARMY, DELETE_ARMY, SAVE_GLOBAL_ARMY,
 		//
 		SET_ATTACKEE, SET_DEFENDEE,
 		// lists
@@ -95,13 +95,55 @@ class API {
 		CONFIRM, JWT;
 	}
 
+	static class Army {
+
+		public static HashMap<Object, HashMap<String, Object>> getAll() {
+			HashMap<Object, HashMap<String, Object>> armies = ge.persistence.getAll("Army");
+			return armies;
+		}
+
+		private static Entity save(final String armyName, String disks) throws GameEngineException {
+			Step step = MiniProfiler.step("API.Army.save");
+			try {
+				return ge.persistence.save("Army", armyName, "json", disks);
+			} finally {
+				step.close();
+			}
+		}
+
+		public static ScriptableObject get(String name) throws GameEngineException {
+			Step step = MiniProfiler.step("API.Army.get");
+			try {
+				final ScriptableObject army = create();
+
+				final HashMap<String, Object> hashMap = ge.persistence.get("Army", name);
+				final String json = (String) hashMap.get("json");
+				if (json != null && json != "") {
+					ge.invoke(army, "update", new Object[] { ge.parse(json) });
+				}
+				return army;
+			} finally {
+				step.close();
+			}
+		}
+
+		private static ScriptableObject create() throws GameEngineException {
+			Step step = MiniProfiler.step("API.Army.createDisk");
+			try {
+				final ScriptableObject disk = (ScriptableObject) ge.invoke("Army");
+				return disk;
+			} finally {
+				step.close();
+			}
+		}
+	}
+
 	static class Disk {
 
 		private static ScriptableObject create() throws GameEngineException {
-			Step step = MiniProfiler.step("API.createDisk");
+			Step step = MiniProfiler.step("API.Disk.createDisk");
 			try {
-				final ScriptableObject disk = (ScriptableObject) ge
-						.invoke("Disk");
+				final ScriptableObject disk = (ScriptableObject) ge.invoke("Disk");
 				return disk;
 			} finally {
 				step.close();
@@ -112,36 +154,26 @@ class API {
 		// flying,swashbuckler,
 		// cost,
 		// faction, alignment, diameter, description, price
-		private static ScriptableObject create(final String name,
-				final String type, final Integer attack, final Integer defense,
-				final Integer toughness, final Integer movement,
-				final Integer wounds, final Boolean flying,
-				final Boolean swashbuckler, final Boolean archer,
-				final Integer arrows, final Integer bolts,
-				final Integer fireballs, final Integer boulders,
-				final Boolean missileImmunity, final Boolean firstblow,
-				final Integer spellcaster, final Integer limit,
-				final Integer cost, final String faction,
-				final String alignment, final String diameter,
-				final String description, final String price)
-				throws GameEngineException {
+		private static ScriptableObject create(final String name, final String type, final Integer attack,
+				final Integer defense, final Integer toughness, final Integer movement, final Integer wounds,
+				final Boolean flying, final Boolean swashbuckler, final Boolean archer, final Integer arrows,
+				final Integer bolts, final Integer fireballs, final Integer boulders, final Boolean missileImmunity,
+				final Boolean firstblow, final Integer spellcaster, final Integer limit, final Integer cost,
+				final String faction, final String alignment, final String diameter, final String description,
+				final String price) throws GameEngineException {
 			Step step = MiniProfiler.step("API.createDisk(...)");
 			try {
 				// name, attack, defense, toughness, movement, wounds, flying,
 				// swashbuckler,cost,
 				// faction, alignment, diameter, description, price
-				final ScriptableObject disk = (ScriptableObject) ge.invoke(
-						"Disk", new Object[] { name, type, attack, defense,
-								toughness, movement, wounds, flying,
-								swashbuckler, archer, arrows, bolts, fireballs,
-								boulders, missileImmunity, firstblow,
-								spellcaster, limit, cost, faction, alignment,
-								diameter, description, price, });
+				final ScriptableObject disk = (ScriptableObject) ge.invoke("Disk",
+						new Object[] { name, type, attack, defense, toughness, movement, wounds, flying, swashbuckler,
+								archer, arrows, bolts, fireballs, boulders, missileImmunity, firstblow, spellcaster,
+								limit, cost, faction, alignment, diameter, description, price, });
 
 				Disk.save(disk);
 
-				final StringBuilder sb = new StringBuilder(
-						"CREATE_DISK\nAPI.createDisk(");
+				final StringBuilder sb = new StringBuilder("CREATE_DISK\nAPI.createDisk(");
 
 				sb.append("\"");
 				sb.append(name);
@@ -220,8 +252,7 @@ class API {
 		private static StringBuilder createCsv() throws GameEngineException {
 			Step step = MiniProfiler.step("API.createDiskCsv");
 			try {
-				HashMap<Object, HashMap<String, Object>> disks = ge.persistence
-						.getAll("Disk");
+				HashMap<Object, HashMap<String, Object>> disks = ge.persistence.getAll("Disk");
 
 				// write the column headers
 				boolean header = true;
@@ -241,8 +272,7 @@ class API {
 					if (header) {
 						for (final Object id : disk.getIds()) {
 
-							if (disk.get(id) instanceof String
-									|| disk.get(id) instanceof Number
+							if (disk.get(id) instanceof String || disk.get(id) instanceof Number
 									|| disk.get(id) instanceof Boolean) {
 								csv.append(id + ",");
 							}
@@ -255,11 +285,8 @@ class API {
 					for (final Object id : disk.getIds()) {
 
 						if (disk.get(id) instanceof String) {
-							csv.append("\""
-									+ ((String) disk.get(id)).replaceAll("\"",
-											"\"\"") + "\",");
-						} else if (disk.get(id) instanceof Number
-								|| disk.get(id) instanceof Boolean) {
+							csv.append("\"" + ((String) disk.get(id)).replaceAll("\"", "\"\"") + "\",");
+						} else if (disk.get(id) instanceof Number || disk.get(id) instanceof Boolean) {
 							csv.append(disk.get(id) + ",");
 						}
 					}
@@ -273,8 +300,7 @@ class API {
 			}
 		}
 
-		private static ScriptableObject save(final ScriptableObject disk)
-				throws GameEngineException {
+		private static ScriptableObject save(final ScriptableObject disk) throws GameEngineException {
 			Step step = MiniProfiler.step("API.Disk.save");
 			try {
 				return saveByName("Disk", disk);
@@ -283,14 +309,12 @@ class API {
 			}
 		}
 
-		protected static ScriptableObject get(final String name)
-				throws GameEngineException {
+		protected static ScriptableObject get(final String name) throws GameEngineException {
 			Step step = MiniProfiler.step("API.Disk.get");
 			try {
 				final ScriptableObject disk = create();
 
-				final HashMap<String, Object> hashMap = ge.persistence.get(
-						"Disk", name);
+				final HashMap<String, Object> hashMap = ge.persistence.get("Disk", name);
 				final String json = (String) hashMap.get("json");
 				if (json != null && json != "") {
 					ge.invoke(disk, "update", new Object[] { ge.parse(json) });
@@ -306,8 +330,7 @@ class API {
 			try {
 				// final ScriptableObject disk = create();
 
-				final HashMap<Object, HashMap<String, Object>> hashMap = ge.persistence
-						.getAll("Disk");
+				final HashMap<Object, HashMap<String, Object>> hashMap = ge.persistence.getAll("Disk");
 				return hashMap;
 			} finally {
 				step.close();
@@ -318,55 +341,47 @@ class API {
 
 	static class Mission {
 
-		protected static HashMap<String, Object> get(String missionName)
-				throws GameEngineException {
-			HashMap<String, Object> mission = ge.persistence.get("Mission",
-					missionName);
+		protected static HashMap<String, Object> get(String campaignMissionName) {
+			HashMap<String, Object> mission = ge.persistence.get("Mission", campaignMissionName);
 			return mission;
 		}
 
-		protected static HashMap<String, Object> get(String campaignName,
-				String missionName) throws GameEngineException {
-			HashMap<String, Object> mission = ge.persistence.get("Mission",
-					campaignName + ":" + missionName);
-			return mission;
+		protected static HashMap<String, Object> get(String campaignName, String missionName) {
+			// HashMap<String, Object> mission = ge.persistence.get("Mission",
+			// campaignName + ":" + missionName);
+			return get(campaignName + "/" + missionName);
 		}
 
 		protected static HashMap<Object, HashMap<String, Object>> getAll() {
-			HashMap<Object, HashMap<String, Object>> missions = ge.persistence
-					.getAll("Mission");
+			HashMap<Object, HashMap<String, Object>> missions = ge.persistence.getAll("Mission");
 			return missions;
 		}
 
-		private static void save(final String campaign, final String mission,
-				final String scenario, final String startingDisks,
-				final String reinforcements, final String activations,
-				final String alignmentRestriction, final String maxPlayers,
-				final String control1, final String army1,
-				final String maxPoints1, final String control2,
-				final String army2, final String maxPoints2) {
+		private static void save(final String campaign, final String mission, final String scenario,
+				final String startingDisks, final String reinforcements, final String activations,
+				final String alignmentRestriction, final String maxPlayers, final String control1, final String army1,
+				final String maxPoints1, final String control2, final String army2, final String maxPoints2) {
 
-			ge.persistence.save("Mission", campaign + ":" + mission,
-					new HashMap<String, Object>() {
-						private static final long serialVersionUID = 1L;
-						{
-							this.put("campaign", campaign);
-							this.put("mission", mission);
-							this.put("scenario", scenario);
-							this.put("startingDisks", startingDisks);
-							this.put("reinforcements", reinforcements);
-							this.put("activations", activations);
-							this.put("alignmentRestriction",
-									alignmentRestriction);
-							this.put("maxPlayers", maxPlayers);
-							this.put("control1", control1);
-							this.put("army1", army1);
-							this.put("maxPoints1", maxPoints1);
-							this.put("control2", control2);
-							this.put("army2", army2);
-							this.put("maxPoints2", maxPoints2);
-						}
-					});
+			ge.persistence.save("Mission", campaign + "/" + mission, new HashMap<String, Object>() {
+				private static final long serialVersionUID = 1L;
+
+				{
+					this.put("campaign", campaign);
+					this.put("mission", mission);
+					this.put("scenario", scenario);
+					this.put("startingDisks", startingDisks);
+					this.put("reinforcements", reinforcements);
+					this.put("activations", activations);
+					this.put("alignmentRestriction", alignmentRestriction);
+					this.put("maxPlayers", maxPlayers);
+					this.put("control1", control1);
+					this.put("army1", army1);
+					this.put("maxPoints1", maxPoints1);
+					this.put("control2", control2);
+					this.put("army2", army2);
+					this.put("maxPoints2", maxPoints2);
+				}
+			});
 		}
 	}
 
@@ -375,91 +390,69 @@ class API {
 		private static final String PLAYER = "Player";
 		private static final String TDGPLAYER = "TDGPlayer";
 
-		protected static ScriptableObject create(final String username)
-				throws GameEngineException {
+		protected static ScriptableObject create(final String username) throws GameEngineException {
 			Step step = MiniProfiler.step("API.Player.create");
 
 			try {
 				// createPlayer
-				final ScriptableObject player = (ScriptableObject) ge.invoke(
-						PLAYER, new String[] { username, });
+				final ScriptableObject player = (ScriptableObject) ge.invoke(PLAYER, new String[] { username, });
 				final LinkedHashMap<String, ScriptableObject[]> disks = new LinkedHashMap<String, ScriptableObject[]>();
 
 				// Knights
 				// Pikemen
-				disks.put(
-						"Pikemen",
-						new ScriptableObject[] { createPoint(-3.2, -6.2),
-								createPoint(-1.2, -5), createPoint(-2.6, -3.6), });
+				disks.put("Pikemen", new ScriptableObject[] { createPoint(-3.2, -6.2), createPoint(-1.2, -5),
+						createPoint(-2.6, -3.6), });
 
 				// Heavy Horse Cavalry
-				disks.put("Heavy Horse Cavalry", new ScriptableObject[] {
-						createPoint(-4.5, -4.5), createPoint(-5.7, -2.9),
-						createPoint(-4.1, -1.7), createPoint(-6, -.8) });
+				disks.put("Heavy Horse Cavalry", new ScriptableObject[] { createPoint(-4.5, -4.5),
+						createPoint(-5.7, -2.9), createPoint(-4.1, -1.7), createPoint(-6, -.8) });
 
 				// Elf
 				// Deepwood Warriors x3
-				disks.put("Deepwood Warriors", new ScriptableObject[] {
-						createPoint(3.6, -6.4), createPoint(2.4, -5.4),
+				disks.put("Deepwood Warriors", new ScriptableObject[] { createPoint(3.6, -6.4), createPoint(2.4, -5.4),
 						createPoint(3.6, -3.8), });
 				// Riders of the Wood x4
-				disks.put("Riders of the Wood", new ScriptableObject[] {
-						createPoint(4.6, -5.4), createPoint(6.5, -4.0),
+				disks.put("Riders of the Wood", new ScriptableObject[] { createPoint(4.6, -5.4), createPoint(6.5, -4.0),
 						createPoint(5.1, -2.1), createPoint(6.5, -.6) });
 				// Deepwood Archers x2
-				disks.put("Deepwood Archers", new ScriptableObject[] {
-						createPoint(7.5, -2.3), createPoint(8.8, -1) });
+				disks.put("Deepwood Archers", new ScriptableObject[] { createPoint(7.5, -2.3), createPoint(8.8, -1) });
 
 				// Dwarf
 				// Damlo Hammerfist
-				disks.put("Damlo Hammerfist",
-						new ScriptableObject[] { createPoint(-8.7, 1.3), });
+				disks.put("Damlo Hammerfist", new ScriptableObject[] { createPoint(-8.7, 1.3), });
 				// Grovan of the Deep
-				disks.put("Grovan of the Deep",
-						new ScriptableObject[] { createPoint(-9.7, 2.2), });
+				disks.put("Grovan of the Deep", new ScriptableObject[] { createPoint(-9.7, 2.2), });
 				// Stalwarts x1
-				disks.put("Stalwarts",
-						new ScriptableObject[] { createPoint(-9.1, 3.8), });
+				disks.put("Stalwarts", new ScriptableObject[] { createPoint(-9.1, 3.8), });
 
 				// Regiment of the Anvil x5
-				disks.put("Regiment of the Anvil", new ScriptableObject[] {
-						createPoint(-7.6, 2.9), createPoint(-6.8, 4.2),
-						createPoint(-8.2, 5), createPoint(-7.2, 6.5),
-						createPoint(-5.7, 5.7), });
+				disks.put("Regiment of the Anvil",
+						new ScriptableObject[] { createPoint(-7.6, 2.9), createPoint(-6.8, 4.2), createPoint(-8.2, 5),
+								createPoint(-7.2, 6.5), createPoint(-5.7, 5.7), });
 
 				// Orc
 				// Urgg the Really Mean x1[+][-]
-				disks.put("Urgg the Really Mean",
-						new ScriptableObject[] { createPoint(9.4, 1.3), });
+				disks.put("Urgg the Really Mean", new ScriptableObject[] { createPoint(9.4, 1.3), });
 				// Shieldgrogs x2[+][-]
-				disks.put("Shieldgrogs",
-						new ScriptableObject[] { createPoint(9.8, 3.4),
-								createPoint(10.5, 2.5), });
+				disks.put("Shieldgrogs", new ScriptableObject[] { createPoint(9.8, 3.4), createPoint(10.5, 2.5), });
 				// Ghash Zzurkan x1[+][-]
-				disks.put("Ghash Zzurkan",
-						new ScriptableObject[] { createPoint(8.4, 2.5), });
+				disks.put("Ghash Zzurkan", new ScriptableObject[] { createPoint(8.4, 2.5), });
 				// Grugs x5
-				disks.put("Grugs",
-						new ScriptableObject[] { createPoint(6.6, 6.7),
-								createPoint(6.6, 5), createPoint(7.9, 6.1),
-								createPoint(7.5, 3.8), createPoint(8.8, 4.8), });
+				disks.put("Grugs", new ScriptableObject[] { createPoint(6.6, 6.7), createPoint(6.6, 5),
+						createPoint(7.9, 6.1), createPoint(7.5, 3.8), createPoint(8.8, 4.8), });
 
 				// Dragon
 				// Dragonflight
-				disks.put("Dragonflight",
-						new ScriptableObject[] { createPoint(-3, 7),
-								createPoint(-3, 8.5), createPoint(-1.5, 8.5),
-								createPoint(-1.5, 7) });
+				disks.put("Dragonflight", new ScriptableObject[] { createPoint(-3, 7), createPoint(-3, 8.5),
+						createPoint(-1.5, 8.5), createPoint(-1.5, 7) });
 
 				// Drake Warriors
 				disks.put("Drake Warriors",
-						new ScriptableObject[] { createPoint(0, 7),
-								createPoint(0, 8.5), createPoint(1.5, 8.5), });
+						new ScriptableObject[] { createPoint(0, 7), createPoint(0, 8.5), createPoint(1.5, 8.5), });
 
 				// Dragonling
 				disks.put("Dragonling",
-						new ScriptableObject[] { createPoint(1.5, 7),
-								createPoint(3, 7), createPoint(3, 8.5), });
+						new ScriptableObject[] { createPoint(1.5, 7), createPoint(3, 7), createPoint(3, 8.5), });
 
 				final String knights = "Starter Knights";
 				final String elves = "Starter Elf";
@@ -467,43 +460,36 @@ class API {
 				final String dragons = "Starter Dragons";
 				final String orcs = "Starter Orc";
 
-				for (final Entry<String, ScriptableObject[]> entry : disks
-						.entrySet()) {
+				for (final Entry<String, ScriptableObject[]> entry : disks.entrySet()) {
 					final ScriptableObject disk = Disk.get(entry.getKey());
 					if (disk.get("name") != null) {
 
 						for (final ScriptableObject location : entry.getValue()) {
 
 							// addDisk
-							Object diskNumber = addDiskToPlayer(player, disk,
-									location);
+							Object diskNumber = addDiskToPlayer(player, disk, location);
 
 							// knight disk
 							if (disk.get("faction").equals("Knight")) {
-								addDiskToArmy(player, knights, diskNumber,
-										location);
+								addDiskToArmy(player, knights, diskNumber, location);
 							}
 							// dragon disk
 							else if (disk.get("faction").equals("Dragon")) {
-								addDiskToArmy(player, dragons, diskNumber,
-										location);
+								addDiskToArmy(player, dragons, diskNumber, location);
 							}
 							// dwarf disk
 							else if (disk.get("faction").equals("Dwarf")) {
-								addDiskToArmy(player, dwarfs, diskNumber,
-										location);
+								addDiskToArmy(player, dwarfs, diskNumber, location);
 							}
 
 							// elf disk
 							else if (disk.get("faction").equals("Elf")) {
-								addDiskToArmy(player, elves, diskNumber,
-										location);
+								addDiskToArmy(player, elves, diskNumber, location);
 							}
 
 							// orc disk
 							else if (disk.get("faction").equals("Orc")) {
-								addDiskToArmy(player, orcs, diskNumber,
-										location);
+								addDiskToArmy(player, orcs, diskNumber, location);
 							}
 						}
 					}
@@ -516,14 +502,12 @@ class API {
 			}
 		}
 
-		protected static ScriptableObject get(final String username)
-				throws GameEngineException {
+		protected static ScriptableObject get(final String username) throws GameEngineException {
 			Step step = MiniProfiler.step("API.Player.get");
 			try {
 				ScriptableObject player = null;
 				if (username != null && !username.equals("")) {
-					final HashMap<String, Object> hashMap = API.ge.persistence
-							.get(TDGPLAYER, username);
+					final HashMap<String, Object> hashMap = API.ge.persistence.get(TDGPLAYER, username);
 					// handle player being null
 					if (!hashMap.isEmpty()) {
 						player = create(username);
@@ -539,8 +523,7 @@ class API {
 			}
 		}
 
-		private static ScriptableObject save(final ScriptableObject player)
-				throws GameEngineException {
+		private static ScriptableObject save(final ScriptableObject player) throws GameEngineException {
 			Step step = MiniProfiler.step("API.Player.save");
 			try {
 
@@ -552,8 +535,7 @@ class API {
 				properties.put("email", player.get("name"));
 				// save rating in its own field
 				properties.put("rating", player.get("rating"));
-				ge.persistence.save(TDGPLAYER, (String) player.get("name"),
-						properties);
+				ge.persistence.save(TDGPLAYER, (String) player.get("name"), properties);
 				// add json to player
 				player.put("json", player, json);
 
@@ -570,11 +552,9 @@ class API {
 
 				query.addSort("rating", SortDirection.DESCENDING);
 
-				final DatastoreService datastore = DatastoreServiceFactory
-						.getDatastoreService();
+				final DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 				final PreparedQuery pq = datastore.prepare(query);
-				final List<Entity> entList = pq.asList(FetchOptions.Builder
-						.withDefaults());
+				final List<Entity> entList = pq.asList(FetchOptions.Builder.withDefaults());
 				return entList;
 			} finally {
 				step.close();
@@ -584,17 +564,15 @@ class API {
 	}
 
 	static class Table {
-		private static final Collection<String> OPEN_SEGMENTS = Arrays
-				.asList("JOIN");
+		private static final Collection<String> OPEN_SEGMENTS = Arrays.asList("JOIN");
 
-		private static final Collection<String> ACTIVE_SEGMENTS = Arrays
-				.asList("ACTIVATION", "REINFORCEMENTS", "COMBAT", "MISSILE");
+		private static final Collection<String> ACTIVE_SEGMENTS = Arrays.asList("ACTIVATION", "REINFORCEMENTS",
+				"COMBAT", "MISSILE");
 
 		private static ScriptableObject create() throws GameEngineException {
 			Step step = MiniProfiler.step("API.createTable");
 			try {
-				final ScriptableObject table = (ScriptableObject) ge
-						.invoke("Table");
+				final ScriptableObject table = (ScriptableObject) ge.invoke("Table");
 
 				return table;
 			} finally {
@@ -602,17 +580,14 @@ class API {
 			}
 		}
 
-		protected static ScriptableObject create(final String description,
-				final String maxPlayers, final String maxPoints,
-				final String activations, final String startingDisks,
-				final String reinforcements, final String alignmentRestriction,
-				final String scenario) throws GameEngineException {
+		protected static ScriptableObject create(final String description, final String maxPlayers,
+				final String maxPoints, final String activations, final String startingDisks,
+				final String reinforcements, final String alignmentRestriction, final String scenario)
+						throws GameEngineException {
 			Step step = MiniProfiler.step("API.createTable(...)");
 			try {
-				final ScriptableObject table = (ScriptableObject) ge.invoke(
-						"Table",
-						new String[] { description, maxPlayers, maxPoints,
-								activations, startingDisks, reinforcements,
+				final ScriptableObject table = (ScriptableObject) ge.invoke("Table",
+						new String[] { description, maxPlayers, maxPoints, activations, startingDisks, reinforcements,
 								alignmentRestriction, scenario, });
 				ge.invoke(table, "placeStagingDisks", new String[] {});
 				return table;
@@ -644,14 +619,11 @@ class API {
 						json = a.toString();
 					}
 
-					ScriptableObject mementos = (ScriptableObject) table
-							.get("mementos");
+					ScriptableObject mementos = (ScriptableObject) table.get("mementos");
 					Long mementoId = getLong(result.getProperty("mementoId"));
 
-					Step step1 = MiniProfiler
-							.step("putProperty,valueOf,ge.parse");
-					ScriptableObject.putProperty(mementos,
-							String.valueOf(mementoId), ge.parse(json));
+					Step step1 = MiniProfiler.step("putProperty,valueOf,ge.parse");
+					ScriptableObject.putProperty(mementos, String.valueOf(mementoId), ge.parse(json));
 					step1.close();
 				}
 
@@ -660,27 +632,20 @@ class API {
 			}
 		}
 
-		private static PreparedQuery getMementos(final Long tableId,
-				final long mementoId) {
+		private static PreparedQuery getMementos(final Long tableId, final long mementoId) {
 			// TODO 0.1 need to try to go to memcache for this first somehow
-			Step step = MiniProfiler.step("API.Table.getMementos(" + tableId
-					+ "," + mementoId + ")");
+			Step step = MiniProfiler.step("API.Table.getMementos(" + tableId + "," + mementoId + ")");
 			try {
 
-				Filter tableIdFilter = new FilterPredicate("tableId",
-						FilterOperator.EQUAL, tableId);
+				Filter tableIdFilter = new FilterPredicate("tableId", FilterOperator.EQUAL, tableId);
 
-				Filter mementoIdFilter = new FilterPredicate("mementoId",
-						FilterOperator.GREATER_THAN, mementoId);
+				Filter mementoIdFilter = new FilterPredicate("mementoId", FilterOperator.GREATER_THAN, mementoId);
 
-				Filter tableIdAndMementoIdFilter = new CompositeFilter(
-						CompositeFilterOperator.AND, Arrays.asList(
-								tableIdFilter, mementoIdFilter));
+				Filter tableIdAndMementoIdFilter = new CompositeFilter(CompositeFilterOperator.AND,
+						Arrays.asList(tableIdFilter, mementoIdFilter));
 
-				Query q = new Query("TableMemento")
-						.setFilter(tableIdAndMementoIdFilter);
-				DatastoreService datastore = DatastoreServiceFactory
-						.getDatastoreService();
+				Query q = new Query("TableMemento").setFilter(tableIdAndMementoIdFilter);
+				DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 
 				PreparedQuery pq = datastore.prepare(q);
 				return pq;
@@ -692,26 +657,20 @@ class API {
 		protected static String getOpenAndActive(String playerName) {
 			Step step = MiniProfiler.step("API.Table.getOpenAndActive");
 			try {
-				Filter playerFilter = new FilterPredicate("players",
-						FilterOperator.EQUAL, playerName);
+				Filter playerFilter = new FilterPredicate("players", FilterOperator.EQUAL, playerName);
 
-				Filter activeSegmentFilter = new FilterPredicate("segment",
-						FilterOperator.IN, ACTIVE_SEGMENTS);
+				Filter activeSegmentFilter = new FilterPredicate("segment", FilterOperator.IN, ACTIVE_SEGMENTS);
 
-				Filter openSegmentFilter = new FilterPredicate("segment",
-						FilterOperator.IN, OPEN_SEGMENTS);
+				Filter openSegmentFilter = new FilterPredicate("segment", FilterOperator.IN, OPEN_SEGMENTS);
 
-				Filter segmentFilter = new CompositeFilter(
-						CompositeFilterOperator.OR, Arrays.asList(
-								activeSegmentFilter, openSegmentFilter));
+				Filter segmentFilter = new CompositeFilter(CompositeFilterOperator.OR,
+						Arrays.asList(activeSegmentFilter, openSegmentFilter));
 
-				Filter segmentAndPlayerFilter = new CompositeFilter(
-						CompositeFilterOperator.AND, Arrays.asList(
-								playerFilter, segmentFilter));
+				Filter segmentAndPlayerFilter = new CompositeFilter(CompositeFilterOperator.AND,
+						Arrays.asList(playerFilter, segmentFilter));
 
 				Query q = new Query("Table").setFilter(segmentAndPlayerFilter);
-				DatastoreService datastore = DatastoreServiceFactory
-						.getDatastoreService();
+				DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 
 				PreparedQuery pq = datastore.prepare(q);
 
@@ -726,12 +685,10 @@ class API {
 		protected static String getActive() {
 			Step step = MiniProfiler.step("API.Table.getActive");
 			try {
-				Filter segmentFilter = new FilterPredicate("segment",
-						FilterOperator.IN, ACTIVE_SEGMENTS);
+				Filter segmentFilter = new FilterPredicate("segment", FilterOperator.IN, ACTIVE_SEGMENTS);
 
 				Query q = new Query("Table").setFilter(segmentFilter);
-				DatastoreService datastore = DatastoreServiceFactory
-						.getDatastoreService();
+				DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 
 				PreparedQuery pq = datastore.prepare(q);
 
@@ -745,12 +702,10 @@ class API {
 		protected static String getOpen() {
 			Step step = MiniProfiler.step("API.Table.getOpen");
 			try {
-				Filter segmentFilter = new FilterPredicate("segment",
-						FilterOperator.IN, OPEN_SEGMENTS);
+				Filter segmentFilter = new FilterPredicate("segment", FilterOperator.IN, OPEN_SEGMENTS);
 
 				Query q = new Query("Table").setFilter(segmentFilter);
-				DatastoreService datastore = DatastoreServiceFactory
-						.getDatastoreService();
+				DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 
 				PreparedQuery pq = datastore.prepare(q);
 
@@ -767,12 +722,10 @@ class API {
 		 * @return Table.js object with additional property named json
 		 * @throws GameEngineException
 		 */
-		protected static ScriptableObject get(final long tableId,
-				final long mementoId) throws GameEngineException {
+		protected static ScriptableObject get(final long tableId, final long mementoId) throws GameEngineException {
 			Step step = MiniProfiler.step("API.Table.get");
 			try {
-				final HashMap<String, Object> hashMap = ge.persistence.get(
-						"Table", tableId);
+				final HashMap<String, Object> hashMap = ge.persistence.get("Table", tableId);
 
 				final ScriptableObject table = create();
 
@@ -803,8 +756,7 @@ class API {
 			}
 		}
 
-		private static void save(final ScriptableObject table)
-				throws GameEngineException {
+		private static void save(final ScriptableObject table) throws GameEngineException {
 			Step step = MiniProfiler.step("API.Table.save");
 			try {
 				Object id = table.get("id");
@@ -824,21 +776,17 @@ class API {
 				HashMap<String, Object> properties = new HashMap<String, Object>();
 
 				// json
-				String json = API
-						.stringify(table, API.ge.execute("[\"json\"]"));
+				String json = API.stringify(table, API.ge.execute("[\"json\"]"));
 				properties.put("json", json);
 
 				// players
-				properties.put("players",
-						((NativeArray) table.get("playerOrder")).toArray());
+				properties.put("players", ((NativeArray) table.get("playerOrder")).toArray());
 
 				// currentplayer
-				properties.put("currentPlayer", ((ScriptableObject) table
-						.get("memento")).get("currentPlayer"));
+				properties.put("currentPlayer", ((ScriptableObject) table.get("memento")).get("currentPlayer"));
 
 				// segment
-				properties.put("segment", ((ScriptableObject) table
-						.get("memento")).get("segment"));
+				properties.put("segment", ((ScriptableObject) table.get("memento")).get("segment"));
 
 				properties.put("mementoId", table.get("mementoId"));
 
@@ -851,8 +799,7 @@ class API {
 
 	}
 
-	protected static void activateDisk(final ScriptableObject table,
-			final String diskNumber, final String user)
+	protected static void activateDisk(final ScriptableObject table, final String diskNumber, final String user)
 			throws GameEngineException {
 		Step step = MiniProfiler.step("API.activateDisk");
 		try {
@@ -869,25 +816,20 @@ class API {
 		}
 	}
 
-	static void addDiskToArmy(ScriptableObject player, String armyName,
-			Object diskNumber, ScriptableObject location)
+	static void addDiskToArmy(ScriptableObject player, String armyName, Object diskNumber, ScriptableObject location)
 			throws GameEngineException {
-		ge.invoke(player, "addDiskToArmy", new Object[] { armyName, diskNumber,
-				location });
+		ge.invoke(player, "addDiskToArmy", new Object[] { armyName, diskNumber, location });
 	}
 
-	static Object addDiskToPlayer(ScriptableObject player,
-			ScriptableObject disk, ScriptableObject location)
+	static Object addDiskToPlayer(ScriptableObject player, ScriptableObject disk, ScriptableObject location)
 			throws GameEngineException {
 		return ge.invoke(player, "addDisk", new Object[] { disk, location });
 	}
 
-	private static void completePurchase(final ScriptableObject player)
-			throws GameEngineException {
+	private static void completePurchase(final ScriptableObject player) throws GameEngineException {
 		Step step = MiniProfiler.step("API.completePurchase");
 		try {
-			final ScriptableObject disks = (ScriptableObject) player
-					.get("cart");
+			final ScriptableObject disks = (ScriptableObject) player.get("cart");
 
 			for (final Object diskName : disks.getIds()) {
 				final ScriptableObject disk = Disk.get((String) diskName);
@@ -908,16 +850,13 @@ class API {
 		}
 	}
 
-	private static String confirm(final String jwt, final String user)
-			throws GameEngineException {
+	private static String confirm(final String jwt, final String user) throws GameEngineException {
 		Step step = MiniProfiler.step("API.confirm");
 		try {
 			final String sd = deserialize(jwt);
 			final ScriptableObject f = ge.execute("_=" + sd);
-			final ScriptableObject jwtResponse = (ScriptableObject) f
-					.get("response");
-			final ScriptableObject jwtRequest = (ScriptableObject) f
-					.get("request");
+			final ScriptableObject jwtResponse = (ScriptableObject) f.get("response");
+			final ScriptableObject jwtRequest = (ScriptableObject) f.get("request");
 			final String u = (String) jwtRequest.get("sellerData");
 			// make sure its still the same person
 			if (user != u) {
@@ -937,8 +876,7 @@ class API {
 		}
 	}
 
-	private static ScriptableObject createPoint(final double x, final double d)
-			throws GameEngineException {
+	private static ScriptableObject createPoint(final double x, final double d) throws GameEngineException {
 		Step step = MiniProfiler.step("API.createPoint");
 		try {
 			return (ScriptableObject) ge.invoke("Point", new Object[] { x, d });
@@ -948,16 +886,15 @@ class API {
 	}
 
 	// used for the google checkout cart
-	private static JsonToken createToken(final String disks, final String user,
-			final float cost, String description) throws InvalidKeyException {
+	private static JsonToken createToken(final String disks, final String user, final float cost, String description)
+			throws InvalidKeyException {
 
 		Step step = MiniProfiler.step("API.createToken");
 		try {
 
 			// Current time and signing algorithm
 			final Calendar cal = Calendar.getInstance();
-			final HmacSHA256Signer signer = new HmacSHA256Signer(ISSUER, null,
-					SIGNING_KEY.getBytes());
+			final HmacSHA256Signer signer = new HmacSHA256Signer(ISSUER, null, SIGNING_KEY.getBytes());
 
 			// Configure JSON token
 			final JsonToken token = new JsonToken(signer);
@@ -992,8 +929,7 @@ class API {
 			}
 
 			final StringBuilder unitTest = new StringBuilder("@Test \n");
-			unitTest.append("public void replay").append(table.get("id"))
-					.append("Round").append(table.get("round"))
+			unitTest.append("public void replay").append(table.get("id")).append("Round").append(table.get("round"))
 					.append("() throws GameEngineException {\n");
 
 			unitTest.append("API api = new API();\n");
@@ -1002,21 +938,18 @@ class API {
 
 			final NativeArray actions = (NativeArray) table.get("actions");
 			for (final Object a : actions) {
-				unitTest.append("api.").append(
-						((ScriptableObject) a).get("method"));
+				unitTest.append("api.").append(((ScriptableObject) a).get("method"));
 
 				if (((ScriptableObject) a).get("method") != "createTable") {
 					unitTest.append("(table,");
 				}
-				final NativeArray args = (NativeArray) ((ScriptableObject) a)
-						.get("arguments");
+				final NativeArray args = (NativeArray) ((ScriptableObject) a).get("arguments");
 				for (final Object argO : args.toArray()) {
 					// test.append("\"");
 					StringBuilder arg = toString(argO);
 					// if string does not start with a quote
 					if (!arg.toString().startsWith("\"")) {
-						final String replaceAll = arg.toString().replace("\"",
-								"\\\"");
+						final String replaceAll = arg.toString().replace("\"", "\\\"");
 						arg = new StringBuilder("\"");
 						arg.append(replaceAll);
 						arg.append("\"");
@@ -1026,8 +959,7 @@ class API {
 					unitTest.append(",");
 				}
 				if (args.getIds().length > 0) {
-					unitTest.replace(unitTest.length() - 1, unitTest.length(),
-							"");
+					unitTest.replace(unitTest.length() - 1, unitTest.length(), "");
 				}
 				unitTest.append(");\n");
 
@@ -1048,8 +980,7 @@ class API {
 			final String[] pieces = splitTokenString(tokenString);
 			final String jwtPayloadSegment = pieces[1];
 			final JsonParser parser = new JsonParser();
-			final String newStringUtf8 = StringUtils.newStringUtf8(Base64
-					.decodeBase64(jwtPayloadSegment.getBytes()));
+			final String newStringUtf8 = StringUtils.newStringUtf8(Base64.decodeBase64(jwtPayloadSegment.getBytes()));
 			final JsonElement payload = parser.parse(newStringUtf8);
 
 			return payload.toString();
@@ -1058,19 +989,15 @@ class API {
 		}
 	}
 
-	static Object diskIsInArmy(ScriptableObject player, String armyName,
-			Object diskNumber) throws GameEngineException {
-		return ge.invoke(player, "diskIsInArmy", new Object[] { diskNumber,
-				armyName });
+	static Object diskIsInArmy(ScriptableObject player, String armyName, Object diskNumber) throws GameEngineException {
+		return ge.invoke(player, "diskIsInArmy", new Object[] { diskNumber, armyName });
 	}
 
-	private static void downloadDisks(final HttpServletResponse response)
-			throws GameEngineException {
+	private static void downloadDisks(final HttpServletResponse response) throws GameEngineException {
 		Step step = MiniProfiler.step("API.downloadDisks");
 		try {
 			// ..... then respond
-			response.setHeader("Content-disposition",
-					"attachment;filename=disks.zip");
+			response.setHeader("Content-disposition", "attachment;filename=disks.zip");
 
 			response.setContentType("application/zip");
 			response.setStatus(HttpServletResponse.SC_OK);
@@ -1080,8 +1007,7 @@ class API {
 			// response
 
 			try {
-				ZipOutputStream zipOut = new ZipOutputStream(
-						response.getOutputStream());
+				ZipOutputStream zipOut = new ZipOutputStream(response.getOutputStream());
 
 				// PrintWriter zipWriter = new PrintWriter(zipOut);
 
@@ -1109,8 +1035,7 @@ class API {
 		}
 	}
 
-	private static void endMissiles(ScriptableObject table, String userName)
-			throws GameEngineException {
+	private static void endMissiles(ScriptableObject table, String userName) throws GameEngineException {
 		Step step = MiniProfiler.step("API.endMissiles");
 		try {
 			ge.invoke(table, "endMissiles", new Object[] { userName });
@@ -1120,10 +1045,8 @@ class API {
 		}
 	}
 
-	private static void fireMissiles(final ScriptableObject table,
-			final String playerName, final String diskNumber,
-			final String pointString, final String missileName)
-			throws GameEngineException {
+	private static void fireMissiles(final ScriptableObject table, final String playerName, final String diskNumber,
+			final String pointString, final String missileName) throws GameEngineException {
 
 		Step step = MiniProfiler.step("API.fireMissiles");
 		try {
@@ -1131,8 +1054,7 @@ class API {
 
 			ScriptableObject missile = Disk.get(missileName);
 
-			ge.invoke(table, "fireMissiles", new Object[] { playerName,
-					diskNumber, point, missile });
+			ge.invoke(table, "fireMissiles", new Object[] { playerName, diskNumber, point, missile });
 			Table.save(table);
 
 		} catch (GameEngineException gee) {
@@ -1146,14 +1068,12 @@ class API {
 
 	}
 
-	static Object getDiskNumber(ScriptableObject player, String diskName,
-			Object startingIndex) throws GameEngineException {
-		return ge.invoke(player, "getDiskNumber", new Object[] { diskName,
-				startingIndex });
+	static Object getDiskNumber(ScriptableObject player, String diskName, Object startingIndex)
+			throws GameEngineException {
+		return ge.invoke(player, "getDiskNumber", new Object[] { diskName, startingIndex });
 	}
 
-	private static Long getId(final ScriptableObject object)
-			throws GameEngineException {
+	private static Long getId(final ScriptableObject object) throws GameEngineException {
 		Step step = MiniProfiler.step("API.getId");
 		try {
 			final Object sd = ge.invoke(object, "getId");
@@ -1195,14 +1115,12 @@ class API {
 		}
 	}
 
-	private static String getName(final ScriptableObject object)
-			throws GameEngineException {
+	private static String getName(final ScriptableObject object) throws GameEngineException {
 		Step step = MiniProfiler.step("API.getName");
 		try {
 			final Object sd = ge.invoke(object, "getName");
 
-			if (sd == null
-					|| sd.getClass() == org.mozilla.javascript.Undefined.class)
+			if (sd == null || sd.getClass() == org.mozilla.javascript.Undefined.class)
 				return null;
 			else if (sd.getClass() == String.class)
 				return (String) sd;
@@ -1215,8 +1133,7 @@ class API {
 		}
 	}
 
-	private static Object getParameter(final String name,
-			final Map<String, Object> parameters) {
+	private static Object getParameter(final String name, final Map<String, Object> parameters) {
 		Step step = MiniProfiler.step("API.getParameter");
 		try {
 			String s = null;
@@ -1266,22 +1183,18 @@ class API {
 		}
 	}
 
-	private static ZipInputStream getZipFile(final BlobKey csvBlobKey)
-			throws FileNotFoundException, IOException {
+	private static ZipInputStream getZipFile(final BlobKey csvBlobKey) throws FileNotFoundException, IOException {
 		Step step = MiniProfiler.step("API.getZipFile");
 
 		try {
 
-			final BlobstoreService blobstoreService = BlobstoreServiceFactory
-					.getBlobstoreService();
+			final BlobstoreService blobstoreService = BlobstoreServiceFactory.getBlobstoreService();
 
 			BlobInfo info = new BlobInfoFactory().loadBlobInfo(csvBlobKey);
 
-			byte[] bytes = blobstoreService.fetchData(csvBlobKey, 0,
-					info.getSize());
+			byte[] bytes = blobstoreService.fetchData(csvBlobKey, 0, info.getSize());
 
-			final ZipInputStream zipIn = new ZipInputStream(
-					new ByteArrayInputStream(bytes));
+			final ZipInputStream zipIn = new ZipInputStream(new ByteArrayInputStream(bytes));
 
 			return zipIn;
 		} finally {
@@ -1290,18 +1203,16 @@ class API {
 	}
 
 	// this one takes a ScriptableObject of disk objects
-	static protected ScriptableObject join(final ScriptableObject table,
-			final ScriptableObject player, final String armyName)
-			throws GameEngineException {
-		Step step = MiniProfiler
-				.step("API.join(ScriptableObject,ScriptableObject,ScriptableObject)");
+	static protected ScriptableObject join(final ScriptableObject table, final ScriptableObject player,
+			final String armyName) throws GameEngineException {
+		Step step = MiniProfiler.step("API.join(ScriptableObject,ScriptableObject,ScriptableObject)");
 
 		try {
 
 			// Table.join returns an object that indicates success or failure
 			// and failure messages
-			ScriptableObject joinResult = (ScriptableObject) ge.invoke(table,
-					"join", new Object[] { player, armyName });
+			ScriptableObject joinResult = (ScriptableObject) ge.invoke(table, "join",
+					new Object[] { player, armyName });
 
 			// don't save armies and disks
 			ScriptableObject.deleteProperty(player, "armies");
@@ -1326,8 +1237,7 @@ class API {
 			final Session session = Session.getDefaultInstance(props, null);
 			final Message msg = new MimeMessage(session);
 			msg.setFrom(new InternetAddress("antony.trupe@gmail.com"));
-			msg.addRecipient(Message.RecipientType.TO, new InternetAddress(
-					"antony.trupe@gmail.com"));
+			msg.addRecipient(Message.RecipientType.TO, new InternetAddress("antony.trupe@gmail.com"));
 			msg.setSubject("TheDiskGame Error");
 			msg.setText(unitTest);
 			try {
@@ -1349,8 +1259,8 @@ class API {
 		}
 	}
 
-	private static Object restoreTable(final ScriptableObject table,
-			final Object jsonObject) throws GameEngineException {
+	private static Object restoreTable(final ScriptableObject table, final Object jsonObject)
+			throws GameEngineException {
 		Step step = MiniProfiler.step("API.updateTable");
 		try {
 			return ge.invoke(table, "restore", new Object[] { jsonObject });
@@ -1359,8 +1269,8 @@ class API {
 		}
 	}
 
-	private static ScriptableObject saveByName(final String clazz,
-			final ScriptableObject object) throws GameEngineException {
+	private static ScriptableObject saveByName(final String clazz, final ScriptableObject object)
+			throws GameEngineException {
 		Step step = MiniProfiler.step("API.saveByName");
 		try {
 			String name = getName(object);
@@ -1378,17 +1288,14 @@ class API {
 		}
 	}
 
-	private static void saveMementos(final ScriptableObject table)
-			throws GameEngineException {
+	private static void saveMementos(final ScriptableObject table) throws GameEngineException {
 		Step step = MiniProfiler.step("API.saveMementos");
 		try {
 			// save the mementos elsewhere
-			ScriptableObject mementos = (ScriptableObject) table
-					.get("mementos");
+			ScriptableObject mementos = (ScriptableObject) table.get("mementos");
 
 			for (Object mementoId : mementos.getIds()) {
-				ScriptableObject memento = (ScriptableObject) mementos
-						.get(mementoId);
+				ScriptableObject memento = (ScriptableObject) mementos.get(mementoId);
 				HashMap<String, Object> mementoProperties = new HashMap<String, Object>();
 				// stringify the memento
 				String mementoJson = ge.stringify(memento);
@@ -1399,13 +1306,9 @@ class API {
 				mementoProperties.put("mementoId", mementoId);
 
 				// make the memento a child of the table
-				ge.persistence.save(
-						"Table",
-						tableId,
-						"TableMemento",
-						(mementoId.getClass() == String.class ? Long
-								.parseLong((String) mementoId) : Long
-								.valueOf((Integer) mementoId)),
+				ge.persistence.save("Table",
+						tableId, "TableMemento", (mementoId.getClass() == String.class
+								? Long.parseLong((String) mementoId) : Long.valueOf((Integer) mementoId)),
 						mementoProperties);
 			}
 		} finally {
@@ -1413,8 +1316,7 @@ class API {
 		}
 	}
 
-	private static void setId(final ScriptableObject object, final long id)
-			throws GameEngineException {
+	private static void setId(final ScriptableObject object, final long id) throws GameEngineException {
 		Step step = MiniProfiler.step("API.setId");
 		try {
 			ge.invoke(object, "setId", new Object[] { id });
@@ -1423,8 +1325,7 @@ class API {
 		}
 	}
 
-	private static void setName(final ScriptableObject object, final String name)
-			throws GameEngineException {
+	private static void setName(final ScriptableObject object, final String name) throws GameEngineException {
 		Step step = MiniProfiler.step("API.setName");
 		try {
 			ge.invoke(object, "setName", new Object[] { name });
@@ -1446,10 +1347,8 @@ class API {
 			}
 			final String[] pieces = tokenString.split(Pattern.quote("."));
 			if (pieces.length != 3) {
-				throw new IllegalStateException(
-						"Expected JWT to have 3 segments separated by '" + "."
-								+ "', but it has " + pieces.length
-								+ " segments");
+				throw new IllegalStateException("Expected JWT to have 3 segments separated by '" + "."
+						+ "', but it has " + pieces.length + " segments");
 			}
 			return pieces;
 		} finally {
@@ -1457,8 +1356,7 @@ class API {
 		}
 	}
 
-	static String stringify(final ScriptableObject object)
-			throws GameEngineException {
+	static String stringify(final ScriptableObject object) throws GameEngineException {
 		Step step = MiniProfiler.step("API.stringify(ScriptableObject)");
 		try {
 			return ge.stringify(object);
@@ -1467,16 +1365,14 @@ class API {
 		}
 	}
 
-	private static String stringify(final ScriptableObject object,
-			ScriptableObject excludedKeys) throws GameEngineException {
-		Step step = MiniProfiler
-				.step("API.stringify(ScriptableObject,String[])");
+	private static String stringify(final ScriptableObject object, ScriptableObject excludedKeys)
+			throws GameEngineException {
+		Step step = MiniProfiler.step("API.stringify(ScriptableObject,String[])");
 		try {
 			String json = null;
 			if (object != null) {
 
-				json = (String) ge.invoke(object, "stringify",
-						new Object[] { excludedKeys });
+				json = (String) ge.invoke(object, "stringify", new Object[] { excludedKeys });
 			}
 			return json;
 		} finally {
@@ -1553,8 +1449,7 @@ class API {
 		}
 	}
 
-	private static Object update(final ScriptableObject dest,
-			final Object source) throws GameEngineException {
+	private static Object update(final ScriptableObject dest, final Object source) throws GameEngineException {
 		Step step = MiniProfiler.step("API.update");
 		try {
 			return ge.invoke(dest, "update", new Object[] { source });
@@ -1563,8 +1458,7 @@ class API {
 		}
 	}
 
-	protected static void updateRatings(ScriptableObject table)
-			throws GameEngineException {
+	protected static void updateRatings(ScriptableObject table) throws GameEngineException {
 		Step step = MiniProfiler.step("API.updateRatings");
 		try {
 			// loop over all the players in the table
@@ -1573,8 +1467,7 @@ class API {
 			List<Object> playerNames = Arrays.asList(players.getIds());
 			for (Object playerName : playerNames) {
 				ScriptableObject player = Player.get((String) playerName);
-				Double adjustment = (Double) ge.invoke(table,
-						"getRatingAdjustment", new Object[] { playerName });
+				Double adjustment = (Double) ge.invoke(table, "getRatingAdjustment", new Object[] { playerName });
 
 				Object object = player.get("rating");
 				if (object == null || !(object instanceof Number)) {
@@ -1611,18 +1504,15 @@ class API {
 	static {
 		Step step = MiniProfiler.step("API static");
 
-		ge = new GameEngine(new String[] {
-				"/com/antonytrupe/thediskgame/Table.js",
-				"/com/antonytrupe/thediskgame/Disk.js",
-				"/com/antonytrupe/thediskgame/Point.js",
-				"/com/antonytrupe/thediskgame/AI.js",
-				"/com/antonytrupe/thediskgame/Player.js" });
+		ge = new GameEngine(
+				new String[] { "/com/antonytrupe/thediskgame/Table.js", "/com/antonytrupe/thediskgame/Disk.js",
+						"/com/antonytrupe/thediskgame/Point.js", "/com/antonytrupe/thediskgame/AI.js",
+						"/com/antonytrupe/thediskgame/Player.js", "/com/antonytrupe/thediskgame/Army.js" });
 
 		final String av = SystemProperty.applicationVersion.get();
 		if (av != null) {
 			applicationVersion = av.substring(0, av.lastIndexOf("."));
-			uploadDate = new Date(Long.parseLong(av.substring(av
-					.lastIndexOf(".") + 1)) / (2 << 27) * 1000);
+			uploadDate = new Date(Long.parseLong(av.substring(av.lastIndexOf(".") + 1)) / (2 << 27) * 1000);
 		} else {
 			applicationVersion = "";
 			uploadDate = new Date();
@@ -1637,8 +1527,7 @@ class API {
 		step.close();
 	}
 
-	protected void endActivations(final ScriptableObject table,
-			final String user) throws GameEngineException {
+	protected void endActivations(final ScriptableObject table, final String user) throws GameEngineException {
 		Step step = MiniProfiler.step("API.endActivations");
 		try {
 			ge.invoke(table, "endActivations", new Object[] { user });
@@ -1653,8 +1542,7 @@ class API {
 		}
 	}
 
-	protected void endReinforcements(ScriptableObject table, String userName)
-			throws GameEngineException {
+	protected void endReinforcements(ScriptableObject table, String userName) throws GameEngineException {
 		Step step = MiniProfiler.step("API.endReinforcements");
 		try {
 			ge.invoke(table, "endReinforcements", new Object[] { userName });
@@ -1687,8 +1575,7 @@ class API {
 	 * @return
 	 * @throws GameEngineException
 	 */
-	protected boolean move(final ScriptableObject table,
-			final String playerName, final String diskNumber,
+	protected boolean move(final ScriptableObject table, final String playerName, final String diskNumber,
 			final String pointString) throws GameEngineException {
 
 		Step step = MiniProfiler.step("API.move");
@@ -1696,8 +1583,7 @@ class API {
 			// MOVE_DISK
 			final ScriptableObject point = ge.execute("_=" + pointString);
 
-			final Object moveResult = ge.invoke(table, "move", new Object[] {
-					playerName, diskNumber, point });
+			final Object moveResult = ge.invoke(table, "move", new Object[] { playerName, diskNumber, point });
 			Table.save(table);
 
 			// see if someone won
@@ -1719,9 +1605,8 @@ class API {
 		}
 	}
 
-	protected String process(final Map<String, Object> parameters,
-			final String userName, final HttpServletResponse response)
-			throws APIException, GameEngineException {
+	protected String process(final Map<String, Object> parameters, final String userName,
+			final HttpServletResponse response) throws APIException, GameEngineException {
 
 		Step step = MiniProfiler.step("API.process");
 		try {
@@ -1735,13 +1620,10 @@ class API {
 			StringBuilder json = new StringBuilder();
 
 			json.append("{ ");
-			json.append("\"user\":\"")
-					.append((userName != null ? userName : "")).append("\",");
+			json.append("\"user\":\"").append((userName != null ? userName : "")).append("\",");
 			json.append("\"appInfo\":{ ");
-			json.append("\"applicationVersion\":\"").append(
-					API.applicationVersion + "\",");
-			json.append("\"uploadDate\":\"").append(API.uploadDate)
-					.append("\"");
+			json.append("\"applicationVersion\":\"").append(API.applicationVersion + "\",");
+			json.append("\"uploadDate\":\"").append(API.uploadDate).append("\"");
 			json.append("},");
 
 			switch (action) {
@@ -1785,13 +1667,13 @@ class API {
 			case JOIN_TABLE: {
 				// JOIN_TABLE
 				final Long tableId = getTableId(parameters);
-				final String armyName = (String) API.getParameter("army",
-						parameters);
+				final String armyName = (String) API.getParameter("army", parameters);
 				if (userName == null || userName == "") {
 
 					try {
-						response.sendRedirect("/login.html?return_to=thediskgame%252Fapi%253Faction%253DJOIN_TABLE%2526id%253D"
-								+ tableId + "%2526army%253D" + armyName);
+						response.sendRedirect(
+								"/login.html?return_to=thediskgame%252Fapi%253Faction%253DJOIN_TABLE%2526id%253D"
+										+ tableId + "%2526army%253D" + armyName);
 						return null;
 					} catch (IOException e1) {
 						e1.printStackTrace();
@@ -1802,32 +1684,25 @@ class API {
 				try {
 					// make sure the player is allowed to join another table
 					String tablesStringJson = Table.getOpenAndActive(userName);
-					NativeArray tables = (NativeArray) ge
-							.execute(tablesStringJson);
+					NativeArray tables = (NativeArray) ge.execute(tablesStringJson);
 					if (tables.size() >= MAX_TABLES) {
 						// tell the player they are not allowed to join another
 						// table
-						json.append("\"messages\":[\"You are already in "
-								+ MAX_TABLES + " active tables.\"],");
+						json.append("\"messages\":[\"You are already in " + MAX_TABLES + " active tables.\"],");
 					} else {
 						ScriptableObject player = Player.get(userName);
 						final Long mementoId = getMementoId(parameters);
 						table = Table.get(tableId, mementoId);
 
-						ScriptableObject joinResult = join(table, player,
-								armyName);
+						ScriptableObject joinResult = join(table, player, armyName);
 
 						if (!(Boolean) joinResult.get("success")) {
 							// TODO give joinResult to the user
 
 						} else {
 							// redirect the user to the game they just joined
-							response.sendRedirect("/thediskgame/game/"
-									+ tableId
-									+ "/"
-									+ URLEncoder.encode(
-											(String) table.get("description"),
-											"UTF-8"));
+							response.sendRedirect("/thediskgame/game/" + tableId + "/"
+									+ URLEncoder.encode((String) table.get("description"), "UTF-8"));
 							return null;
 						}
 
@@ -1850,33 +1725,22 @@ class API {
 
 					ScriptableObject player = Player.get(userName);
 
-					final String description = (String) getParameter(
-							"description", parameters);
+					final String description = (String) getParameter("description", parameters);
 
-					final String maxPlayers = (String) getParameter(
-							"maxPlayers", parameters);
-					final String armyName = (String) getParameter("armyName",
-							parameters);
-					final String activations = (String) getParameter(
-							"activations", parameters);
-					final String startingDisks = (String) getParameter(
-							"startingDisks", parameters);
-					final String reinforcements = (String) getParameter(
-							"reinforcements", parameters);
-					final String alignmentRestriction = (String) getParameter(
-							"alignmentRestriction", parameters);
-					final String maxPoints = (String) getParameter("maxPoints",
-							parameters);
-					final String scenario = (String) getParameter("scenario",
-							parameters);
+					final String maxPlayers = (String) getParameter("maxPlayers", parameters);
+					final String armyName = (String) getParameter("armyName", parameters);
+					final String activations = (String) getParameter("activations", parameters);
+					final String startingDisks = (String) getParameter("startingDisks", parameters);
+					final String reinforcements = (String) getParameter("reinforcements", parameters);
+					final String alignmentRestriction = (String) getParameter("alignmentRestriction", parameters);
+					final String maxPoints = (String) getParameter("maxPoints", parameters);
+					final String scenario = (String) getParameter("scenario", parameters);
 
 					ScriptableObject table = null;
 					try {
 						// make sure the player is allowed to create a new table
-						String tablesStringJson = Table
-								.getOpenAndActive(userName);
-						NativeArray tables = (NativeArray) ge
-								.execute(tablesStringJson);
+						String tablesStringJson = Table.getOpenAndActive(userName);
+						NativeArray tables = (NativeArray) ge.execute(tablesStringJson);
 						if (tables.size() >= 4) {
 							// tell the player they are not allowed to create
 							// more
@@ -1885,31 +1749,24 @@ class API {
 							json.append("\"messages\":[\"You are already in 4 active tables.\"]");
 
 						} else {
-							table = Table.create(description, maxPlayers,
-									maxPoints, activations, startingDisks,
-									reinforcements, alignmentRestriction,
-									scenario);
+							table = Table.create(description, maxPlayers, maxPoints, activations, startingDisks,
+									reinforcements, alignmentRestriction, scenario);
 
-							ScriptableObject joinResult = join(table, player,
-									armyName);
+							ScriptableObject joinResult = join(table, player, armyName);
 
 							Object success = joinResult.get("success");
 							if ((Boolean) success) {
 
 								final Long tableId = getId(table);
 
-								response.sendRedirect("/thediskgame/game/"
-										+ tableId
-										+ "/"
-										+ URLEncoder.encode((String) table
-												.get("description"), "UTF-8"));
+								response.sendRedirect("/thediskgame/game/" + tableId + "/"
+										+ URLEncoder.encode((String) table.get("description"), "UTF-8"));
 								return null;
 
 							} else {
 								json.append(",\"messages\":[");
 								// give joinResult to the user
-								NativeArray messages = (NativeArray) joinResult
-										.get("messages");
+								NativeArray messages = (NativeArray) joinResult.get("messages");
 								for (Object message : messages) {
 									json.append("\"" + message + "\",");
 								}
@@ -1961,70 +1818,46 @@ class API {
 
 				final String type = (String) getParameter("type", parameters);
 
-				final Integer attack = Integer.parseInt((String) getParameter(
-						"attack", parameters));
-				final Integer defense = Integer.parseInt((String) getParameter(
-						"defense", parameters));
-				final Integer toughness = Integer
-						.parseInt((String) getParameter("toughness", parameters));
-				final Integer movement = Integer
-						.parseInt((String) getParameter("movement", parameters));
-				final Integer wounds = Integer.parseInt((String) getParameter(
-						"wounds", parameters));
+				final Integer attack = Integer.parseInt((String) getParameter("attack", parameters));
+				final Integer defense = Integer.parseInt((String) getParameter("defense", parameters));
+				final Integer toughness = Integer.parseInt((String) getParameter("toughness", parameters));
+				final Integer movement = Integer.parseInt((String) getParameter("movement", parameters));
+				final Integer wounds = Integer.parseInt((String) getParameter("wounds", parameters));
 				final Boolean flying = getParameter("flying", parameters) == null ? false
-						: Boolean.parseBoolean((String) getParameter("flying",
-								parameters));
-				final Boolean swashbuckler = getParameter("swashbuckler",
-						parameters) == null ? false : Boolean
-						.parseBoolean((String) getParameter("swashbuckler",
-								parameters));
+						: Boolean.parseBoolean((String) getParameter("flying", parameters));
+				final Boolean swashbuckler = getParameter("swashbuckler", parameters) == null ? false
+						: Boolean.parseBoolean((String) getParameter("swashbuckler", parameters));
 				final Boolean archer = getParameter("archer", parameters) == null ? false
-						: Boolean.parseBoolean((String) getParameter("archer",
-								parameters));
+						: Boolean.parseBoolean((String) getParameter("archer", parameters));
 
 				final Integer arrows = getParameter("arrows", parameters) == null ? 0
-						: Integer.parseInt((String) getParameter("arrows",
-								parameters));
+						: Integer.parseInt((String) getParameter("arrows", parameters));
 
 				final Integer bolts = getParameter("bolts", parameters) == null ? 0
-						: Integer.parseInt((String) getParameter("bolts",
-								parameters));
+						: Integer.parseInt((String) getParameter("bolts", parameters));
 
 				final Integer fireballs = getParameter("fireballs", parameters) == null ? 0
-						: Integer.parseInt((String) getParameter("fireballs",
-								parameters));
+						: Integer.parseInt((String) getParameter("fireballs", parameters));
 
 				final Integer boulders = getParameter("boulders", parameters) == null ? 0
-						: Integer.parseInt((String) getParameter("boulders",
-								parameters));
+						: Integer.parseInt((String) getParameter("boulders", parameters));
 
-				final Integer spellcaster = Integer
-						.parseInt((String) getParameter("spellcaster",
-								parameters));
+				final Integer spellcaster = Integer.parseInt((String) getParameter("spellcaster", parameters));
 
-				final Integer limit = Integer.parseInt((String) getParameter(
-						"limit", parameters));
+				final Integer limit = Integer.parseInt((String) getParameter("limit", parameters));
 
-				String parameter = (String) getParameter("missileImmunity",
-						parameters);
-				final Boolean missileImmunity = getParameter("missileImmunity",
-						parameters) == null ? false : Boolean
-						.parseBoolean(parameter);
+				String parameter = (String) getParameter("missileImmunity", parameters);
+				final Boolean missileImmunity = getParameter("missileImmunity", parameters) == null ? false
+						: Boolean.parseBoolean(parameter);
 
 				final Boolean firstblow = getParameter("firstblow", parameters) == null ? false
-						: Boolean.parseBoolean((String) getParameter(
-								"firstblow", parameters));
+						: Boolean.parseBoolean((String) getParameter("firstblow", parameters));
 
-				final Integer cost = Integer.parseInt((String) getParameter(
-						"cost", parameters));
-				final String faction = (String) getParameter("faction",
-						parameters);
-				final String alignment = (String) getParameter("alignment",
-						parameters);
-				final String diameter = (String) getParameter("diameter",
-						parameters);
-				final String description = (String) getParameter("description",
-						parameters);
+				final Integer cost = Integer.parseInt((String) getParameter("cost", parameters));
+				final String faction = (String) getParameter("faction", parameters);
+				final String alignment = (String) getParameter("alignment", parameters);
+				final String diameter = (String) getParameter("diameter", parameters);
+				final String description = (String) getParameter("description", parameters);
 				final String price = (String) getParameter("price", parameters);
 
 				// name, attack, defense, toughness, movement, wounds, flying,
@@ -2032,12 +1865,9 @@ class API {
 				// missileImmunity, firstblow, spellcaster, cost, faction,
 				// alignment, diameter, description, price
 				try {
-					Disk.create(name, type, attack, defense, toughness,
-							movement, wounds, flying, swashbuckler, archer,
-							arrows, bolts, fireballs, boulders,
-							missileImmunity, firstblow, spellcaster, limit,
-							cost, faction, alignment, diameter, description,
-							price);
+					Disk.create(name, type, attack, defense, toughness, movement, wounds, flying, swashbuckler, archer,
+							arrows, bolts, fireballs, boulders, missileImmunity, firstblow, spellcaster, limit, cost,
+							faction, alignment, diameter, description, price);
 
 					// redirect to a better place
 					response.sendRedirect("/thediskgame/diskEditor/" + name);
@@ -2095,14 +1925,11 @@ class API {
 
 				if (player != null) {
 
-					final String armyName = (String) getParameter("armyName",
-							parameters);
+					final String armyName = (String) getParameter("armyName", parameters);
 
-					final String disks = (String) getParameter("disks",
-							parameters);
+					final String disks = (String) getParameter("disks", parameters);
 
-					ge.invoke(player, "saveArmy",
-							new Object[] { armyName, ge.execute(disks) });
+					ge.invoke(player, "saveArmy", new Object[] { armyName, ge.execute(disks) });
 
 					Player.save(player);
 
@@ -2115,13 +1942,27 @@ class API {
 				break;
 			}
 
+			case SAVE_GLOBAL_ARMY: {
+				final String armyName = (String) getParameter("armyName", parameters);
+
+				final String disks = (String) getParameter("disks", parameters);
+
+				Army.save(armyName, disks);
+
+				try {
+					response.sendRedirect("/thediskgame/armyEditor/" + armyName);
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+
 			case DELETE_ARMY: {
 				final ScriptableObject player = Player.get(userName);
 
 				if (player != null) {
 
-					final String armyName = (String) getParameter("armyName",
-							parameters);
+					final String armyName = (String) getParameter("armyName", parameters);
 
 					ge.invoke(player, "deleteArmy", new Object[] { armyName });
 
@@ -2141,10 +1982,8 @@ class API {
 				try {
 					Long mementoId = getMementoId(parameters);
 					table = Table.get(getTableId(parameters), mementoId);
-					final String pointString = (String) getParameter("point",
-							parameters);
-					final String diskNumber = (String) getParameter(
-							"diskNumber", parameters);
+					final String pointString = (String) getParameter("point", parameters);
+					final String diskNumber = (String) getParameter("diskNumber", parameters);
 
 					saveReinforcement(table, userName, diskNumber, pointString);
 
@@ -2203,17 +2042,13 @@ class API {
 					final Long mementoId = getMementoId(parameters);
 					table = Table.get(getTableId(parameters), mementoId);
 
-					final String diskNumber = (String) getParameter(
-							"diskNumber", parameters);
+					final String diskNumber = (String) getParameter("diskNumber", parameters);
 
-					final String point = (String) getParameter("point",
-							parameters);
+					final String point = (String) getParameter("point", parameters);
 
-					final String missileName = (String) getParameter("missile",
-							parameters);
+					final String missileName = (String) getParameter("missile", parameters);
 
-					fireMissiles(table, userName, diskNumber, point,
-							missileName);
+					fireMissiles(table, userName, diskNumber, point, missileName);
 
 					json.append("\"table\":");
 					json.append(table.get("json"));
@@ -2227,11 +2062,9 @@ class API {
 			}
 
 			case MOVE_DISK: {
-				final String diskNumber = (String) getParameter("diskNumber",
-						parameters);
+				final String diskNumber = (String) getParameter("diskNumber", parameters);
 				final Long mementoId = getMementoId(parameters);
-				final ScriptableObject table = Table.get(
-						getTableId(parameters), mementoId);
+				final ScriptableObject table = Table.get(getTableId(parameters), mementoId);
 				// "diskNumber" : movedDiskNumber,
 
 				// "point" : tableClickPoint
@@ -2255,8 +2088,7 @@ class API {
 						break;
 					}
 
-					final String s = saveCart(
-							(String) getParameter("disks", parameters), player);
+					final String s = saveCart((String) getParameter("disks", parameters), player);
 					json.append("\"jwt\":\"" + s + "\"");
 
 				} catch (GameEngineException gee) {
@@ -2281,8 +2113,7 @@ class API {
 			case GET_ALL_DISKS: {
 				json.append("\"disks\":{");
 
-				final HashMap<Object, HashMap<String, Object>> disks = ge.persistence
-						.getAll("Disk");
+				final HashMap<Object, HashMap<String, Object>> disks = ge.persistence.getAll("Disk");
 
 				for (HashMap<String, Object> disk : disks.values()) {
 					final String diskJson = (String) disk.get("json");
@@ -2307,13 +2138,11 @@ class API {
 			}
 				break;
 			case GET_DISK: {
-				final String diskName = (String) getParameter("diskName",
-						parameters);
+				final String diskName = (String) getParameter("diskName", parameters);
 
 				json.append("\"disk\":");
 
-				final HashMap<String, Object> disk = ge.persistence.get("Disk",
-						diskName);
+				final HashMap<String, Object> disk = ge.persistence.get("Disk", diskName);
 				if (disk != null && disk.get("json") != null) {
 					final String text = (String) disk.get("json");
 					json.append(text);
@@ -2329,8 +2158,7 @@ class API {
 					final Long mementoId = getMementoId(parameters);
 					table = Table.get(getTableId(parameters), mementoId);
 					// "diskNumber" : movedDiskNumber,
-					final String diskNumber = (String) getParameter(
-							"diskNumber", parameters);
+					final String diskNumber = (String) getParameter("diskNumber", parameters);
 
 					activateDisk(table, diskNumber, userName);
 
@@ -2393,12 +2221,9 @@ class API {
 			//
 			{
 				final Long mementoId = getMementoId(parameters);
-				final ScriptableObject table = Table.get(
-						getTableId(parameters), mementoId);
-				final String attacker = (String) getParameter("attacker",
-						parameters);
-				final String attackee = (String) getParameter("attackee",
-						parameters);
+				final ScriptableObject table = Table.get(getTableId(parameters), mementoId);
+				final String attacker = (String) getParameter("attacker", parameters);
+				final String attackee = (String) getParameter("attackee", parameters);
 
 				setAttackee(table, userName, attacker, attackee);
 
@@ -2410,12 +2235,9 @@ class API {
 			//
 			{
 				final Long mementoId = getMementoId(parameters);
-				final ScriptableObject table = Table.get(
-						getTableId(parameters), mementoId);
-				final String defender = (String) getParameter("defender",
-						parameters);
-				final String defendee = (String) getParameter("defendee",
-						parameters);
+				final ScriptableObject table = Table.get(getTableId(parameters), mementoId);
+				final String defender = (String) getParameter("defender", parameters);
+				final String defendee = (String) getParameter("defendee", parameters);
 
 				setDefendee(table, userName, defender, defendee);
 
@@ -2449,45 +2271,31 @@ class API {
 				String campaign = (String) getParameter("campaign", parameters);
 				String mission = (String) getParameter("mission", parameters);
 				String scenario = (String) getParameter("scenario", parameters);
-				String startingDisks = (String) getParameter("startingDisks",
-						parameters);
+				String startingDisks = (String) getParameter("startingDisks", parameters);
 
-				String reinforcements = (String) getParameter("reinforcements",
-						parameters);
-				String activations = (String) getParameter("activations",
-						parameters);
+				String reinforcements = (String) getParameter("reinforcements", parameters);
+				String activations = (String) getParameter("activations", parameters);
 
-				String alignmentRestriction = (String) getParameter(
-						"alignmentRestriction", parameters);
+				String alignmentRestriction = (String) getParameter("alignmentRestriction", parameters);
 
-				String maxPlayers = (String) getParameter("maxPlayers",
-						parameters);
+				String maxPlayers = (String) getParameter("maxPlayers", parameters);
 
 				String control1 = (String) getParameter("control1", parameters);
 				String army1 = (String) getParameter("army1", parameters);
-				String maxPoints1 = (String) getParameter("maxPoints1",
-						parameters);
+				String maxPoints1 = (String) getParameter("maxPoints1", parameters);
 				String control2 = (String) getParameter("control2", parameters);
 				String army2 = (String) getParameter("army2", parameters);
-				String maxPoints2 = (String) getParameter("maxPoints2",
-						parameters);
+				String maxPoints2 = (String) getParameter("maxPoints2", parameters);
 
 				// create mission
-				Mission.save(campaign, mission, scenario, startingDisks,
-						reinforcements, activations, alignmentRestriction,
-						maxPlayers, control1, army1, maxPoints1, control2,
-						army2, maxPoints2);
+				Mission.save(campaign, mission, scenario, startingDisks, reinforcements, activations,
+						alignmentRestriction, maxPlayers, control1, army1, maxPoints1, control2, army2, maxPoints2);
 
 				try {
 
 					response.sendRedirect("/thediskgame/missionEditor/"
-							+ URLEncoder.encode(
-									(String) getParameter("campaign",
-											parameters), "UTF-8")
-							+ ":"
-							+ URLEncoder
-									.encode((String) getParameter("mission",
-											parameters), "UTF-8"));
+							+ URLEncoder.encode((String) getParameter("campaign", parameters), "UTF-8") + "/"
+							+ URLEncoder.encode((String) getParameter("mission", parameters), "UTF-8"));
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
@@ -2504,9 +2312,8 @@ class API {
 		}
 	}
 
-	private String saveCart(final String disksString,
-			final ScriptableObject player) throws InvalidKeyException,
-			SignatureException, GameEngineException {
+	private String saveCart(final String disksString, final ScriptableObject player)
+			throws InvalidKeyException, SignatureException, GameEngineException {
 
 		Step step = MiniProfiler.step("API.saveByName");
 		try {
@@ -2568,8 +2375,7 @@ class API {
 
 			Player.save(player);
 
-			final JsonToken token = createToken(disksString,
-					(String) player.get("name"), totalPrice,
+			final JsonToken token = createToken(disksString, (String) player.get("name"), totalPrice,
 					description.toString());
 			return token.serializeAndSign();
 		} finally {
@@ -2578,16 +2384,14 @@ class API {
 	}
 
 	// [{"name":"King Falladir","location":{"x":8,"y":5}},...]
-	protected void saveReinforcement(final ScriptableObject table,
-			final String user, final String diskNumber, final String pointString)
-			throws GameEngineException {
+	protected void saveReinforcement(final ScriptableObject table, final String user, final String diskNumber,
+			final String pointString) throws GameEngineException {
 		Step step = MiniProfiler.step("API.saveReinforcements");
 		try {
 
 			final ScriptableObject point = ge.execute("_=" + pointString);
 
-			ge.invoke(table, "saveReinforcement", new Object[] { user,
-					diskNumber, point });
+			ge.invoke(table, "saveReinforcement", new Object[] { user, diskNumber, point });
 
 			Table.save(table);
 		} finally {
@@ -2595,13 +2399,11 @@ class API {
 		}
 	}
 
-	private void setAttackee(final ScriptableObject table, final String user,
-			final String attacker, final String attackee)
-			throws GameEngineException {
+	private void setAttackee(final ScriptableObject table, final String user, final String attacker,
+			final String attackee) throws GameEngineException {
 		Step step = MiniProfiler.step("API.setAttackee");
 		try {
-			ge.invoke(table, "setAttackee", new Object[] { user, attacker,
-					attackee });
+			ge.invoke(table, "setAttackee", new Object[] { user, attacker, attackee });
 			Table.save(table);
 
 			// see if someone won
@@ -2613,13 +2415,11 @@ class API {
 		}
 	}
 
-	protected void setDefendee(final ScriptableObject table, final String user,
-			final String defender, final String defendee)
-			throws GameEngineException {
+	protected void setDefendee(final ScriptableObject table, final String user, final String defender,
+			final String defendee) throws GameEngineException {
 		Step step = MiniProfiler.step("API.setDefendee");
 		try {
-			ge.invoke(table, "setDefendee", new Object[] { user, defender,
-					defendee });
+			ge.invoke(table, "setDefendee", new Object[] { user, defender, defendee });
 
 			Table.save(table);
 
@@ -2692,122 +2492,57 @@ class API {
 									break;
 								}
 
-								final String diskName = diskData[headers
-										.indexOf("name")];
+								final String diskName = diskData[headers.indexOf("name")];
 
-								final String type = diskData[headers
-										.indexOf("type")];
+								final String type = diskData[headers.indexOf("type")];
 
-								int attack = Integer.parseInt(diskData[headers
-										.indexOf("attack")]);
-								int defense = Integer.parseInt(diskData[headers
-										.indexOf("defense")]);
-								int toughness = Integer
-										.parseInt(diskData[headers
-												.indexOf("toughness")]);
-								int movement = Integer
-										.parseInt(diskData[headers
-												.indexOf("movement")]);
-								int wounds = Integer.parseInt(diskData[headers
-										.indexOf("wounds")]);
+								int attack = Integer.parseInt(diskData[headers.indexOf("attack")]);
+								int defense = Integer.parseInt(diskData[headers.indexOf("defense")]);
+								int toughness = Integer.parseInt(diskData[headers.indexOf("toughness")]);
+								int movement = Integer.parseInt(diskData[headers.indexOf("movement")]);
+								int wounds = Integer.parseInt(diskData[headers.indexOf("wounds")]);
 								int indexOfFlying = headers.indexOf("flying");
 								String s = diskData[indexOfFlying];
 								boolean flying = Boolean.parseBoolean(s);
-								boolean swashbuckler = headers
-										.indexOf("swashbuckler") > -1
-										&& !diskData[headers
-												.indexOf("swashbuckler")]
-												.equals("null") ? Boolean
-										.parseBoolean(diskData[headers
-												.indexOf("swashbuckler")])
-										: false;
+								boolean swashbuckler = headers.indexOf("swashbuckler") > -1
+										&& !diskData[headers.indexOf("swashbuckler")].equals("null")
+												? Boolean.parseBoolean(diskData[headers.indexOf("swashbuckler")])
+												: false;
 								boolean archer = headers.indexOf("archer") > -1
-										&& !diskData[headers.indexOf("archer")]
-												.equals("null") ? Boolean
-										.parseBoolean(diskData[headers
-												.indexOf("archer")]) : false;
+										&& !diskData[headers.indexOf("archer")].equals("null")
+												? Boolean.parseBoolean(diskData[headers.indexOf("archer")]) : false;
 								int arrows = headers.indexOf("arrows") > -1
-										&& !diskData[headers.indexOf("arrows")]
-												.equals("null") ? Integer
-										.parseInt(diskData[headers
-												.indexOf("arrows")]) : 0;
+										&& !diskData[headers.indexOf("arrows")].equals("null")
+												? Integer.parseInt(diskData[headers.indexOf("arrows")]) : 0;
 								int bolts = headers.indexOf("bolts") > -1
-										&& !diskData[headers.indexOf("bolts")]
-												.equals("null") ? Integer
-										.parseInt(diskData[headers
-												.indexOf("bolts")]) : 0;
+										&& !diskData[headers.indexOf("bolts")].equals("null")
+												? Integer.parseInt(diskData[headers.indexOf("bolts")]) : 0;
 								int fireballs = headers.indexOf("fireballs") > -1
-										&& !diskData[headers
-												.indexOf("fireballs")]
-												.equals("null") ? Integer
-										.parseInt(diskData[headers
-												.indexOf("fireballs")]) : 0;
+										&& !diskData[headers.indexOf("fireballs")].equals("null")
+												? Integer.parseInt(diskData[headers.indexOf("fireballs")]) : 0;
 								int boulders = headers.indexOf("boulders") > -1
-										&& !diskData[headers
-												.indexOf("boulders")]
-												.equals("null") ? Integer
-										.parseInt(diskData[headers
-												.indexOf("boulders")]) : 0;
-								boolean missileImmunity = headers
-										.indexOf("missileImmunity") > -1
-										&& !diskData[headers
-												.indexOf("missileImmunity")]
-												.equals("null") ? Boolean
-										.parseBoolean(diskData[headers
-												.indexOf("missileImmunity")])
-										: false;
-								boolean firstblow = Boolean
-										.parseBoolean(headers
-												.indexOf("firstblow") > -1
-												&& !diskData[headers
-														.indexOf("firstblow")]
-														.equals("null") ? diskData[headers
-												.indexOf("firstblow")]
-												: "false");
-								int spellcaster = Integer
-										.parseInt(headers
-												.indexOf("spellcaster") > -1
-												&& !diskData[headers
-														.indexOf("spellcaster")]
-														.equals("null") ? diskData[headers
-												.indexOf("spellcaster")] : "0");
+										&& !diskData[headers.indexOf("boulders")].equals("null")
+												? Integer.parseInt(diskData[headers.indexOf("boulders")]) : 0;
+								boolean missileImmunity = headers.indexOf("missileImmunity") > -1
+										&& !diskData[headers.indexOf("missileImmunity")].equals("null")
+												? Boolean.parseBoolean(diskData[headers.indexOf("missileImmunity")])
+												: false;
+								boolean firstblow = Boolean.parseBoolean(headers.indexOf("firstblow") > -1
+										&& !diskData[headers.indexOf("firstblow")].equals("null")
+												? diskData[headers.indexOf("firstblow")] : "false");
+								int spellcaster = Integer.parseInt(headers.indexOf("spellcaster") > -1
+										&& !diskData[headers.indexOf("spellcaster")].equals("null")
+												? diskData[headers.indexOf("spellcaster")] : "0");
 								int limit = headers.indexOf("limit") > -1
-										&& !diskData[headers.indexOf("limit")]
-												.equals("null") ? Integer
-										.parseInt(diskData[headers
-												.indexOf("limit")]) : 0;
-								int cost = Integer.parseInt(diskData[headers
-										.indexOf("cost")]);
-								ScriptableObject disk = Disk
-										.create(diskName,
-												type,
-												attack,
-												defense,
-												toughness,
-												movement,
-												wounds,
-												flying,
-												swashbuckler,
-												archer,
-												arrows,
-												bolts,
-												fireballs,
-												boulders,
-												missileImmunity,
-												firstblow,
-												spellcaster,
-												limit,
-												cost,
-												diskData[headers
-														.indexOf("faction")],
-												diskData[headers
-														.indexOf("alignment")],
-												diskData[headers
-														.indexOf("diameter")],
-												diskData[headers
-														.indexOf("description")],
-												diskData[headers
-														.indexOf("price")]);
+										&& !diskData[headers.indexOf("limit")].equals("null")
+												? Integer.parseInt(diskData[headers.indexOf("limit")]) : 0;
+								int cost = Integer.parseInt(diskData[headers.indexOf("cost")]);
+								ScriptableObject disk = Disk.create(diskName, type, attack, defense, toughness,
+										movement, wounds, flying, swashbuckler, archer, arrows, bolts, fireballs,
+										boulders, missileImmunity, firstblow, spellcaster, limit, cost,
+										diskData[headers.indexOf("faction")], diskData[headers.indexOf("alignment")],
+										diskData[headers.indexOf("diameter")], diskData[headers.indexOf("description")],
+										diskData[headers.indexOf("price")]);
 
 								Disk.save(disk);
 							}
@@ -2825,8 +2560,7 @@ class API {
 			} finally {
 				// delete the zip
 				if (zipBlobKey != null) {
-					BlobstoreService blobstoreService = BlobstoreServiceFactory
-							.getBlobstoreService();
+					BlobstoreService blobstoreService = BlobstoreServiceFactory.getBlobstoreService();
 					blobstoreService.delete(zipBlobKey);
 				}
 			}
