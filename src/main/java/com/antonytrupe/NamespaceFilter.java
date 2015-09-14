@@ -17,10 +17,10 @@ public class NamespaceFilter implements javax.servlet.Filter {
 			FilterChain chain) throws IOException, ServletException {
 		// Make sure set() is only called if the current namespace is not
 		// already set.
-		if (NamespaceManager.get() == null) {
-			String serverName = request.getServerName();
-			NamespaceManager.set(serverName);
-		}
+		//if (NamespaceManager.get() == null) {
+		//	String serverName = request.getServerName();
+		//	NamespaceManager.set(serverName);
+		//}
 		chain.doFilter(request, response);
 	}
 

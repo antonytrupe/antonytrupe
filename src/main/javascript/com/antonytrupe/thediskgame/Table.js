@@ -2205,7 +2205,7 @@ function Table(description, maxPlayers, maxPoints, activations, startingDisks,
 	/**
 	 * used by API.createUnitTest and the replay functionality. Only call this
 	 * after something has changed, ie, do not call this to record attempted and
-	 * failed actions. This does create a memento except when methodName is
+	 * failed actions. This create a memento, except when methodName is
 	 * "createTable"
 	 * 
 	 * @param methodName
