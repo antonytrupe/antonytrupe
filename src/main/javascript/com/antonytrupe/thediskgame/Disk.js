@@ -5,28 +5,50 @@
  *            name
  * @param {string}
  *            type
- * @param attack
- * @param defense
- * @param toughness
- * @param movement
- * @param wounds
- * @param flying
- * @param swashbuckler
- * @param archer
- * @param arrows
- * @param bolts
- * @param fireballs
- * @param boulders
- * @param missileImmunity
- * @param firstblow
- * @param spellcaster
- * @param limit
- * @param cost
- * @param faction
- * @param alignment
- * @param diameter
- * @param description
- * @param price
+ * @param {Number}
+ *            attack
+ * @param {Number}
+ *            defense
+ * @param {Number}
+ *            toughness
+ * @param {Number}
+ *            movement
+ * @param {Number}
+ *            wounds
+ * @param {boolean}
+ *            flying
+ * @param {boolean}
+ *            swashbuckler
+ * @param {boolean}
+ *            archer
+ * @param {Number}
+ *            arrows
+ * @param {Number}
+ *            bolts
+ * @param {Number}
+ *            fireballs
+ * @param {Number}
+ *            boulders
+ * @param {boolean}
+ *            missileImmunity
+ * @param {boolean}
+ *            firstblow
+ * @param {boolean}
+ *            spellcaster
+ * @param {Number}
+ *            limit
+ * @param {Number}
+ *            cost
+ * @param {string}
+ *            faction
+ * @param {string}
+ *            alignment
+ * @param {Number}
+ *            diameter
+ * @param {string}
+ *            description
+ * @param {Number}
+ *            price
  */
 function Disk(name, type, attack, defense, toughness, movement, wounds, flying,
 		swashbuckler, archer, arrows, bolts, fireballs, boulders,
@@ -51,7 +73,7 @@ function Disk(name, type, attack, defense, toughness, movement, wounds, flying,
 	$this.fireballs = fireballs;
 	$this.boulders = boulders;
 	$this.spellcaster = spellcaster;
-	$this.limit = limit||0;
+	$this.limit = limit || 0;
 	$this.cost = cost;
 	$this.faction = faction || 'Unaligned';
 	$this.alignment = alignment || 'Neutral';

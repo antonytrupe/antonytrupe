@@ -1,355 +1,413 @@
 //model must contain a method named getActions
-//getActions must return an array of Nodes
+//getActions must return an array of objects. those objects must include a property named state, and optionally properties named action and arguments
 /**
- * @constructor
- * @param {AI}
- *            ai
- * 
- * @callback ai.getActions
- * @return {Array.<{{state: Object, method: String,arguments:Array}}>}
- * 
- * 
- * @param {ai.getActions}
- *            ai.getActions
+ * @class
+ * @param {Object}
+ *          model - object that represents the world and provides information to
+ *          AStar
  * @param {Function}
- *            ai.gScore - actual cost to this point
+ *          model.getActions - return a list of objects that have an attributes
+ *          state and method: [{'state':'1,'action':'jump'}...]
  * @param {Function}
- *            ai.hScore - estimated cost from this point to goal
+ *          model.gScore - return actual cost to this state from initial state
  * @param {Function}
- *            ai.getGoal
+ *          model.hScore - return estimated cost from current state to goal
  * @param {Function}
- *            ai.setState
+ *          model.atGoal - return false to keep searching, true to stop
+ *          searching
  * @param {Function}
- *            ai.getState
- * @param options
+ *          model.setState - restore the model to to a specific state
+ * @param {Function}
+ *          model.getState - return the current state of the model
  */
-function AStar(ai, options) {
-	"use strict";
-	/**
-	 * @type PriorityQueue
-	 */
-	var closed_set = new PriorityQueue('getF', PriorityQueue.MIN_HEAP);
-	/**
-	 * @type PriorityQueue
-	 */
-	var open_set = new PriorityQueue('getF', PriorityQueue.MIN_HEAP);
+function AStar(model) {
+    "use strict";
+    /**
+     * the nodes we've already listed, for checking to make sure we don't
+     * backtrack
+     */
+    var closedSet = new Set();
+    /**
+     * @type {PriorityQueue} - the nodes we've already visited, in order
+     */
+    var closedPriorityQueue = new PriorityQueue('getH', PriorityQueue.MIN_HEAP);
 
-	// make sure the model has the right methods for a_star to use
-	if (typeof ai === "undefined") {
-		throw "no ai provided";
-	}
-	var requiredAiMembers = [ 'getActions', 'gScore', 'hScore', 'getGoal',
-			'setState', 'getState', 'keepSearching' ];
-	var missingMembers = [];
-	requiredAiMembers.forEach(function(method) {
-		if (typeof ai[method] === "undefined") {
-			missingMembers.push(method);
-		}
-	});
-	if (missingMembers.length !== 0) {
-		throw "ai missing attributes: " + JSON.stringify(missingMembers);
-	}
+    /**
+     * @type {PriorityQueue} - the nodes we want to visit
+     */
+    var openPriorityQueue = new PriorityQueue('getF', PriorityQueue.MIN_HEAP);
 
-	// now initialize some stuff
-	var start = new Node({
-		'state' : ai.getState()
-	});
-	start.setG(ai.gScore());
-	start.setH(ai.hScore());
+    // make sure we got a model
+    if (typeof model === "undefined") {
+        throw "no model provided";
+    }
 
-	var goal = new Node({
-		'state' : ai.getGoal()
-	});
-	// console.log('goal state');
-	// console.log(goal.getState());
-	// console.log('start state');
-	// console.log(start.getState());
-	open_set.add(start);
-	// console.log('done initializing AStar');
+    // make sure the model has the right methods for a_star to use
+    var requiredModelMembers = ['getActions', 'gScore', 'hScore', 'setState',
+            'getState', 'atGoal', 'keepSearching'];
+    var missingMembers = [];
+    requiredModelMembers.forEach(function(method) {
+        if (typeof model[method] === "undefined") {
+            missingMembers.push(method);
+        }
+    });
+    if (missingMembers.length !== 0) {
+        throw "model missing attributes: " + JSON.stringify(missingMembers);
+    }
 
-	this.search = function() {
- 
-		while (open_set.size() > 0 && ai.keepSearching()) {
- 			var q = open_set.peek();
+    // now initialize some stuff
+    var start = new Node({
+        'state': model.getState()
+    });
+    start.setG(0);
+    start.setH(model.hScore());
 
-			// console.log('current state');
-			// console.log(q.getState());
+    openPriorityQueue.add(start);
 
-			// the stopping condition(s)
-			if (q.isEqual(goal)) {
-				// console.log('got to goal');
-				return reconstruct_path(q);
-			}
+    /**
+     * @memberOf AStar
+     * @return
+     */
+    function process() {
+        var loops = 0, MAX_LOOPS = 10000;
+        // && loops <= MAX_LOOPS
+        while (openPriorityQueue.size() > 0 && model.keepSearching()) {
+            loops++;
+            /**
+             * @type {Node}
+             */
+            var q = openPriorityQueue.peek();
+            model.setState(q.getState());
 
-			open_set.poll();
-			closed_set.add(q);
-			// console.log('update ai state');
+            console.log(q.action);
 
-			ai.setState(q.getState());
-			// console.log(ai.getState());
+            // the stopping condition(s)
+            if (model.atGoal()) {
+                console.log('got to goal or some other constraint');
+                return q;
+            }
 
-			// console.log('adding neighbors');
+            // remove this node from the open list
+            openPriorityQueue.poll();
+            // add it to the closed lists
+            closedSet.add(JSON.stringify(q.getState()));
+            closedPriorityQueue.add(q);
 
-			// closed_set.push(q);
-			// get actions returns an array of objects
-			ai.getActions().forEach(function(n) {
-				ai.setState(n.state);
-				var neighbor = new Node(n);
-				// console.log(neighbor._state);
+            // get actions returns an array of objects
+            model.getActions().forEach(function(n) {
+                model.setState(n.state);
+                var neighbor = new Node(n);
+                console.log(neighbor.action);
 
-				neighbor.setPredecessor(q);
-				neighbor.setG(ai.gScore());
-				neighbor.setH(ai.hScore());
+                neighbor.setPredecessor(q);
+                // get the total cost
+                neighbor.setG(model.gScore(q.getG(), n.action));
+                neighbor.setH(model.hScore());
 
-				open_set.add(neighbor);
-			});
+                // check the closed set to make sure we don't
+                // backtrack
+                if (!closedSet.has(JSON.stringify(neighbor.getState()))) {
+                    openPriorityQueue.add(neighbor);
+                }
+            });
 
-		}
-		// if we got here, that means we failed to get to the goal
-		// so return the best path we did find
-		var c = closed_set.peek();
-		return reconstruct_path(c);
+        }
+        /**
+         * if we got here, that means we failed to get to the goal. we may have
+         * gotten here because openPriorityQueue is empty(no solution) or we may
+         * have gotten here because we were forced to stop by some other
+         * constraint
+         */
+        console.log('openPriorityQueue');
+        console.log(openPriorityQueue);
+        console.log('closedPriorityQueue');
+        console.log(closedPriorityQueue);
+        var c = openPriorityQueue.peek();
+        console.log(c);
+        if (typeof c === "undefined") {
+            c = closedPriorityQueue.peek();
+            console.log(c.action);
+        }
+        // return the best path we did find
+        console.log('got to a constraint');
+        return c;
+    }
 
-	};
+    /**
+     * @returns best state given constraints
+     */
+    this.getSolution = function() {
+        return process().getState();
+    };
 
-	function reconstruct_path(q) {
-		// console.log('reconstruct_path');
-		// console.log(q.getState());
-		var total_path = [ q.getState() ];
-		// console.log(total_path);
-		var current = q;
-		while (current.getPredecessor()) {
-			total_path.push(current.getPredecessor().getState());
-			current = current.getPredecessor();
-		}
+    /**
+     * @returns list of actions to get to the best state
+     */
+    this.search = function() {
+        var a = process();
+        console.log(a);
+        var path = reconstruct_path(a);
+        console.log(path);
+        return path;
+    };
 
-		// console.log(total_path);
-		return total_path.reverse();
-	}
+    /**
+     * @memberOf AStar
+     * @param {Node}
+     *          q
+     * @return an array of objects that describe the path/actions to take
+     */
+    function reconstruct_path(q) {
+        var total_path = [];
+        /**
+         * @type {Node}
+         */
+        var current = q;
+        while (typeof current.getPredecessor() !== "undefined") {
 
+            total_path.push(current.getAction());
+            current = current.getPredecessor();
+        }
+        return total_path.reverse();
+    }
 }
 
 function Node(args) {
-	"use strict";
-	// f is total cost from start to goal through this node
-	this._f;
-	// h is the estimated cost from this node to the goal
-	this._h;
-	// g is the actual cost from start to this node
-	this._g;
-	//
-	this._state = args.state;
-	var predecessor = args.predecessor, _actionName = args.actionName, _args = args.args;
+    "use strict";
+    // f is total cost from start to goal through this node
+    this._f;
+    // h is the estimated cost from this node to the goal
+    this._h;
+    // g is the actual cost from start to this node
+    this._g;
+    //
+    this._state = args.state;
+    this.predecessor = args.predecessor;
+    // action has method and arguments, if any
+    // this is the action to get to this state from the predecessor state
+    console.log(args);
+    this.action = args.action;
 
-	this.setState = function(__state) {
-		this._state = __state;
-	};
-	this.getState = function() {
-		return this._state;
-	};
+    this.getAction = function() {
+        return this.action;
+    };
 
-	// g is the actual cost from start to this node
-	this.setG = function(__g) {
-		this._g = __g;
-		this._f = this._g + this._h;
-	};
+    this.setState = function(__state) {
+        this._state = __state;
+    };
+    this.getState = function() {
+        return this._state;
+    };
 
-	// h is the estimated cost from this node to the goal
-	this.setH = function(__h) {
-		this._h = __h;
-		this._f = this._g + this._h;
-	};
+    // g is the actual cost from start to this node
+    this.setG = function(__g) {
+        this._g = __g;
+        this._f = this._g + this._h;
+    };
 
-	// f is total cost from start to goal through this node
-	this.getF = function() {
-		return this._f;
-	};
+    this.getG = function() {
+        return this._g;
+    };
 
-	this.setPredecessor = function(__p) {
-		predecessor = __p;
-	};
-	this.getPredecessor = function() {
-		return predecessor;
-	};
-	this.isEqual = function(node) {
-		// console.log('Node.isEqual');
-		if (!(node instanceof Node)) {
-			return false;
-		}
-		// console.log(JSON.stringify(node.getState()));
-		// console.log(JSON.stringify(this.getState()));
-		return JSON.stringify(node.getState()) == JSON.stringify(this
-				.getState());
-	};
+    // h is the estimated cost from this node to the goal
+    this.setH = function(__h) {
+        this._h = __h;
+        this._f = this._g + this._h;
+    };
+
+    this.getH = function() {
+        return this._h;
+    };
+
+    // f is total cost from start to goal through this node
+    this.getF = function() {
+        return this._f;
+    };
+
+    this.setPredecessor = function(__p) {
+        this.predecessor = __p;
+    };
+    this.getPredecessor = function() {
+        return this.predecessor;
+    };
+    this.isEqual = function(node) {
+        if (!(node instanceof Node)) {
+            return false;
+        }
+        return JSON.stringify(node.getState()) == JSON.stringify(this
+                .getState());
+    };
 }
 
 /**
+ * https://github.com/prettymuchbryce/easystarjs/blob/master/src/priority-queue.js
  * This is an improved Priority Queue data type implementation that can be used
  * to sort any object type. It uses a technique called a binary heap.
  * 
  * For more on binary heaps see: http://en.wikipedia.org/wiki/Binary_heap
  * 
  * @param {String}
- *            criteria The criteria by which to sort the objects. This should be
- *            a property of the objects you're sorting.
+ *          criteria The criteria by which to sort the objects. This should be a
+ *          property of the objects you're sorting.
  * 
  * @param {Number}
- *            heapType either PriorityQueue.MAX_HEAP or PriorityQueue.MIN_HEAP.
+ *          heapType either PriorityQueue.MAX_HEAP or PriorityQueue.MIN_HEAP.
  */
 var PriorityQueue = function(criteria, heapType) {
-	this.length = 0; // The current length of heap.
-	/**
-	 * @memberOf PriorityQueue
-	 */
-	var queue = [];
-	var isMax = false;
+    this.length = 0; // The current length of heap.
+    /**
+     * @memberOf PriorityQueue
+     * @type Array
+     */
+    var queue = [];
+    var isMax = false;
 
-	// Constructor
-	if (heapType == PriorityQueue.MAX_HEAP) {
-		isMax = true;
-	}
+    // Constructor
+    if (heapType == PriorityQueue.MAX_HEAP) {
+        isMax = true;
+    }
 
-	this.size = function() {
-		return this.length;
-	};
+    this.size = function() {
+        return this.length;
+    };
 
-	/**
-	 * Inserts the value into the heap and sorts it.
-	 * 
-	 * @param value
-	 *            The object to insert into the heap.
-	 * @memberOf PriorityQueue
-	 * @return
-	 */
-	this.insert = function(value) {
-		if (!value.hasOwnProperty(criteria)) {
-			throw "Cannot insert " + value
-					+ " because it does not have a property by the name of "
-					+ criteria + ".";
-		}
-		queue.push(value);
-		this.length++;
-		bubbleUp(this.length - 1);
-	};
+    /**
+     * Inserts the value into the heap and sorts it.
+     * 
+     * @param value
+     *          The object to insert into the heap.
+     * @memberOf PriorityQueue
+     * @return
+     */
+    this.insert = function(value) {
+        if (!value.hasOwnProperty(criteria)) {
+            throw "Cannot insert " + value
+                    + " because it does not have a property by the name of "
+                    + criteria + ".";
+        }
+        queue.push(value);
+        this.length++;
+        bubbleUp(this.length - 1);
+    };
 
-	this.add = this.insert;
+    this.add = this.insert;
 
-	/**
-	 * Peeks at the highest priority element.
-	 * 
-	 * @return the highest priority element
-	 */
-	this.getHighestPriorityElement = function() {
-		return queue[0];
-	};
+    /**
+     * Peeks at the highest priority element.
+     * 
+     * @return the highest priority element
+     */
+    this.getHighestPriorityElement = function() {
+        return queue[0];
+    };
 
-	this.peek = this.getHighestPriorityElement;
+    this.peek = this.getHighestPriorityElement;
 
-	/**
-	 * Removes and returns the highest priority element from the queue.
-	 * 
-	 * @return the highest priority element
-	 */
-	this.shiftHighestPriorityElement = function() {
-		if (this.length === 0) {
-			throw ("There are no more elements in your priority queue.");
-		} else if (this.length === 1) {
-			var onlyValue = queue[0];
-			queue = [];
-			this.length = 0;
-			return onlyValue;
-		}
-		var oldRoot = queue[0];
-		var newRoot = queue.pop();
-		this.length--;
-		queue[0] = newRoot;
-		swapUntilQueueIsCorrect(0);
-		return oldRoot;
-	};
+    /**
+     * Removes and returns the highest priority element from the queue.
+     * 
+     * @return the highest priority element
+     */
+    this.shiftHighestPriorityElement = function() {
+        if (this.length === 0) {
+            throw ("There are no more elements in your priority queue.");
+        } else if (this.length === 1) {
+            var onlyValue = queue[0];
+            queue = [];
+            this.length = 0;
+            return onlyValue;
+        }
+        var oldRoot = queue[0];
+        var newRoot = queue.pop();
+        this.length--;
+        queue[0] = newRoot;
+        swapUntilQueueIsCorrect(0);
+        return oldRoot;
+    };
 
-	this.poll = this.shiftHighestPriorityElement;
+    this.poll = this.shiftHighestPriorityElement;
 
-	/**
-	 * @memberOf PriorityQueue
-	 */
-	var bubbleUp = function(index) {
-		if (index === 0) {
-			return;
-		}
-		var parent = getParentOf(index);
-		if (evaluate(index, parent)) {
-			swap(index, parent);
-			bubbleUp(parent);
-		} else {
-			return;
-		}
-	};
+    /**
+     * @memberOf PriorityQueue
+     */
+    var bubbleUp = function(index) {
+        if (index === 0) {
+            return;
+        }
+        var parent = getParentOf(index);
+        if (evaluate(index, parent)) {
+            swap(index, parent);
+            bubbleUp(parent);
+        } else {
+            return;
+        }
+    };
 
-	var swapUntilQueueIsCorrect = function(value) {
-		var left = getLeftOf(value);
-		var right = getRightOf(value);
-		if (evaluate(left, value)) {
-			swap(value, left);
-			swapUntilQueueIsCorrect(left);
-		} else if (evaluate(right, value)) {
-			swap(value, right);
-			swapUntilQueueIsCorrect(right);
-		} else if (value == 0) {
-			return;
-		} else {
-			swapUntilQueueIsCorrect(0);
-		}
-	};
+    var swapUntilQueueIsCorrect = function(value) {
+        var left = getLeftOf(value);
+        var right = getRightOf(value);
+        if (evaluate(left, value)) {
+            swap(value, left);
+            swapUntilQueueIsCorrect(left);
+        } else if (evaluate(right, value)) {
+            swap(value, right);
+            swapUntilQueueIsCorrect(right);
+        } else if (value === 0) {
+            return;
+        } else {
+            swapUntilQueueIsCorrect(0);
+        }
+    };
 
-	var swap = function(self, target) {
-		var placeHolder = queue[self];
-		queue[self] = queue[target];
-		queue[target] = placeHolder;
-	};
+    var swap = function(self, target) {
+        var placeHolder = queue[self];
+        queue[self] = queue[target];
+        queue[target] = placeHolder;
+    };
 
-	var evaluate = function(self, target) {
-		if (queue[target] === undefined || queue[self] === undefined) {
-			return false;
-		}
+    var evaluate = function(self, target) {
+        if (queue[target] === undefined || queue[self] === undefined) {
+            return false;
+        }
 
-		var selfValue;
-		var targetValue;
+        var selfValue;
+        var targetValue;
 
-		// Check if the criteria should be the result of a function call.
-		if (typeof queue[self][criteria] === 'function') {
-			selfValue = queue[self][criteria]();
-			targetValue = queue[target][criteria]();
-		} else {
-			selfValue = queue[self][criteria];
-			targetValue = queue[target][criteria];
-		}
+        // Check if the criteria should be the result of a function call.
+        if (typeof queue[self][criteria] === 'function') {
+            selfValue = queue[self][criteria]();
+            targetValue = queue[target][criteria]();
+        } else {
+            selfValue = queue[self][criteria];
+            targetValue = queue[target][criteria];
+        }
 
-		if (isMax) {
-			if (selfValue > targetValue) {
-				return true;
-			} else {
-				return false;
-			}
-		} else {
-			if (selfValue < targetValue) {
-				return true;
-			} else {
-				return false;
-			}
-		}
-	};
+        if (isMax) {
+            if (selfValue > targetValue) {
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            if (selfValue < targetValue) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+    };
 
-	var getParentOf = function(index) {
-		return Math.floor(Math.floor((index - 1) / 2));
-	};
+    var getParentOf = function(index) {
+        return Math.floor(Math.floor((index - 1) / 2));
+    };
 
-	var getLeftOf = function(index) {
-		return index * 2 + 1;
-	};
+    var getLeftOf = function(index) {
+        return index * 2 + 1;
+    };
 
-	var getRightOf = function(index) {
-		return index * 2 + 2;
-	};
+    var getRightOf = function(index) {
+        return index * 2 + 2;
+    };
 };
 
 // Constants

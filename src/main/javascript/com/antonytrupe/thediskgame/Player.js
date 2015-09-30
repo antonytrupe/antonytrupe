@@ -1,343 +1,350 @@
 /**
  * @constructor
  * @param {string}
- *            name
+ *          name
  */
 function Player(name) {
-	"use strict";
-	var $this = this;
-	this.name = name;
-	this.rating = 0.0;
+    "use strict";
+    var $this = this;
+    this.name = name;
+    this.rating = 0.0;
 
-	// player or ai
-	this.type = 'player';
+    // player or ai
+    this.type = 'player';
 
-	// {"diskName": diskInfo,...}
-	this.disks = {};
+    // {"diskName": diskInfo,...}
+    this.disks = {};
 
-	// {diskNumber:{location:{},"diskName":""},...}
-	this.diskLocations = {};
+    // {diskNumber:{location:{},"diskName":""},...}
+    this.diskLocations = {};
 
-	// reinforcements is only used when in a table
-	this.reinforcements = [];
-	// only used in the context of a game
-	this.spells = [];
+    // reinforcements is only used when in a table
+    this.reinforcements = [];
+    // only used in the context of a game
+    this.spells = [];
 
-	// segment is only used when in a table
-	this.segment = "REINFORCEMENTS";
-	this.activations = 0;
+    /**
+     * only used in the context of a game
+     * 
+     * @memberOf Player
+     */
+    this.killed = [];
 
-	// {"armyName": {"diskNumber":location,...},...}
-	this.armies = {};
-	this.cart = {};
+    // segment is only used when in a table
+    this.segment = "REINFORCEMENTS";
+    this.activations = 0;
 
-	/**
-	 * @param {Disk}
-	 *            disk
-	 * @param {Point}
-	 *            location
-	 * @return
-	 */
-	this.addDisk = function(disk, location) {
+    // {"armyName": {"diskNumber":location,...},...}
+    this.armies = {};
+    this.cart = {};
 
-		if (location === undefined) {
-			location = new Point(0, 0);
-		}
+    /**
+     * @param {Disk}
+     *          disk
+     * @param {Point}
+     *          location
+     * @return {Number}
+     */
+    this.addDisk = function(disk, location) {
 
-		var diskNumber = Object.keys($this.diskLocations).length;
+        if (location === undefined) {
+            location = new Point(0, 0);
+        }
 
-		$this.diskLocations[diskNumber] = {
-			"location" : location,
-			"diskName" : disk.name
-		};
-		$this.disks[disk.name] = disk;
-		return diskNumber;
-	};
+        var diskNumber = Object.keys($this.diskLocations).length;
 
-	/**
-	 * @param {string}
-	 *            armyName
-	 * @param {number}
-	 *            diskNumber
-	 * @param {Point}
-	 *            location
-	 */
-	this.addDiskToArmy = function(armyName, diskNumber, location) {
-		// $this.debug('Player.addDiskToArmy');
-		// $this.debug('diskNumber:' + diskNumber);
-		// $this.debug('armyName:' + armyName);
+        $this.diskLocations[diskNumber] = {
+            "location": location,
+            "diskName": disk.name
+        };
+        $this.disks[disk.name] = disk;
+        return diskNumber;
+    };
 
-		// make sure this disk is not already in this army
-		if ($this.diskIsInArmy(diskNumber, armyName)) {
-			return;
-		}
+    /**
+     * @param {string}
+     *          armyName
+     * @param {number}
+     *          diskNumber
+     * @param {Point}
+     *          location
+     */
+    this.addDiskToArmy = function(armyName, diskNumber, location) {
+        // $this.debug('Player.addDiskToArmy');
+        // $this.debug('diskNumber:' + diskNumber);
+        // $this.debug('armyName:' + armyName);
 
-		// console.log(location);
-		// console.log($this.diskLocations);
-		// console.log(diskNumber);
-		// console.log($this.diskLocations[diskNumber]);
-		// console.log($this.diskLocations[diskNumber].location);
+        // make sure this disk is not already in this army
+        if ($this.diskIsInArmy(diskNumber, armyName)) {
+            return;
+        }
 
-		location = (location === undefined ? $this.diskLocations[diskNumber].location
-				: location);
-		if ($this.armies[armyName] === undefined) {
-			$this.armies[armyName] = [];
-		}
+        // console.log(location);
+        // console.log($this.diskLocations);
+        // console.log(diskNumber);
+        // console.log($this.diskLocations[diskNumber]);
+        // console.log($this.diskLocations[diskNumber].location);
 
-		var index = $this.armies[armyName].length;
+        location = (location === undefined ? $this.diskLocations[diskNumber].location
+                : location);
+        if ($this.armies[armyName] === undefined) {
+            $this.armies[armyName] = [];
+        }
 
-		$this.armies[armyName][index] = {
-			"diskNumber" : diskNumber,
-			"location" : location
-		};
-	};
+        var index = $this.armies[armyName].length;
 
-	this.getArmies = function() {
-		return Object.keys($this.armies);
-	};
+        $this.armies[armyName][index] = {
+            "diskNumber": diskNumber,
+            "location": location
+        };
+    };
 
-	/**
-	 * @param {string}
-	 *            armyName
-	 * @return {{points:number,faction:string,factions,alignments}}
-	 */
-	this.getArmyInfo = function(armyName) {
+    this.getArmies = function() {
+        return Object.keys($this.armies);
+    };
 
-		var points = 0;
-		var factions = {};
-		var alignments = {};
+    /**
+     * @param {string}
+     *          armyName
+     * @return {{points:number,faction:string,factions,alignments}}
+     */
+    this.getArmyInfo = function(armyName) {
 
-		// $this.debug('armyName:' + armyName);
+        var points = 0;
+        var factions = {};
+        var alignments = {};
 
-		Object.keys($this.armies[armyName]).forEach(
-				function(order) {
-					// armyDisks
-					// $this.debug('order:' + order);
-					// $this.debug('$this.armies[armyName][order]:' +
-					// $this.armies[armyName][order]);
-					var armyDiskInfo = $this.armies[armyName][order];
-					var diskInfo = $this.getDiskInfo(armyDiskInfo.diskNumber,
-							armyName);
-					points += parseInt(diskInfo.disk.cost, 10);
-					if (!factions[diskInfo.disk.faction]) {
-						factions[diskInfo.disk.faction] = 0;
-					}
-					factions[diskInfo.disk.faction] += parseInt(
-							diskInfo.disk.cost, 10);
+        // $this.debug('armyName:' + armyName);
 
-					if (!alignments[diskInfo.disk.alignment]) {
-						alignments[diskInfo.disk.alignment] = 0;
-					}
-					alignments[diskInfo.disk.alignment] += parseInt(
-							diskInfo.disk.cost, 10);
+        Object.keys($this.armies[armyName]).forEach(
+                function(order) {
+                    // armyDisks
+                    // $this.debug('order:' + order);
+                    // $this.debug('$this.armies[armyName][order]:' +
+                    // $this.armies[armyName][order]);
+                    var armyDiskInfo = $this.armies[armyName][order];
+                    var diskInfo = $this.getDiskInfo(armyDiskInfo.diskNumber,
+                            armyName);
+                    points += parseInt(diskInfo.disk.cost, 10);
+                    if (!factions[diskInfo.disk.faction]) {
+                        factions[diskInfo.disk.faction] = 0;
+                    }
+                    factions[diskInfo.disk.faction] += parseInt(
+                            diskInfo.disk.cost, 10);
 
-				});
+                    if (!alignments[diskInfo.disk.alignment]) {
+                        alignments[diskInfo.disk.alignment] = 0;
+                    }
+                    alignments[diskInfo.disk.alignment] += parseInt(
+                            diskInfo.disk.cost, 10);
 
-		// get majority faction
-		var faction = null;
-		var factionPoints = 0;
+                });
 
-		Object.keys(factions).forEach(function(f) {
-			if (factions[f] > factionPoints) {
-				factionPoints = factions[f];
-				faction = f;
-			}
-		});
+        // get majority faction
+        var faction = null;
+        var factionPoints = 0;
 
-		return {
-			"points" : points,
-			"factions" : factions,
-			"alignments" : alignments,
-			'faction' : faction
-		};
-	};
+        Object.keys(factions).forEach(function(f) {
+            if (factions[f] > factionPoints) {
+                factionPoints = factions[f];
+                faction = f;
+            }
+        });
 
-	this.move = function(diskNumber, location, armyName) {
-		// console.log('Player.move');
-		// console.log(armyName);
+        return {
+            "points": points,
+            "factions": factions,
+            "alignments": alignments,
+            'faction': faction
+        };
+    };
 
-		if (armyName !== undefined && armyName !== null) {
-			$this.armies[armyName].some(function(armyDiskInfo, index) {
-				// console.log(armyName);
-				// console.log(index);
-				// console.log(armyDiskInfo);
+    this.move = function(diskNumber, location, armyName) {
+        // console.log('Player.move');
+        // console.log(armyName);
 
-				if (armyDiskInfo.diskNumber == diskNumber) {
-					// console.log('moving disk ' + diskNumber + ' in army ' +
-					// armyName);
-					armyDiskInfo.location = location;
-					return true;
-				}
-			});
-		} else {
-			// console.log(diskNumber);
-			$this.diskLocations[diskNumber].location = location;
-		}
-	};
+        if (armyName !== undefined && armyName !== null) {
+            $this.armies[armyName].some(function(armyDiskInfo, index) {
+                // console.log(armyName);
+                // console.log(index);
+                // console.log(armyDiskInfo);
 
-	this.getArmy = function(armyName) {
-		// console.log('Player.getArmy');
-		// console.log(armyName);
-		if (armyName === "" || armyName === null
-				|| $this.armies[armyName] === undefined) {
-			return {};
-		}
-		return $this.armies[armyName];
+                if (armyDiskInfo.diskNumber == diskNumber) {
+                    // console.log('moving disk ' + diskNumber + ' in army ' +
+                    // armyName);
+                    armyDiskInfo.location = location;
+                    return true;
+                }
+            });
+        } else {
+            // console.log(diskNumber);
+            $this.diskLocations[diskNumber].location = location;
+        }
+    };
 
-	};
+    this.getArmy = function(armyName) {
+        // console.log('Player.getArmy');
+        // console.log(armyName);
+        if (armyName === "" || armyName === null
+                || $this.armies[armyName] === undefined) {
+            return {};
+        }
+        return $this.armies[armyName];
 
-	/**
-	 * 
-	 * @returns array of diskNumbers
-	 */
-	this.getDiskNumbers = function() {
-		return Object.keys($this.diskLocations);
-	};
+    };
 
-	this.getDiskNumber = function(diskName, startingIndex) {
-		var s = 0;
-		if (typeof startingIndex !== "undefined") {
-			s = startingIndex;
-		}
-		for (var i = s; i < 0; i++) {
-			var diskInfo = $this.getDiskInfo(i);
-			if (diskInfo.disk.name === diskName) {
-				return i;
-			}
-		}
-	};
+    /**
+     * 
+     * @returns array of diskNumbers
+     */
+    this.getDiskNumbers = function() {
+        return Object.keys($this.diskLocations);
+    };
 
-	this.diskIsInArmy = function(diskNumber, armyName) {
-		if ($this.armies[armyName] === undefined) {
-			return false;
-		}
-		return $this.armies[armyName].some(function(armyDiskInfo, index) {
-			if (armyDiskInfo.diskNumber == diskNumber) {
-				return true;
-			}
-		});
-	};
+    this.getDiskNumber = function(diskName, startingIndex) {
+        var s = 0;
+        if (typeof startingIndex !== "undefined") {
+            s = startingIndex;
+        }
+        for (var i = s; i < 0; i++) {
+            var diskInfo = $this.getDiskInfo(i);
+            if (diskInfo.disk.name === diskName) {
+                return i;
+            }
+        }
+    };
 
-	/**
-	 * @param {number}
-	 *            diskNumber
-	 * @param {string}
-	 *            armyName
-	 * @return {{disk,location}}
-	 */
-	this.getDiskInfo = function(diskNumber, armyName) {
-		// console.log('Player.getDiskInfo');
-		// console.log(diskNumber);
-		// console.log(armyName);
-		var info = {};
+    this.diskIsInArmy = function(diskNumber, armyName) {
+        if ($this.armies[armyName] === undefined) {
+            return false;
+        }
+        return $this.armies[armyName].some(function(armyDiskInfo, index) {
+            if (armyDiskInfo.diskNumber == diskNumber) {
+                return true;
+            }
+        });
+    };
 
-		// console.log($this.disks);
+    /**
+     * @param {number}
+     *          diskNumber
+     * @param {string}
+     *          armyName
+     * @return {{disk,location}}
+     */
+    this.getDiskInfo = function(diskNumber, armyName) {
+        // console.log('Player.getDiskInfo');
+        // console.log(diskNumber);
+        // console.log(armyName);
+        var info = {};
 
-		info.disk = $this.disks[$this.diskLocations[diskNumber].diskName];
-		info.location = $this.diskLocations[diskNumber].location;
+        // console.log($this.disks);
 
-		// console.log(info);
+        info.disk = $this.disks[$this.diskLocations[diskNumber].diskName];
+        info.location = $this.diskLocations[diskNumber].location;
 
-		if (armyName !== undefined && $this.armies[armyName] !== undefined
-				&& $this.armies[armyName] !== null) {
-			// console.log($this.armies[armyName]);
-			$this.armies[armyName].forEach(function(armyInfo, index) {
-				// console.log(index);
-				if (armyInfo.diskNumber == diskNumber) {
-					// console.log('using army ' + armyName + ' location for ' +
-					// diskNumber);
-					info.location = armyInfo.location;
-				}
-			});
-		}
+        // console.log(info);
 
-		return info;
-	};
+        if (armyName !== undefined && $this.armies[armyName] !== undefined
+                && $this.armies[armyName] !== null) {
+            // console.log($this.armies[armyName]);
+            $this.armies[armyName].forEach(function(armyInfo, index) {
+                // console.log(index);
+                if (armyInfo.diskNumber == diskNumber) {
+                    // console.log('using army ' + armyName + ' location for ' +
+                    // diskNumber);
+                    info.location = armyInfo.location;
+                }
+            });
+        }
 
-	this.removeDiskFromArmy = function(armyName, diskNumber) {
-		// console.log(armyName);
+        return info;
+    };
 
-		if (armyName !== undefined && armyName !== null) {
-			$this.armies[armyName].some(function(armyDiskInfo, index) {
-				if (armyDiskInfo.diskNumber == diskNumber) {
-					$this.armies[armyName].splice(index, 1);
-					return true;
-				}
-			});
-		}
-	};
+    this.removeDiskFromArmy = function(armyName, diskNumber) {
+        // console.log(armyName);
 
-	this.setRating = function(rating) {
-		$this.rating = rating;
-	};
+        if (armyName !== undefined && armyName !== null) {
+            $this.armies[armyName].some(function(armyDiskInfo, index) {
+                if (armyDiskInfo.diskNumber == diskNumber) {
+                    $this.armies[armyName].splice(index, 1);
+                    return true;
+                }
+            });
+        }
+    };
 
-	this.saveArmy = function(armyName, armyDiskNumbers) {
-		$this.debug('Player.saveArmy');
-		$this.armies[armyName] = armyDiskNumbers;
-	};
+    this.setRating = function(rating) {
+        $this.rating = rating;
+    };
 
-	this.deleteArmy = function(armyName) {
-		// $this.debug('Player.saveArmy');
-		delete $this.armies[armyName];
-	};
+    this.saveArmy = function(armyName, armyDiskNumbers) {
+        $this.debug('Player.saveArmy');
+        $this.armies[armyName] = armyDiskNumbers;
+    };
 
-	/**
-	 * @param message
-	 * @private
-	 */
-	this.debug = function(message) {
-		//
-		if (typeof e !== "undefined") {
-			e.io.write(message + "\n");
-		}
-		if (typeof console !== "undefined") {
-			console.log(message);
-		}
-	};
+    this.deleteArmy = function(armyName) {
+        // $this.debug('Player.saveArmy');
+        delete $this.armies[armyName];
+    };
 
-	this.getName = function() {
-		return $this.name;
-	};
+    /**
+     * @param message
+     * @private
+     */
+    this.debug = function(message) {
+        //
+        if (typeof e !== "undefined") {
+            e.io.write(message + "\n");
+        }
+        if (typeof console !== "undefined") {
+            console.log(message);
+        }
+    };
 
-	this.saveCart = function(cart) {
-		$this.cart = cart;
-	};
+    this.getName = function() {
+        return $this.name;
+    };
 
-	this.setName = function(n) {
-		$this.name = n;
-	};
+    this.saveCart = function(cart) {
+        $this.cart = cart;
+    };
 
-	this.stringify = function() {
-		return JSON.stringify($this);
-	};
+    this.setName = function(n) {
+        $this.name = n;
+    };
 
-	/**
-	 * 
-	 * @param {Object}
-	 *            result
-	 * @returns
-	 */
-	this.update = function(result) {
-		if (result === undefined) {
-			return -1;
-		}
-		if (result === null) {
-			return -2;
-		}
+    this.stringify = function() {
+        return JSON.stringify($this);
+    };
 
-		if (result.disks === undefined) {
-			return -3;
-		}
+    /**
+     * 
+     * @param {Object}
+     *          result
+     * @returns
+     */
+    this.update = function(result) {
+        if (result === undefined) {
+            return -1;
+        }
+        if (result === null) {
+            return -2;
+        }
 
-		if (result.disks === null) {
-			return -4;
-		}
+        if (result.disks === undefined) {
+            return -3;
+        }
 
-		// future proof
-		Object.keys(result).forEach(function(key) {
-			$this[key] = result[key];
-		});
+        if (result.disks === null) {
+            return -4;
+        }
 
-		return $this;
-	};
+        // future proof
+        Object.keys(result).forEach(function(key) {
+            $this[key] = result[key];
+        });
+
+        return $this;
+    };
 }
