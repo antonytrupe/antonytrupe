@@ -72,8 +72,10 @@ function AI(table, playerName) {
         var winners = this.table.getWinners();
         // console.log(winners);
         if (winners.indexOf(this.playerName) >= 0) {
+            console.log('!!!!!!!!!SOMEONE WON!!!!!!!!!');
             return true;
         }
+        // console.log('No Winner Yet');
         return false;
     };
 
@@ -91,9 +93,11 @@ function AI(table, playerName) {
         // get the number of points lost so far
         this.table.getPlayerInfo(this.playerName).killed
                 .forEach(function(disk) {
-                    console.log(disk);
-                    g += disk.info.cost;
+                    // console.log(disk);
+                    g += parseFloat(disk.cost);
+
                 });
+        // console.log(g);
         return g;
     };
 
@@ -107,19 +111,16 @@ function AI(table, playerName) {
      */
     this.hScore = function(attackerInfo, defenderInfo) {
         var h = 0;
-        this.table.getEnemyDisks(this.playerName).forEach(function(diskNumber) {
-            console.log(diskNumber);
-            var diskInfo = table.getDiskInfo(diskNumber);
-            console.log(diskInfo);
-            h += diskInfo.disk.cost;
-        });
+        this.table.getEnemyDiskNumbers(this.playerName).forEach(
+                function(diskNumber) {
+                    // console.log(diskNumber);
+                    var diskInfo = table.getDiskInfo(diskNumber);
+                    // console.log(diskInfo);
+                    h += parseFloat(diskInfo.disk.cost);
+                });
+        // console.log(h);
         return h;
-        // var movementPoints = getMovementPoints(attackerInfo, defenderInfo);
-        // var defenderPoints = getDefenderDamageBonus(attackerInfo,
-        // defenderInfo);
-        // var attackerPoint = getAttackerDamagePenalty(attackerInfo,
-        // defenderInfo);
-        // return movementPoints * (defenderPoints - attackerPoint);
+
     };
 
     /**
@@ -169,7 +170,9 @@ function AI(table, playerName) {
      * @memberOf AI
      */
     function getMovementPoints(attackerInfo, defenderInfo) {
-        var distance = attackerInfo.mementoInfo.location
+
+        var distance = new Point(attackerInfo.mementoInfo.location.x,
+                attackerInfo.mementoInfo.location.y)
                 .distance(defenderInfo.mementoInfo.location);
         distance = -(attackerInfo.disk.diameter / 2 + defenderInfo.disk.diameter / 2);
         var flips = distance / attackerInfo.disk.diameter;
@@ -268,9 +271,9 @@ function AI(table, playerName) {
      */
     this.getActions = function() {
         var actions = [];
-         var table = this.getState();
-        console.log('round');
-        console.log(table.memento.round);
+        var table = this.getState();
+        // console.log('round');
+        // console.log(table.memento.round);
         var currentPlayerName = table.getCurrentPlayer();
         // console.log(currentPlayerName);
         // var currentPlayer = table.getPlayerInfo(currentPlayerName);
@@ -279,8 +282,8 @@ function AI(table, playerName) {
         case Table.SEGMENT.JOIN:
         case Table.SEGMENT.REINFORCEMENTS:
             var a;
-            console.log(this.playerName);
-            console.log(this.table.getPlayerInfo(this.playerName));
+            // console.log(this.playerName);
+            // console.log(this.table.getPlayerInfo(this.playerName));
             if (this.table.getPlayerInfo(this.playerName).segment === Table.SEGMENT.REINFORCEMENTS) {
                 a = this.playerName;
             } else {
@@ -298,7 +301,7 @@ function AI(table, playerName) {
                 },
                 'state': newTable
             };
-            console.log(action);
+            // console.log(action);
             actions.push(action);
             break;
         case Table.SEGMENT.ACTIVATION:
@@ -316,17 +319,63 @@ function AI(table, playerName) {
                 },
                 'state': newTable
             };
-            console.log(a);
+            // console.log(a);
             actions.push(a);
 
-            // TODO get disk attack options
+            // get disk attack options
+            var myDiskNumbers = table.getUnactivatedDisks(currentPlayerName);
+            // console.log(myDiskNumbers);
+            var enemyDiskNumbers = table.getEnemyDiskNumbers(currentPlayerName);
+            // console.log(enemyDiskNumbers);
 
+            // var p = new PriorityQueue("h", PriorityQueue.MAX_HEAP);
+
+            myDiskNumbers.forEach(function(myDiskNumber) {
+                // var myDiskInfo = $this.table.getDiskInfo(myDiskNumber);
+                enemyDiskNumbers.forEach(function(enemyDiskNumber) {
+                    var enemyDiskInfo = $this.table
+                            .getDiskInfo(enemyDiskNumber);
+                    // var h = foo(myDiskInfo, enemyDiskInfo);
+
+                    // create a new shell
+                    var newTable = new Table();
+                    // load the shell
+                    newTable.restore(JSON.parse(JSON.stringify($this.table)));
+                    // advance the game
+                    var moveWorked = newTable.move(currentPlayerName,
+                            myDiskNumber, enemyDiskInfo.mementoInfo.location);
+                    // console.log(moveWorked);
+                    // move towards enemy disk
+                    var a = {
+                        'action': {
+                            'method': 'move',
+                            'arguments': [currentPlayerName, myDiskNumber,
+                                    enemyDiskInfo.mementoInfo.location]
+                        },
+                        'state': newTable
+                    };
+                    // console.log(a);
+                    actions.push(a);
+
+                    // TODO action to move away from enemy disk
+
+                });
+            });
             break;
         }
         return actions;
     };
 
+    function foo(attackerInfo, defenderInfo) {
+        var movementPoints = getMovementPoints(attackerInfo, defenderInfo);
+        var defenderPoints = getDefenderDamageBonus(attackerInfo, defenderInfo);
+        var attackerPoint = getAttackerDamagePenalty(attackerInfo, defenderInfo);
+        return movementPoints * (defenderPoints - attackerPoint);
+    }
+
     /**
+     * @param {Table}
+     *          _table
      * @memberOf AI
      */
     this.setState = function(_table) {
@@ -345,16 +394,26 @@ function AI(table, playerName) {
      * @return
      * @memberOf AI
      */
-    this.search = function() {
-        console.log('AI.search');
+    this.getPath = function() {
+        // console.log('AI.search');
+        // return [];
         var path = new AStar(this).search();
         // if path is empty, then no actions are better
         // so just do the minimum
         console.log(path);
         if (path.length === 0) {
             this.table = this.initial_table;
-            path = this.getActions();
+            var actions = this.getActions();
+            if (actions.length >= 1) {
+                path[0] = actions[0].action;
+            }
         }
+        console.log(path);
+        // only return the current player's actions
+        path = path.filter(function(action) {
+            // console.log(action);
+            return action.arguments[0] === this.playerName;
+        }, this);
         console.log(path);
         return path;
     };
@@ -374,10 +433,13 @@ function AI(table, playerName) {
         // 4-1=>3
         var delta = current_round - initial_round;
         // console.log(delta);
-        return delta <= 2;
+        if (delta < 3) {
+            // console.log('keep searching');
+        } else {
+            // console.log('stop searching');
+        }
+        return delta < 3;
     };
-
-    
 
     /**
      * @param {Array}
@@ -400,7 +462,7 @@ function AI(table, playerName) {
             // $this.table.restoreMemento(parent.data.memento);
             // add the friendly attacker to the tree
 
-            // TODO loopOverFriendlyAttackers
+            // loopOverFriendlyAttackers
             var node = addToTree(parent, "max", (-1)
                     * $this.table.getDiskInfo(friendlyDiskNumber).disk.cost,
                     friendlyDiskNumber, diskCount, $this.table.memento);

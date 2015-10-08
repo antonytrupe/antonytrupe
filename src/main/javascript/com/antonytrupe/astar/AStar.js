@@ -1,5 +1,3 @@
-//model must contain a method named getActions
-//getActions must return an array of objects. those objects must include a property named state, and optionally properties named action and arguments
 /**
  * @class
  * @param {Object}
@@ -69,7 +67,7 @@ function AStar(model) {
      * @return
      */
     function process() {
-        var loops = 0, MAX_LOOPS = 10000;
+        var loops = 0, MAX_LOOPS = 50000;
         // && loops <= MAX_LOOPS
         while (openPriorityQueue.size() > 0 && model.keepSearching()) {
             loops++;
@@ -79,11 +77,9 @@ function AStar(model) {
             var q = openPriorityQueue.peek();
             model.setState(q.getState());
 
-            console.log(q.action);
-
             // the stopping condition(s)
             if (model.atGoal()) {
-                console.log('got to goal or some other constraint');
+                // console.log('got to goal or some other constraint');
                 return q;
             }
 
@@ -97,7 +93,6 @@ function AStar(model) {
             model.getActions().forEach(function(n) {
                 model.setState(n.state);
                 var neighbor = new Node(n);
-                console.log(neighbor.action);
 
                 neighbor.setPredecessor(q);
                 // get the total cost
@@ -118,18 +113,12 @@ function AStar(model) {
          * have gotten here because we were forced to stop by some other
          * constraint
          */
-        console.log('openPriorityQueue');
-        console.log(openPriorityQueue);
-        console.log('closedPriorityQueue');
-        console.log(closedPriorityQueue);
         var c = openPriorityQueue.peek();
-        console.log(c);
         if (typeof c === "undefined") {
             c = closedPriorityQueue.peek();
-            console.log(c.action);
         }
         // return the best path we did find
-        console.log('got to a constraint');
+        // console.log('got to a constraint');
         return c;
     }
 
@@ -144,11 +133,7 @@ function AStar(model) {
      * @returns list of actions to get to the best state
      */
     this.search = function() {
-        var a = process();
-        console.log(a);
-        var path = reconstruct_path(a);
-        console.log(path);
-        return path;
+        return reconstruct_path(process());
     };
 
     /**
@@ -185,7 +170,6 @@ function Node(args) {
     this.predecessor = args.predecessor;
     // action has method and arguments, if any
     // this is the action to get to this state from the predecessor state
-    console.log(args);
     this.action = args.action;
 
     this.getAction = function() {
@@ -237,6 +221,22 @@ function Node(args) {
         return JSON.stringify(node.getState()) == JSON.stringify(this
                 .getState());
     };
+    this.compareTo = function(that) {
+        if (this.getF() !== that.getF()) {
+            if (this.getF() < that.getF()) {
+                return -1;
+            }
+            return 1;
+        } else {
+            if (this.getH() == that.getH()) {
+                return 0;
+            } else if (this.getH() < that.getH()) {
+                return 1;
+            } else {
+                return -1;
+            }
+        }
+    };
 }
 
 /**
@@ -246,6 +246,7 @@ function Node(args) {
  * 
  * For more on binary heaps see: http://en.wikipedia.org/wiki/Binary_heap
  * 
+ * @class
  * @param {String}
  *          criteria The criteria by which to sort the objects. This should be a
  *          property of the objects you're sorting.
@@ -267,6 +268,10 @@ var PriorityQueue = function(criteria, heapType) {
         isMax = true;
     }
 
+    /**
+     * @memberOf PriorityQueue
+     * @return {number}
+     */
     this.size = function() {
         return this.length;
     };
@@ -373,8 +378,12 @@ var PriorityQueue = function(criteria, heapType) {
         var selfValue;
         var targetValue;
 
+        if (criteria == 'compareTo'
+                && typeof queue[self][criteria] === 'function') {
+            return queue[self][criteria](queue[target]);
+        }
         // Check if the criteria should be the result of a function call.
-        if (typeof queue[self][criteria] === 'function') {
+        else if (typeof queue[self][criteria] === 'function') {
             selfValue = queue[self][criteria]();
             targetValue = queue[target][criteria]();
         } else {

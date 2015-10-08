@@ -805,7 +805,7 @@ function Table(description, maxPlayers, maxPoints, activations, startingDisks,
             e.io.write(message + "\n");
         }
         if (typeof console !== "undefined") {
-            console.log(message);
+           // console.log(message);
         }
     };
 
@@ -1190,10 +1190,28 @@ function Table(description, maxPlayers, maxPoints, activations, startingDisks,
      * @memberOf Table
      */
     this.getDiskNumbers = function() {
-        // return an object that doesn't have killed disks and
+        // return an array that doesn't have killed disks
         return Object.keys($this.memento.diskInfo).filter(function(diskNumber) {
             return $this.memento.diskInfo[diskNumber] !== null;
         });
+    };
+
+    /**
+     * 
+     * @returns {Array}
+     * @memberOf Table
+     */
+    this.getPlayersDiskNumbers = function(playerName) {
+        // return an array that doesn't have killed disks
+        return Object
+                .keys($this.memento.diskInfo)
+                .filter(
+                        function(diskNumber) {
+                            // TODO
+                            // console.log($this.memento.diskInfo[diskNumber]);
+                            return $this.memento.diskInfo[diskNumber] !== null
+                                    && $this.memento.diskInfo[diskNumber].player === playerName;
+                        });
     };
 
     /**
@@ -1252,11 +1270,12 @@ function Table(description, maxPlayers, maxPoints, activations, startingDisks,
      * @returns {Array}
      * @memberOf Table
      */
-    this.getEnemyDisks = function(playerName) {
+    this.getEnemyDiskNumbers = function(playerName) {
         return $this
                 .getDiskNumbers()
                 .filter(
                         function(diskNumber) {
+                            // console.log($this.getDiskInfo(diskNumber));
                             return $this.getDiskInfo(diskNumber).mementoInfo.player != playerName;
                         });
     };
@@ -1493,7 +1512,7 @@ function Table(description, maxPlayers, maxPoints, activations, startingDisks,
          * return 0; }
          */
         var reinforcementCount = parseInt($this.reinforcements, 10);
-        if ($this.round === 0) {
+        if ($this.memento.round === 0) {
             reinforcementCount = parseInt($this.startingDisks, 10);
         }
         // $this.debug(playerName);
@@ -1600,6 +1619,8 @@ function Table(description, maxPlayers, maxPoints, activations, startingDisks,
     };
 
     /**
+     * returns a list of disks that are unactivated and unpinned
+     * 
      * @param playerName
      * @returns {Array}
      * @memberOf Table
@@ -1903,7 +1924,7 @@ function Table(description, maxPlayers, maxPoints, activations, startingDisks,
      *          movedDiskNumber
      * @param {Point}
      *          tableClickPoint
-     * @returns
+     * @returns {boolean}
      * @memberOf Table
      */
     this.move = function(playerName, movedDiskNumber, tableClickPoint) {
@@ -1911,6 +1932,9 @@ function Table(description, maxPlayers, maxPoints, activations, startingDisks,
         // console.log(playerName);
         // console.log(movedDiskNumber);
         // console.log(tableClickPoint);
+        $this.debug(playerName + " attempting to move " + movedDiskNumber
+                + " towards (" + tableClickPoint.x + "," + tableClickPoint.y
+                + ")");
 
         // make sure we got an x and y
         if (typeof tableClickPoint === "undefined"
@@ -2311,8 +2335,12 @@ function Table(description, maxPlayers, maxPoints, activations, startingDisks,
         }
 
         // add the disk to the player's killed list
-        var player = $this.getPlayerInfo(playerName);
-        player.killed.push($this.memento.diskInfo[diskNumber]);
+        // console.log($this.getDiskInfo(diskNumber).mementoInfo.player);
+        var player = $this
+                .getPlayerInfo($this.getDiskInfo(diskNumber).mementoInfo.player);
+        // console.log($this.memento.diskInfo[diskNumber]);
+        // console.log($this.getDiskInfo(diskNumber).disk);
+        player.killed.push($this.getDiskInfo(diskNumber).disk);
         // remove the disk from the table
         $this.memento.diskInfo[diskNumber] = null;
 
@@ -2584,7 +2612,7 @@ function Table(description, maxPlayers, maxPoints, activations, startingDisks,
         $this.debug("startReinforcementSegment");
         this.memento.segment = Table.SEGMENT.REINFORCEMENTS;
 
-        this.round = parseInt($this.round, 10) + 1;
+        this.memento.round = parseInt($this.memento.round, 10) + 1;
 
         this.memento.currentPlayer = $this.memento.firstPlayer;
         Object

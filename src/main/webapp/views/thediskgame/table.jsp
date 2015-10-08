@@ -1,4 +1,4 @@
-﻿<%@ taglib prefix="tdg" tagdir="/WEB-INF/tags/thediskgame"%>
+<%@ taglib prefix="tdg" tagdir="/WEB-INF/tags/thediskgame"%>
 <!DOCTYPE html>
 <html data-ng-app="thediskgame">
 <head>
@@ -20,7 +20,7 @@
 			//
 			this.table = $scope.table = window['table'] = new Table();
 			//console.log(this.table);
-			this.table.restore(${tableJson});
+			this.table.restore(JSON.parse('${tableJson}'));
 			
 			
 			//console.log(this.table);
@@ -30,7 +30,7 @@
 			var ui = window['ui'] =new TableUI(api, this.table, '#table');
 			
 			//ui.player.update(${playerJson});
-			var player = window['player'] = ${playerJson};
+			var player = window['player'] = JSON.parse('${playerJson}');
 			//console.log(player);
 			ui.update({'user':player.name});
 			//console.log(ui.currentPlayer);
@@ -73,7 +73,8 @@
 	<tdg:header gravatar="${gravatar}" />
 
 	<div style="position: fixed; top: 4em; bottom: 0px; left: 0; right: 0;">
-		<!-- start table -->
+	
+		<!-- start table container/controller-->
 		<div data-ng-controller="table as table" style="height: 100%;">
 
 
@@ -214,7 +215,7 @@
 			<!-- end context menu -->
 
 		</div>
-		<!-- end table -->
+		<!-- end table container-->
 	</div>
 
 </body>
