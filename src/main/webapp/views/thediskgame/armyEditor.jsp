@@ -124,7 +124,7 @@ head.ready(
 			name="disks" />
 		<ul id="campaign" class="two" style="white-space: nowrap;">
 			<c:forEach items="${allDisks}" var="disk" varStatus="loop">
-				<li><a style="text-decoration: none;" data-ng-click="addDisk()"><-</a>${disk.key}</li>
+				<li><a style="text-decoration: none;" data-ng-click="addDisk()">&lt;-</a>${disk.key}</li>
 			</c:forEach>
 
 		</ul>

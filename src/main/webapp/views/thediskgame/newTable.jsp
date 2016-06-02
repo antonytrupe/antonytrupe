@@ -63,7 +63,7 @@ head.ready(function() {
 
 			<div>
 				<label class="one" for="army">Army:</label>
-				<span class="two">
+				<div class="two">
 					<select id="armyName" name="armyName" data-ng-model="selectedArmyName" style="vertical-align: top;">
 						<option data-ng-repeat="armyName in armyNames">{{armyName}}</option>
 					</select>
@@ -71,7 +71,7 @@ head.ready(function() {
 						<div><span>{{player.getArmyInfo(selectedArmyName).points}} point {{player.getArmyInfo(selectedArmyName).faction}}</span></div>
 						<div data-ng-repeat="(faction,points) in player.getArmyInfo(selectedArmyName).factions">{{faction}}:{{points}}</div>
 					</div>
-				</span>
+				</div>
 			</div>
 
 			<div>

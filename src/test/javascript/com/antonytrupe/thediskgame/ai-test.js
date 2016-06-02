@@ -120,7 +120,7 @@ QUnit.test("attack", function(assert) {
 
     // TODO check the location of playerOne's disk
     assert.equal(table.getDiskInfo(0).mementoInfo.location, new Point(-8, 0),
-            'playerOnes disk moved');
+            'playerOne\'s disk moved');
 
     // make sure player two is the current player
     assert.equal(playerTwo.name, table.getCurrentPlayer(),
