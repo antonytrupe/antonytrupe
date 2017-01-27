@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>antonytrupe.com - login</title>
+<link rel="stylesheet" type="text/css" media="screen" href="openid.css" />
+<!-- jQuery OpenID Plugin 1.1 Copyright 2009 Jarrett Vance http://jvance.com/pages/jQueryOpenIdPlugin.xhtml -->
+
+<script type="text/javascript"
+	src="https://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
+<script type="text/javascript" src="jquery.openid.js"></script>
+<script type="text/javascript">
+	$(document).ready(function() {
+		$("form.openid").openid();
+	});
+</script>
+
+<script type="text/javascript">
+	var _gaq = _gaq || [];
+	_gaq.push([ '_setAccount', 'UA-4582706-4' ]);
+	_gaq.push([ '_trackPageview' ]);
+
+	(function() {
+		var ga = document.createElement('script');
+		ga.type = 'text/javascript';
+		ga.async = true;
+		ga.src = ('https:' == document.location.protocol ? 'https://ssl'
+				: 'http://www')
+				+ '.google-analytics.com/ga.js';
+		var s = document.getElementsByTagName('script')[0];
+		s.parentNode.insertBefore(ga, s);
+	})();
+</script>
+
+<script type="text/javascript">
+/*
+  console.log(1);
+  $(document).ready(function() {
+    $('form').submit(function(){
+    console.log('submit');
+   _gaq.push(['_trackEvent', 'log in', 'log in', '']);
+  });
+  console.log(2);
+  */
+</script>
+
+</head>
+<body>
+	<form class="openid" method="post"
+		action="/oauth2/?redirect_uri=" style="text-align: center;">
+		<div>
+			<ul class="providers">
+				<!--google -->
+				<li class="direct" title="Google">
+					<div
+						style="background-image: url(/openid-logos.png); background-position: 0 0; width: 102px; height: 62px"></div>
+					<span>https://accounts.google.com/o/oauth2/auth</span>
+				</li>
+				<!--facebook -->
+				<li class="direct" title="Facebook user name">
+					<div
+						style="background-image: url(/openid-logos.png); background-position: 0 124px; width: 102px; height: 62px"></div>
+					<span>https://www.facebook.com/dialog/oauth</span>
+				</li>
+				<!-- yahoo 
+				<li class="direct" title="Yahoo">
+					<div
+						style="background-image: url(/openid-logos.png); background-position: 0 517px; width: 102px; height: 62px"></div>
+					<span>http://me.yahoo.com/</span>
+				</li>-->
+				<!-- stackexchange -->
+				<li class="direct" title="StackExchange">
+					<div
+						style="background-image: url(/openid-logos.png); background-position: 0 62px; width: 102px; height: 62px"></div>
+					<span>https://openid.stackexchange.com/</span>
+				</li>
+				<!-- myopenid 
+				<li class="username" title="MyOpenID user name">
+					<div
+						style="background-image: url(/openid-logos.png); background-position: 0 393px; width: 102px; height: 62px"></div>
+					<span>http://<strong>username</strong>.myopenid.com/
+				</span>
+				</li>-->
+			</ul>
+		</div>
+		<fieldset>
+			<label for="openid_username">Enter your <span>Provider
+					user name</span></label>
+			<div>
+				<span></span> <input type="text" name="openid_username"
+					id="openid_username" /> <span></span> <input type="submit"
+					value="Login" onclick="" />
+			</div>
+		</fieldset>
+		<fieldset>
+			<label for="openid_identifier">Enter your <a
+				class="openid_logo" href="http://openid.net">OpenID</a></label>
+			<div>
+				<input type="text" name="openid_identifier" id="openid_identifier" />
+				<input type="submit" value="Login" />
+			</div>
+		</fieldset>
+	</form>
+</body>
+</html>
