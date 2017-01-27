@@ -277,15 +277,15 @@ public class TheDiskGameServlet extends HttpServlet {
 		NativeObject playerArmies = null;
 		Object playerDisks = null;
 		Object playerName = null;
-		Object army = null;
+		//Object army = null;
 		if (player != null) {
 			playerArmies = (NativeObject) player.get("armies");
 			playerDisks = player.get("disks");
 			playerName = player.get("name");
-			army = playerArmies.get(armyName);
+			//army = playerArmies.get(armyName);
 		}
 		if (armyName != null) {
-			army = API.Army.get(armyName);
+			//army = API.Army.get(armyName);
 		}
 
 		HashMap<Object, HashMap<String, Object>> globalArmies = API.Army.getAll();

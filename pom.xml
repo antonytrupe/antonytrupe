@@ -7,7 +7,7 @@
 	<packaging>war</packaging>
 
 	<properties>
-		<appengine.target.version>1.9.26</appengine.target.version>
+		<appengine.target.version>1.9.38</appengine.target.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<jersey.version>1.17.1</jersey.version>
 	</properties>
@@ -35,7 +35,7 @@
 		<dependency>
 			<groupId>org.mozilla</groupId>
 			<artifactId>rhino</artifactId>
-			<version>1.7.7</version>
+			<version>1.7.7.1</version>
 		</dependency>
 
 		<dependency>
