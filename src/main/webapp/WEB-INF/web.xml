@@ -51,6 +51,17 @@
 		<url-pattern>/*</url-pattern>
 	</filter-mapping>
 
+<!-- -->
+	<filter>
+		<filter-name>WikiAuthorizationFilter</filter-name>
+		<filter-class>com.antonytrupe.wiki.WikiEditAuthorization</filter-class>
+	</filter>
+	<filter-mapping>
+		<filter-name>WikiAuthorizationFilter</filter-name>
+		<url-pattern>/edit/*</url-pattern>
+	</filter-mapping>
+ 
+<!-- -->
 	<servlet>
 		<servlet-name>OAuth2Servlet</servlet-name>
 		<servlet-class>com.antonytrupe.authentication.OAuth2Servlet</servlet-class>
@@ -67,7 +78,32 @@
 		<servlet-name>OAuth2Servlet</servlet-name>
 		<url-pattern>/oauth2</url-pattern>
 	</servlet-mapping>
-
+ 
+<!-- 
+	<servlet>
+		<description>ImageServlet</description>
+		<display-name>ImageServlet</display-name>
+		<servlet-name>ImageServlet</servlet-name>
+		<servlet-class>com.antonytrupe.ImageServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>ImageServlet</servlet-name>
+		<url-pattern>/images/*</url-pattern>
+	</servlet-mapping>
+	 -->
+<!-- -
+	<servlet>
+		<description>UploadServlet</description>
+		<display-name>UploadServlet</display-name>
+		<servlet-name>UploadServlet</servlet-name>
+		<servlet-class>com.antonytrupe.UploadServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>UploadServlet</servlet-name>
+		<url-pattern>/upload/*</url-pattern>
+	</servlet-mapping>
+ -->
+ <!-- -->
 	<servlet>
 		<description>TheDiskGameAPIServlet</description>
 		<display-name>TheDiskGameAPIServlet</display-name>
@@ -89,7 +125,8 @@
 		<servlet-name>TheDiskGameServlet</servlet-name>
 		<url-pattern>/thediskgame/*</url-pattern>
 	</servlet-mapping>
-
+ 
+ <!-- 
 	<servlet>
 		<description>BeeLogServlet</description>
 		<display-name>BeeLogServlet</display-name>
@@ -100,7 +137,8 @@
 		<servlet-name>BeeLogServlet</servlet-name>
 		<url-pattern>/beelog/*</url-pattern>
 	</servlet-mapping>
-
+ -->
+ <!-- -->
 	<servlet>
 		<description>WikiHistoryServlet</description>
 		<display-name>WikiHistoryServlet</display-name>
@@ -137,7 +175,7 @@
 		<servlet-name>WikiServlet</servlet-name>
 		<url-pattern>/</url-pattern>
 	</servlet-mapping>
-
+ 
 	<jsp-config>
 		<jsp-property-group>
 			<url-pattern>*.jsp</url-pattern>

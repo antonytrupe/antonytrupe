@@ -8,6 +8,7 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta name="google-site-verification"
 	content="ItIJdlZhuvHIZVeAB1amAdQvFUipqer5tzNy2O_pVM4" />
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
 .footer {
 	position: absolute;
@@ -29,13 +30,13 @@
 		format("opentype");
 }
 
-html,body {
+html, body {
 	height: 100%;
 	margin: 0 !important;
 	font-family: Open Sans !important
 }
 
-a,a:visited {
+a, a:visited {
 	color: #0066cc;
 	text-decoration: none;
 }
@@ -45,7 +46,7 @@ a:hover {
 	text-decoration: underline;
 }
 
-body,table td,select,button {
+body, table td, select, button {
 	font-family: Arial Unicode MS, Arial, sans-serif;
 	font-size: small;
 }

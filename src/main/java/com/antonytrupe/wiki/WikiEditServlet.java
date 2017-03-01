@@ -54,7 +54,7 @@ public class WikiEditServlet extends HttpServlet {
 
 	}
 
-	private String getTitle(HttpServletRequest request) {
+	static String getTitle(HttpServletRequest request) {
 		String path = request.getRequestURI().substring(
 				request.getContextPath().length()
 						+ request.getServletPath().length());
