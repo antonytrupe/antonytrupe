@@ -44,7 +44,6 @@ public class APIServlet extends HttpServlet {
 		Step getParameterMapStep = MiniProfiler
 				.step("APIServlet.doGet getParameters");
 
-		@SuppressWarnings("unchecked")
 		final Map<String, Object> parameters = new HashMap<String, Object>(
 				request.getParameterMap());
 

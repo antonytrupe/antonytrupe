@@ -1,7 +1,6 @@
 <appengine-web-app xmlns="http://appengine.google.com/ns/1.0">
-	<application>antonytrupe</application>
 	<module>default</module>
-	<version>1</version>
+	<runtime>java8</runtime>
 
 	<!-- Allows App Engine to send multiple requests to one instance in parallel: -->
 	<threadsafe>true</threadsafe>

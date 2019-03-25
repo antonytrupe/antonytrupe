@@ -86,6 +86,6 @@ test {
 group   = "com.antonytrupe"        // Generated output GroupId
 version = "0.1.0-SNAPSHOT"        // Version in generated output
 
-sourceCompatibility = 1.7     // App Engine Standard uses Java 7
-targetCompatibility = 1.7     // App Engine Standard uses Java 7
+sourceCompatibility = 1.8     // App Engine Standard uses Java 7
+targetCompatibility = 1.8     // App Engine Standard uses Java 7
 // [END gradle]
