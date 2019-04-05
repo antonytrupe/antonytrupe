@@ -59,7 +59,8 @@ public class OAuth2Servlet extends HttpServlet {
 		REDIRECT_URI = "http://" + serverName + (serverPort != 80 ? ":" + serverPort : "") + "/oauth2/";
 
 		// String pathInfo = req.getPathInfo();
-		if (req.getPathInfo().contains("logout")) {
+		String pathInfo = req.getPathInfo();
+		if (pathInfo !=null && pathInfo.contains("logout")) {
 			Cookie[] cookies = req.getCookies();
 			if (cookies != null)
 				for (int i = 0; i < cookies.length; i++) {

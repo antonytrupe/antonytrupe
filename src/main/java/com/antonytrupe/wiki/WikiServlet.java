@@ -14,8 +14,7 @@ import com.antonytrupe.authentication.OAuth2Servlet;
 
 @SuppressWarnings("serial")
 public class WikiServlet extends HttpServlet {
-	public void doGet(HttpServletRequest request, HttpServletResponse response)
-			throws IOException, ServletException {
+	public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
 
 		String title = getTitle(request);
 
@@ -28,24 +27,23 @@ public class WikiServlet extends HttpServlet {
 
 		String decodedName = URLDecoder.decode(title, "UTF-8");
 		String encodedName = URLEncoder.encode(decodedName, "UTF-8");
-		
-		//user stuff
+
+		// user stuff
 		String email = OAuth2Servlet.getAuthenticatedUser(request);
 		request.setAttribute("email", email);
-		
+
 		if (page.getContent() != null) {
-			request.setAttribute("content",
-					WikiDao.parseServerContent(page.getContent()));
+			request.setAttribute("content", WikiDao.parseServerContent(page.getContent()));
 		} else {
-			request.setAttribute("content",
-					WikiDao.parseServerContent(decodedName));
+			request.setAttribute("content", WikiDao.parseServerContent(decodedName));
 		}
+
+		Object footer = request.getParameter("footer");
+		request.setAttribute("footer", footer);
 		request.setAttribute("decodedName", decodedName);
 		request.setAttribute("encodedName", encodedName);
-		request.setAttribute("domain",
-				request.getServerName().replaceAll("www.", ""));
-		RequestDispatcher requestDispatcher = request
-				.getRequestDispatcher("/views/wiki/wiki.jsp");
+		request.setAttribute("domain", request.getServerName().replaceAll("www.", ""));
+		RequestDispatcher requestDispatcher = request.getRequestDispatcher("/views/wiki/wiki.jsp");
 		requestDispatcher.forward(request, response);
 
 	}

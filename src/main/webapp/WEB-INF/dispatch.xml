@@ -10,13 +10,13 @@
 		<url>*/favicon.ico</url>
 		<module>default</module>
 	</dispatch>
-	<dispatch>
+	<!-- <dispatch>
 		<url>/authentication/*</url>
 		<module>authentication</module>
 	</dispatch>
 	<dispatch>
-		<!-- Send all work to the one static backend. -->
+		Send all work to the one static backend.
 		<url>/battledisks/*</url>
 		<module>battledisks</module>
-	</dispatch>
+	</dispatch> -->
 </dispatch-entries>

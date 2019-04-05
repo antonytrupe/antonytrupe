@@ -54,6 +54,8 @@ body, table td, select, button {
 <title><c:if test="${decodedName !='home'}">${decodedName}|</c:if>${domain}</title>
 </head>
 <body>${content}
-	<w:footer encodedName="${encodedName}"></w:footer>
+	<c:if test="${footer != 'no'}">
+		<w:footer encodedName="${encodedName}"></w:footer>
+	</c:if>
 </body>
 </html>
