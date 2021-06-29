@@ -1471,7 +1471,7 @@ class API {
 
 				Object object = player.get("rating");
 				if (object == null || !(object instanceof Number)) {
-					object = new Double(0);
+					object = Double.valueOf(0);
 				}
 				Double rating = ((Number) object).doubleValue();
 				rating += adjustment;

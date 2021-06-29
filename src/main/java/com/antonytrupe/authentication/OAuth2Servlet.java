@@ -56,7 +56,7 @@ public class OAuth2Servlet extends HttpServlet {
 		int serverPort = req.getServerPort();
 
 		// http://localhost:8888/oauth2/
-		REDIRECT_URI = "http://" + serverName + (serverPort != 80 ? ":" + serverPort : "") + "/oauth2/";
+		REDIRECT_URI = "https://" + serverName + (serverPort != 80 ? ":" + serverPort : "") + "/oauth2/";
 
 		// String pathInfo = req.getPathInfo();
 		String pathInfo = req.getPathInfo();
