@@ -1,4 +1,5 @@
-<appengine-web-app xmlns="http://appengine.google.com/ns/1.0">
+<appengine-web-app
+	xmlns="http://appengine.google.com/ns/1.0">
 	<module>default</module>
 	<runtime>java8</runtime>
 
@@ -7,7 +8,8 @@
 
 	<!-- Configure java.util.logging -->
 	<system-properties>
-		<property name="java.util.logging.config.file" value="WEB-INF/logging.properties" />
+		<property name="java.util.logging.config.file"
+			value="WEB-INF/logging.properties" />
 	</system-properties>
 
 	<!-- HTTP Sessions are disabled by default. To enable HTTP sessions specify: -->
@@ -17,4 +19,8 @@
 	<async-session-persistence enabled="true" />
 	<!-- With this feature enabled, there is a very small chance your app will 
 		see stale session data. For details, see http://code.google.com/appengine/docs/java/config/appconfig.html#Enabling_Sessions -->
+
+	<automatic-scaling>
+		<max-instances>100</max-instances>
+	</automatic-scaling>
 </appengine-web-app>
