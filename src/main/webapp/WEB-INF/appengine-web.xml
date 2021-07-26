@@ -21,6 +21,19 @@
 		see stale session data. For details, see http://code.google.com/appengine/docs/java/config/appconfig.html#Enabling_Sessions -->
 
 	<automatic-scaling>
-		<max-instances>100</max-instances>
+		<max-instances>1</max-instances>
 	</automatic-scaling>
+
+
+	<!-- enforcing HTTPS -->
+	<security-constraint>
+		<web-resource-collection>
+			<web-resource-name>HTTPS</web-resource-name>
+			<url-pattern>/*</url-pattern>
+		</web-resource-collection>
+		<user-data-constraint>
+			<transport-guarantee>CONFIDENTIAL</transport-guarantee>
+		</user-data-constraint>
+	</security-constraint>
+
 </appengine-web-app>
