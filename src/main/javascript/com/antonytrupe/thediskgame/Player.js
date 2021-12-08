@@ -4,7 +4,7 @@
  *          name
  */
 function Player(name) {
-    "use strict";
+    //"use strict";
     var $this = this;
     this.name = name;
     this.rating = 0.0;

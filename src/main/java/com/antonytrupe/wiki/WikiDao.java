@@ -43,7 +43,8 @@ public class WikiDao {
 
 	// @Deprecated
 	public static String parseServerContent(String content) {
-
+		// TODO replace [[[...]]] with that page's content
+		// replace [[..]] with a link to that page
 		Pattern p = Pattern.compile("\\[{2}((?:.)*?)\\]{2}");
 		Matcher m = p.matcher(content);
 		StringBuffer sb = new StringBuffer();
@@ -59,8 +60,7 @@ public class WikiDao {
 				url = URLEncoder.encode(split[0], "UTF-8");
 
 				// urlquery encode, not urlencode
-				sb.append("<a href=\"" + url + "\">"
-						+ (split.length > 1 ? split[1] : split[0]) + "</a>");
+				sb.append("<a href=\"" + url + "\">" + (split.length > 1 ? split[1] : split[0]) + "</a>");
 			} catch (UnsupportedEncodingException e) {
 			}
 
@@ -83,8 +83,7 @@ public class WikiDao {
 			decodedName = URLDecoder.decode(name, "UTF-8");
 
 			try {
-				cache = CacheManager.getInstance().getCacheFactory()
-						.createCache(Collections.emptyMap());
+				cache = CacheManager.getInstance().getCacheFactory().createCache(Collections.emptyMap());
 				// Get the value from the cache.
 				Page value = (Page) cache.get(decodedName);
 				if (value != null) {
@@ -95,14 +94,11 @@ public class WikiDao {
 
 			}
 
-			DatastoreService datastore = DatastoreServiceFactory
-					.getDatastoreService();
+			DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 
 			try {
-				Entity e = datastore.get(KeyFactory.createKey(
-						Page.class.getSimpleName(), decodedName));
-				page = new Page(e.getKey().getName(),
-						((Text) e.getProperty(Page.CONTENT)).getValue());
+				Entity e = datastore.get(KeyFactory.createKey(Page.class.getSimpleName(), decodedName));
+				page = new Page(e.getKey().getName(), ((Text) e.getProperty(Page.CONTENT)).getValue());
 				Text diff = (Text) e.getProperty(Page.DIFF);
 				if (diff != null) {
 					page.setDiff(diff.getValue());
@@ -112,8 +108,7 @@ public class WikiDao {
 				throw new WikiPageNotFoundException();
 			}
 			try {
-				cache = CacheManager.getInstance().getCacheFactory()
-						.createCache(Collections.emptyMap());
+				cache = CacheManager.getInstance().getCacheFactory().createCache(Collections.emptyMap());
 				cache.put(decodedName, page);
 			} catch (CacheException e) {
 				// ...
@@ -125,13 +120,11 @@ public class WikiDao {
 	}
 
 	public ArrayList<Page> getHistory(String name) {
-		DatastoreService datastore = DatastoreServiceFactory
-				.getDatastoreService();
+		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 		ArrayList<Page> pages = new ArrayList<Page>();
 		// The Query interface assembles a query
 		Query q = new Query(Page.PAGEHISTORY);
-		q.setFilter(new FilterPredicate(Page.NAME, Query.FilterOperator.EQUAL,
-				name));
+		q.setFilter(new FilterPredicate(Page.NAME, Query.FilterOperator.EQUAL, name));
 
 		q.addSort(Page.DATE, SortDirection.DESCENDING);
 
@@ -140,8 +133,7 @@ public class WikiDao {
 		PreparedQuery pq = datastore.prepare(q);
 
 		for (Entity result : pq.asIterable()) {
-			String content = ((Text) result.getProperty(Page.CONTENT))
-					.getValue();
+			String content = ((Text) result.getProperty(Page.CONTENT)).getValue();
 			Date date = (Date) result.getProperty(Page.DATE);
 			String ipaddress = (String) result.getProperty(Page.REMOTE_IP);
 			Page e = new Page(name, content, null, ipaddress, date);
@@ -158,8 +150,7 @@ public class WikiDao {
 	@SuppressWarnings("unchecked")
 	public void save(Page p) throws UnsupportedEncodingException {
 
-		AsyncDatastoreService datastore = DatastoreServiceFactory
-				.getAsyncDatastoreService();
+		AsyncDatastoreService datastore = DatastoreServiceFactory.getAsyncDatastoreService();
 
 		// start the query to get the original page
 		Page oldPage = new Page();
@@ -167,8 +158,7 @@ public class WikiDao {
 		String name = p.getName();
 		String decodedName = URLDecoder.decode(name, "UTF-8");
 		{
-			oldPageFuture = datastore.get(KeyFactory.createKey(
-					Page.class.getSimpleName(), decodedName));
+			oldPageFuture = datastore.get(KeyFactory.createKey(Page.class.getSimpleName(), decodedName));
 
 		}
 
@@ -181,8 +171,7 @@ public class WikiDao {
 		String identity = p.getUser();
 
 		{
-			Entity page = new Entity(KeyFactory.createKey(Page.PAGE,
-					decodedName));
+			Entity page = new Entity(KeyFactory.createKey(Page.PAGE, decodedName));
 
 			// ... set properties ...
 			page.setProperty(Page.CONTENT, new Text(p.getContent()));
@@ -194,8 +183,7 @@ public class WikiDao {
 			try {
 				// block on retrieving previous version
 				Entity e = oldPageFuture.get();
-				oldPage = new Page(e.getKey().getName(),
-						((Text) e.getProperty(Page.CONTENT)).getValue());
+				oldPage = new Page(e.getKey().getName(), ((Text) e.getProperty(Page.CONTENT)).getValue());
 
 			} catch (InterruptedException e) {
 				e.printStackTrace();
@@ -210,8 +198,7 @@ public class WikiDao {
 		}
 		// create the pagehistory entity
 		{
-			Entity history = new Entity(KeyFactory.createKey(Page.PAGEHISTORY,
-					decodedName + now.getTime()));
+			Entity history = new Entity(KeyFactory.createKey(Page.PAGEHISTORY, decodedName + now.getTime()));
 
 			// ... set properties ...
 			history.setProperty(Page.NAME, decodedName);
@@ -225,8 +212,7 @@ public class WikiDao {
 			// create the diff
 			diff_match_patch dmp = new diff_match_patch();
 			// create the diff
-			LinkedList<Diff> diffs = dmp.diff_main(oldPage.getContent(),
-					p.getContent());
+			LinkedList<Diff> diffs = dmp.diff_main(oldPage.getContent(), p.getContent());
 			// make the diff human readable
 			dmp.diff_cleanupSemantic(diffs);
 			// convert the diff to html
@@ -238,8 +224,7 @@ public class WikiDao {
 		}
 
 		try {
-			Cache cache = CacheManager.getInstance().getCacheFactory()
-					.createCache(Collections.emptyMap());
+			Cache cache = CacheManager.getInstance().getCacheFactory().createCache(Collections.emptyMap());
 			cache.put(decodedName, p);
 		} catch (CacheException e) {
 			// ...

@@ -12,6 +12,17 @@
 		<exception-type>com.antonytrupe.wiki.WikiPageNotFoundException</exception-type>
 		<location>/404.html</location>
 	</error-page>
+	
+	<!-- enforcing HTTPS -->
+	<security-constraint>
+		<web-resource-collection>
+			<web-resource-name>HTTPS</web-resource-name>
+			<url-pattern>/*</url-pattern>
+		</web-resource-collection>
+		<user-data-constraint>
+			<transport-guarantee>CONFIDENTIAL</transport-guarantee>
+		</user-data-constraint>
+	</security-constraint>
 
 	<!-- <servlet>
 		<servlet-name>default</servlet-name>

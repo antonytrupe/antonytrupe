@@ -398,6 +398,7 @@ class API {
 				final ScriptableObject player = (ScriptableObject) ge.invoke(PLAYER, new String[] { username, });
 				final LinkedHashMap<String, ScriptableObject[]> disks = new LinkedHashMap<String, ScriptableObject[]>();
 
+				//TODO put this in configuration somewhere
 				// Knights
 				// Pikemen
 				disks.put("Pikemen", new ScriptableObject[] { createPoint(-3.2, -6.2), createPoint(-1.2, -5),
@@ -583,7 +584,7 @@ class API {
 		protected static ScriptableObject create(final String description, final String maxPlayers,
 				final String maxPoints, final String activations, final String startingDisks,
 				final String reinforcements, final String alignmentRestriction, final String scenario)
-						throws GameEngineException {
+				throws GameEngineException {
 			Step step = MiniProfiler.step("API.createTable(...)");
 			try {
 				final ScriptableObject table = (ScriptableObject) ge.invoke("Table",
@@ -1306,9 +1307,9 @@ class API {
 				mementoProperties.put("mementoId", mementoId);
 
 				// make the memento a child of the table
-				ge.persistence.save("Table",
-						tableId, "TableMemento", (mementoId.getClass() == String.class
-								? Long.parseLong((String) mementoId) : Long.valueOf((Integer) mementoId)),
+				ge.persistence.save("Table", tableId, "TableMemento",
+						(mementoId.getClass() == String.class ? Long.parseLong((String) mementoId)
+								: Long.valueOf((Integer) mementoId)),
 						mementoProperties);
 			}
 		} finally {
@@ -1335,8 +1336,7 @@ class API {
 	}
 
 	/**
-	 * @param tokenString
-	 *            The original encoded representation of a JWT
+	 * @param tokenString The original encoded representation of a JWT
 	 * @return Three components of the JWT as an array of strings
 	 */
 	private static String[] splitTokenString(final String tokenString) {
@@ -2510,32 +2510,40 @@ class API {
 												: false;
 								boolean archer = headers.indexOf("archer") > -1
 										&& !diskData[headers.indexOf("archer")].equals("null")
-												? Boolean.parseBoolean(diskData[headers.indexOf("archer")]) : false;
+												? Boolean.parseBoolean(diskData[headers.indexOf("archer")])
+												: false;
 								int arrows = headers.indexOf("arrows") > -1
 										&& !diskData[headers.indexOf("arrows")].equals("null")
-												? Integer.parseInt(diskData[headers.indexOf("arrows")]) : 0;
+												? Integer.parseInt(diskData[headers.indexOf("arrows")])
+												: 0;
 								int bolts = headers.indexOf("bolts") > -1
 										&& !diskData[headers.indexOf("bolts")].equals("null")
-												? Integer.parseInt(diskData[headers.indexOf("bolts")]) : 0;
+												? Integer.parseInt(diskData[headers.indexOf("bolts")])
+												: 0;
 								int fireballs = headers.indexOf("fireballs") > -1
 										&& !diskData[headers.indexOf("fireballs")].equals("null")
-												? Integer.parseInt(diskData[headers.indexOf("fireballs")]) : 0;
+												? Integer.parseInt(diskData[headers.indexOf("fireballs")])
+												: 0;
 								int boulders = headers.indexOf("boulders") > -1
 										&& !diskData[headers.indexOf("boulders")].equals("null")
-												? Integer.parseInt(diskData[headers.indexOf("boulders")]) : 0;
+												? Integer.parseInt(diskData[headers.indexOf("boulders")])
+												: 0;
 								boolean missileImmunity = headers.indexOf("missileImmunity") > -1
 										&& !diskData[headers.indexOf("missileImmunity")].equals("null")
 												? Boolean.parseBoolean(diskData[headers.indexOf("missileImmunity")])
 												: false;
 								boolean firstblow = Boolean.parseBoolean(headers.indexOf("firstblow") > -1
 										&& !diskData[headers.indexOf("firstblow")].equals("null")
-												? diskData[headers.indexOf("firstblow")] : "false");
+												? diskData[headers.indexOf("firstblow")]
+												: "false");
 								int spellcaster = Integer.parseInt(headers.indexOf("spellcaster") > -1
 										&& !diskData[headers.indexOf("spellcaster")].equals("null")
-												? diskData[headers.indexOf("spellcaster")] : "0");
+												? diskData[headers.indexOf("spellcaster")]
+												: "0");
 								int limit = headers.indexOf("limit") > -1
 										&& !diskData[headers.indexOf("limit")].equals("null")
-												? Integer.parseInt(diskData[headers.indexOf("limit")]) : 0;
+												? Integer.parseInt(diskData[headers.indexOf("limit")])
+												: 0;
 								int cost = Integer.parseInt(diskData[headers.indexOf("cost")]);
 								ScriptableObject disk = Disk.create(diskName, type, attack, defense, toughness,
 										movement, wounds, flying, swashbuckler, archer, arrows, bolts, fireballs,
